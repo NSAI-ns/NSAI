@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trợ lí ảo - NS AI</title>
+<link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+<div class="stars"></div>
+
+<header class="topbar">
+<a class="brand" href="index.html"><span>NS</span> NS AI</a>
+<nav>
+<a href="index.html">Trang chủ</a><a href="thongtin.html">Thông tin</a>
+<a href="diemso.html">Điểm số</a><a href="sothich.html">Sở thích</a>
+<a href="tinhcach.html">Tính cách</a><a href="muc-tieu.html">Mục tiêu</a>
+<a href="truong-hoc.html">Trường học</a><a href="ketqua.html">Kết quả</a>
+<a class="active" href="chatbot.html">Chatbot</a>
+<button class="session-reset" onclick="resetAllData()">↻ Phiên mới</button>
+</nav>
+</header>
+
+<main class="page">
+<section class="glass chat-card">
+
+  <div class="chat-title">
+    <div class="bot-avatar">NS</div>
+    <div>
+      <h1>NS AI Assistant</h1>
+      <p>Trợ lý định hướng được cá nhân hóa theo hồ sơ của bạn</p>
+    </div>
+  </div>
+
+  <div id="personalProfile" class="profile-mini"></div>
+
+  <div id="messages" class="messages">
+    <div class="msg bot">Chào bạn! Mình đã sẵn sàng hỗ trợ dựa trên hồ sơ bạn đã nhập. Bạn có thể hỏi về ngành học, điểm số, sở thích, tính cách, mục tiêu hoặc trường học. 🌌</div>
+  </div>
+
+  <div class="quick">
+    <button onclick="quick('Ngành nào phù hợp với em?')">🎯 Ngành phù hợp</button>
+    <button onclick="quick('Điểm của em có gì đáng chú ý?')">📊 Phân tích điểm</button>
+    <button onclick="quick('Tính cách của em như thế nào?')">🧠 Tính cách</button>
+    <button onclick="quick('Tìm trường phù hợp với em.')">🏫 Tìm trường</button>
+    <button onclick="quick('Em đang áp lực học tập.')">💬 Áp lực học tập</button>
+  </div>
+
+  <div class="chat-input">
+    <input id="input" placeholder="Ví dụ: Ngành nào hợp với em?">
+    <button class="btn primary" onclick="send()">Gửi</button>
+  </div>
+
+  <p class="tiny">
+    Chatbot sử dụng dữ liệu bạn đã nhập trong NS Career AI để cá nhân hóa câu trả lời.
+    Đây là công cụ hỗ trợ tham khảo, không thay thế chuyên gia tâm lý hoặc tư vấn tuyển sinh chính thức.
+  </p>
+
+</section>
+</main>
+
+<script src="../JS/main.js"></script>
+<script src="../JS/phantich.js"></script>
+<script src="../JS/chatbot.js"></script>
+<script>
+const p = getProfile();
+const top = analyzeCareer().results[0];
+document.getElementById('personalProfile').innerHTML = `
+  <b>Hồ sơ đang dùng:</b>
+  ${p.info.province || 'Chưa chọn tỉnh'} ·
+  ${p.info.grade ? 'Lớp '+p.info.grade : 'Chưa chọn lớp'} ·
+  ${p.scoreCount ? p.scoreCount+' môn đã nhập' : 'Chưa nhập điểm'} ·
+  xu hướng ${p.personality}.
+  ${top ? ` Gợi ý hiện tại: <strong>${top.name}</strong> (${top.score}%).` : ''}
+`;
+</script>
+</body>
+</html>

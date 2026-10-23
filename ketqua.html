@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kết quả AI - NS AI</title><link rel="stylesheet" href="../CSS/style.css"></head><body><div class="stars"></div>
+<header class="topbar"><a class="brand" href="index.html"><span>NS</span> NS AI</a><nav>
+<a href="index.html">Trang chủ</a><a href="thongtin.html">Thông tin</a><a href="diemso.html">Điểm số</a><a href="sothich.html">Sở thích</a><a href="tinhcach.html">Tính cách</a><a href="muc-tieu.html">Mục tiêu</a><a href="truong-hoc.html">Trường học</a><a class="active" href="ketqua.html">Kết quả</a><a href="chatbot.html">Chatbot</a><button class="session-reset" onclick="resetAllData()">↻ Phiên mới</button></nav></header>
+<main class="page"><section class="glass form-card wide"><p class="eyebrow">NS AI ANALYSIS</p><h1>Kết quả định hướng</h1><p class="muted">Điểm phù hợp là chỉ số tham khảo được tính từ dữ liệu bạn đã nhập.</p>
+<div id="summary"></div><div id="results" class="result-list"></div>
+<div class="actions"><a class="btn secondary" href="truong-hoc.html">🏫 Tìm trường phù hợp</a><a class="btn primary" href="chatbot.html">🤖 Hỏi NS AI</a></div></section></main>
+<script src="../JS/main.js"></script><script src="../JS/phantich.js"></script><script>
+const r=analyzeCareer();document.getElementById('summary').innerHTML=`<div class="notice">📍 ${r.province||'Chưa chọn tỉnh'} · 🎯 ${r.goals.length?r.goals.join(', '):'Chưa xác định ngành'}</div>`;
+document.getElementById('results').innerHTML=r.results.map((x,i)=>`<div class="result-card"><div class="result-head"><b>${i+1}. ${x.name}</b><strong>${x.score}%</strong></div><div class="progress"><i style="width:${x.score}%"></i></div><p>${x.reason}</p></div>`).join('');
+</script></body></html>

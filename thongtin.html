@@ -1,0 +1,262 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thông tin - NS AI</title>
+
+<!-- ĐÃ SỬA ĐƯỜNG DẪN CSS -->
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="stars"></div>
+
+<header class="topbar">
+<a class="brand" href="index.html"><span>NS</span> NS AI</a>
+
+<nav>
+<a href="index.html">Trang chủ</a>
+<a class="active" href="thongtin.html">Thông tin</a>
+<a href="diemso.html">Điểm số</a>
+<a href="sothich.html">Sở thích</a>
+<a href="tinhcach.html">Tính cách</a>
+<a href="muc-tieu.html">Mục tiêu</a>
+<a href="truong-hoc.html">Trường học</a>
+<a href="ketqua.html">Kết quả</a>
+<a href="chatbot.html">Chatbot</a>
+<button class="session-reset" onclick="resetAllData()">↻ Phiên mới</button>
+</nav>
+</header>
+
+<main class="page">
+
+<section class="glass form-card">
+
+<p class="eyebrow">BƯỚC 1</p>
+
+<h1>Thông tin cơ bản</h1>
+
+<p class="muted">
+Không cần nhập họ tên. Các thông tin này giúp NS Career AI
+cá nhân hóa kết quả và chatbot.
+</p>
+
+<div class="info-box-grid">
+
+<div class="info-box">
+<b>📍 Tỉnh/thành</b>
+<span>Giúp gợi ý trường thuận tiện hơn.</span>
+</div>
+
+<div class="info-box">
+<b>🎓 Lớp</b>
+<span>Giúp đặt kết quả trong đúng bối cảnh học tập.</span>
+</div>
+
+<div class="info-box">
+<b>🎯 Mục tiêu</b>
+<span>Giúp hệ thống ưu tiên đúng hướng bạn đang quan tâm.</span>
+</div>
+
+</div>
+
+
+<label>Tỉnh / Thành phố</label>
+
+<div class="province-search">
+<input
+id="provinceSearch"
+type="text"
+placeholder="🔎 Tìm tỉnh/thành phố..."
+autocomplete="off">
+</div>
+
+<select id="province">
+
+<option value="">-- Chọn tỉnh/thành --</option>
+
+<option>Hà Nội</option>
+<option>Cao Bằng</option>
+<option>Tuyên Quang</option>
+<option>Điện Biên</option>
+<option>Lai Châu</option>
+<option>Sơn La</option>
+<option>Lào Cai</option>
+<option>Thái Nguyên</option>
+<option>Lạng Sơn</option>
+<option>Quảng Ninh</option>
+<option>Bắc Ninh</option>
+<option>Phú Thọ</option>
+<option>Hải Phòng</option>
+<option>Hưng Yên</option>
+<option>Ninh Bình</option>
+<option>Thanh Hóa</option>
+<option>Nghệ An</option>
+<option>Hà Tĩnh</option>
+<option>Quảng Trị</option>
+<option>Huế</option>
+<option>Đà Nẵng</option>
+<option>Quảng Ngãi</option>
+<option>Gia Lai</option>
+<option>Khánh Hòa</option>
+<option>Đắk Lắk</option>
+<option>Lâm Đồng</option>
+<option>Đồng Nai</option>
+<option>TP. Hồ Chí Minh</option>
+<option>Tây Ninh</option>
+<option>Đồng Tháp</option>
+<option>Vĩnh Long</option>
+<option>An Giang</option>
+<option>Cần Thơ</option>
+<option>Cà Mau</option>
+
+</select>
+
+
+<label>Lớp
+
+<select id="grade">
+<option>10</option>
+<option>11</option>
+<option>12</option>
+</select>
+
+</label>
+
+
+<label>Mục tiêu hiện tại
+
+<select id="goal">
+
+<option>Khám phá ngành phù hợp</option>
+
+<option>Đã có ngành mục tiêu</option>
+
+<option>Đang tìm trường đại học</option>
+
+<option>Chưa biết mình muốn gì</option>
+
+</select>
+
+</label>
+
+
+<div class="actions">
+
+<button
+class="btn primary"
+onclick="saveInfo()">
+
+Lưu & tiếp tục →
+
+</button>
+
+</div>
+
+</section>
+
+</main>
+
+
+<!-- ĐÃ SỬA ĐƯỜNG DẪN JS -->
+
+<script src="main.js"></script>
+
+
+<script>
+
+// Tìm kiếm tỉnh/thành phố
+const provinceSearch = document.getElementById("provinceSearch");
+const provinceSelect = document.getElementById("province");
+
+const provinceOptions =
+Array.from(provinceSelect.options).map(option => ({
+    text: option.text,
+    value: option.value
+}));
+
+provinceSearch.addEventListener("input", function(){
+
+    const keyword = this.value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+    provinceSelect.innerHTML = "";
+
+    const filtered = provinceOptions.filter(province => {
+
+        const text = province.text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+        return text.includes(keyword);
+
+    });
+
+    filtered.forEach(province => {
+
+        const option = document.createElement("option");
+
+        option.value = province.value;
+        option.textContent = province.text;
+
+        provinceSelect.appendChild(option);
+
+    });
+
+    if(filtered.length === 0){
+
+        const option = document.createElement("option");
+
+        option.textContent = "Không tìm thấy tỉnh/thành phố";
+        option.disabled = true;
+
+        provinceSelect.appendChild(option);
+
+    }
+
+});
+
+
+function saveInfo(){
+
+    const data = {
+
+        province:
+        document.getElementById('province').value,
+
+        grade:
+        document.getElementById('grade').value,
+
+        goal:
+        document.getElementById('goal').value
+
+    };
+
+    if(!data.province){
+
+        alert('Hãy chọn tỉnh/thành phố.');
+
+        return;
+
+    }
+
+    save('info',data);
+
+    location.href='diemso.html';
+
+}
+
+
+// Load dữ liệu đã lưu
+loadInfo();
+
+</script>
+
+</body>
+</html>
+```

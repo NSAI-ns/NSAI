@@ -1,0 +1,216 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tính cách - NS AI</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="stars"></div>
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <span>NS</span> NS AI
+  </a>
+
+  <nav>
+    <a href="index.html">Trang chủ</a>
+    <a href="thongtin.html">Thông tin</a>
+    <a href="diemso.html">Điểm số</a>
+    <a href="sothich.html">Sở thích</a>
+    <a class="active" href="tinhcach.html">Tính cách</a>
+    <a href="muc-tieu.html">Mục tiêu</a>
+    <a href="truong-hoc.html">Trường học</a>
+    <a href="ketqua.html">Kết quả</a>
+    <a href="chatbot.html">Chatbot</a>
+
+    <button class="session-reset" onclick="resetAllData()">
+      ↻ Phiên mới
+    </button>
+  </nav>
+</header>
+
+<main class="page">
+
+<section class="glass form-card wide">
+
+<p class="eyebrow">BƯỚC 4</p>
+
+<h1>Khám phá tính cách</h1>
+
+<p class="muted">
+Chọn phương án gần với bạn nhất. Kết quả chỉ mang tính tham khảo.
+</p>
+
+<div id="questions"></div>
+
+<div class="actions">
+  <button class="btn primary" onclick="finish()">
+    Lưu & tiếp tục →
+  </button>
+</div>
+
+</section>
+
+</main>
+
+<script src="main.js"></script>
+
+<script>
+
+const qs = [
+
+[
+  'Khi gặp một bài toán khó, bạn thường...',
+  [
+    'Tìm cách giải từng bước',
+    'Hỏi người khác',
+    'Thử một cách hoàn toàn mới',
+    'Tạm bỏ qua'
+  ]
+],
+
+[
+  'Khi làm việc nhóm, bạn thường...',
+  [
+    'Phân tích nhiệm vụ',
+    'Kết nối mọi người',
+    'Đưa ra ý tưởng',
+    'Hỗ trợ phía sau'
+  ]
+],
+
+[
+  'Bạn thích công việc nào hơn?',
+  [
+    'Làm việc với dữ liệu',
+    'Làm việc với con người',
+    'Tạo ra sản phẩm mới',
+    'Giúp đỡ người khác'
+  ]
+],
+
+[
+  'Khi có một vấn đề mới, bạn thường...',
+  [
+    'Tìm thông tin và phân tích',
+    'Trao đổi với người khác',
+    'Thử nghiệm ngay',
+    'Quan sát trước'
+  ]
+],
+
+[
+  'Bạn cảm thấy hứng thú nhất khi...',
+  [
+    'Tìm ra quy luật',
+    'Thuyết phục người khác',
+    'Sáng tạo thứ chưa có',
+    'Hoàn thành việc khó'
+  ]
+],
+
+[
+  'Bạn thích môi trường...',
+  [
+    'Có hệ thống rõ ràng',
+    'Nhiều giao tiếp',
+    'Tự do sáng tạo',
+    'Ổn định và hỗ trợ'
+  ]
+],
+
+[
+  'Khi thất bại, bạn thường...',
+  [
+    'Phân tích nguyên nhân',
+    'Chia sẻ với người khác',
+    'Tìm cách khác',
+    'Kiên trì làm lại'
+  ]
+],
+
+[
+  'Bạn muốn được đánh giá cao vì...',
+  [
+    'Khả năng tư duy',
+    'Khả năng giao tiếp',
+    'Sự sáng tạo',
+    'Sự đáng tin cậy'
+  ]
+]
+
+];
+
+const old = read('personalityAnswers') || [];
+
+const box = document.getElementById('questions');
+
+qs.forEach((q, i) => {
+
+  let h = `
+    <div class="question">
+      <h3>${i + 1}. ${q[0]}</h3>
+  `;
+
+  q[1].forEach((a, j) => {
+
+    h += `
+      <label class="radio">
+        <input
+          type="radio"
+          name="q${i}"
+          value="${j}"
+          ${old[i] == j ? 'checked' : ''}
+        >
+        ${a}
+      </label>
+    `;
+
+  });
+
+  h += `</div>`;
+
+  box.innerHTML += h;
+
+});
+
+
+function finish() {
+
+  const ans = [];
+
+  for (let i = 0; i < qs.length; i++) {
+
+    const x = document.querySelector(
+      `input[name=q${i}]:checked`
+    );
+
+    if (!x) {
+
+      alert('Hãy trả lời tất cả câu hỏi.');
+
+      return;
+    }
+
+    ans.push(Number(x.value));
+
+  }
+
+  save('personalityAnswers', ans);
+
+  location.href = 'muc-tieu.html';
+
+}
+
+</script>
+
+</body>
+</html>
+```

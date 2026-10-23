@@ -1,0 +1,238 @@
+[
+  {
+    "name": "Đại học Bách khoa Hà Nội",
+    "province": "Hà Nội",
+    "majors": [
+      "Kỹ thuật",
+      "Công nghệ thông tin",
+      "Khoa học máy tính"
+    ],
+    "description": "Trường đại học kỹ thuật - công nghệ lớn, phù hợp với học sinh quan tâm kỹ thuật, công nghệ và khoa học máy tính.",
+    "admissionNote": "Phương thức tuyển sinh và chỉ tiêu thay đổi theo từng năm; cần xem đề án tuyển sinh chính thức.",
+    "tuitionNote": "Học phí phụ thuộc chương trình đào tạo và từng năm học.",
+    "website": "https://www.hust.edu.vn"
+  },
+  {
+    "name": "Đại học Quốc gia Hà Nội",
+    "province": "Hà Nội",
+    "majors": [
+      "Công nghệ thông tin",
+      "Kinh tế",
+      "Khoa học"
+    ],
+    "description": "Hệ thống đại học đa lĩnh vực với nhiều đơn vị đào tạo về khoa học, công nghệ, kinh tế, xã hội và ngoại ngữ.",
+    "admissionNote": "Mỗi đơn vị thành viên có thể có phương thức và chỉ tiêu riêng.",
+    "tuitionNote": "Học phí thay đổi theo trường thành viên và chương trình.",
+    "website": "https://vnu.edu.vn"
+  },
+  {
+    "name": "Đại học Kinh tế Quốc dân",
+    "province": "Hà Nội",
+    "majors": [
+      "Kinh tế",
+      "Quản trị kinh doanh",
+      "Tài chính - Ngân hàng"
+    ],
+    "description": "Trường nổi bật về kinh tế, quản trị, tài chính, kế toán và các lĩnh vực kinh doanh.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Mức học phí thay đổi theo chương trình và khóa học.",
+    "website": "https://neu.edu.vn"
+  },
+  {
+    "name": "Đại học Ngoại thương",
+    "province": "Hà Nội",
+    "majors": [
+      "Kinh tế",
+      "Kinh doanh quốc tế",
+      "Tài chính"
+    ],
+    "description": "Trường đào tạo mạnh về kinh tế, kinh doanh quốc tế, thương mại và tài chính.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Mức học phí thay đổi theo chương trình đào tạo.",
+    "website": "https://ftu.edu.vn"
+  },
+  {
+    "name": "Đại học Y Hà Nội",
+    "province": "Hà Nội",
+    "majors": [
+      "Y khoa",
+      "Dược",
+      "Điều dưỡng"
+    ],
+    "description": "Cơ sở đào tạo và nghiên cứu y khoa lâu đời, phù hợp với học sinh định hướng sức khỏe và khoa học sự sống.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí phụ thuộc chương trình và từng năm học.",
+    "website": "https://hmu.edu.vn"
+  },
+  {
+    "name": "Đại học Sư phạm Hà Nội",
+    "province": "Hà Nội",
+    "majors": [
+      "Sư phạm",
+      "Ngữ văn",
+      "Toán học"
+    ],
+    "description": "Đào tạo giáo viên và các ngành khoa học giáo dục, khoa học cơ bản và ngôn ngữ.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí phụ thuộc chương trình đào tạo.",
+    "website": "https://hnue.edu.vn"
+  },
+  {
+    "name": "Đại học Bách khoa - Đại học Quốc gia TP. Hồ Chí Minh",
+    "province": "TP. Hồ Chí Minh",
+    "majors": [
+      "Kỹ thuật",
+      "Công nghệ thông tin",
+      "Khoa học máy tính"
+    ],
+    "description": "Trường kỹ thuật - công nghệ thuộc hệ thống ĐHQG TP.HCM, có thế mạnh về kỹ thuật và công nghệ.",
+    "admissionNote": "Theo phương án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình đào tạo.",
+    "website": "https://hcmut.edu.vn"
+  },
+  {
+    "name": "Đại học Kinh tế TP. Hồ Chí Minh",
+    "province": "TP. Hồ Chí Minh",
+    "majors": [
+      "Kinh tế",
+      "Marketing",
+      "Tài chính"
+    ],
+    "description": "Trường đào tạo đa ngành về kinh tế, kinh doanh, tài chính, marketing và quản trị.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình.",
+    "website": "https://ueh.edu.vn"
+  },
+  {
+    "name": "Đại học Quốc gia TP. Hồ Chí Minh",
+    "province": "TP. Hồ Chí Minh",
+    "majors": [
+      "Công nghệ thông tin",
+      "Kinh tế",
+      "Khoa học"
+    ],
+    "description": "Hệ thống đại học đa ngành với các lĩnh vực công nghệ, khoa học, kinh tế, xã hội và nhân văn.",
+    "admissionNote": "Mỗi trường thành viên có thể có phương thức tuyển sinh riêng.",
+    "tuitionNote": "Phụ thuộc trường thành viên và chương trình.",
+    "website": "https://vnuhcm.edu.vn"
+  },
+  {
+    "name": "Đại học Y Dược TP. Hồ Chí Minh",
+    "province": "TP. Hồ Chí Minh",
+    "majors": [
+      "Y khoa",
+      "Dược",
+      "Điều dưỡng"
+    ],
+    "description": "Đào tạo các ngành sức khỏe như y khoa, dược và điều dưỡng.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình và năm học.",
+    "website": "https://ump.edu.vn"
+  },
+  {
+    "name": "Đại học Đà Nẵng",
+    "province": "Đà Nẵng",
+    "majors": [
+      "Công nghệ thông tin",
+      "Kinh tế",
+      "Kỹ thuật"
+    ],
+    "description": "Hệ thống đại học đa lĩnh vực tại miền Trung với các trường thành viên về kỹ thuật, kinh tế, sư phạm và khoa học.",
+    "admissionNote": "Tùy trường thành viên và đề án tuyển sinh từng năm.",
+    "tuitionNote": "Phụ thuộc trường thành viên và chương trình.",
+    "website": "https://udn.vn"
+  },
+  {
+    "name": "Đại học Bách khoa - Đại học Đà Nẵng",
+    "province": "Đà Nẵng",
+    "majors": [
+      "Kỹ thuật",
+      "Công nghệ thông tin",
+      "Điện - điện tử"
+    ],
+    "description": "Đào tạo mạnh về kỹ thuật, công nghệ thông tin, điện - điện tử và các lĩnh vực kỹ thuật.",
+    "admissionNote": "Theo phương án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình.",
+    "website": "https://dut.udn.vn"
+  },
+  {
+    "name": "Đại học Kinh tế - Đại học Đà Nẵng",
+    "province": "Đà Nẵng",
+    "majors": [
+      "Kinh tế",
+      "Marketing",
+      "Quản trị kinh doanh"
+    ],
+    "description": "Phù hợp với học sinh quan tâm kinh tế, marketing, quản trị và kinh doanh.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình.",
+    "website": "https://due.udn.vn"
+  },
+  {
+    "name": "Đại học Huế",
+    "province": "Huế",
+    "majors": [
+      "Khoa học",
+      "Sư phạm",
+      "Kinh tế",
+      "Ngôn ngữ"
+    ],
+    "description": "Hệ thống đại học đa lĩnh vực tại Huế, gồm nhiều trường và khoa thành viên.",
+    "admissionNote": "Mỗi đơn vị thành viên có thể có phương thức và chỉ tiêu riêng.",
+    "tuitionNote": "Phụ thuộc trường thành viên và chương trình.",
+    "website": "https://hueuni.edu.vn"
+  },
+  {
+    "name": "Trường Đại học Khoa học - Đại học Huế",
+    "province": "Huế",
+    "majors": [
+      "Công nghệ thông tin",
+      "Khoa học",
+      "Kiến trúc"
+    ],
+    "description": "Đào tạo khoa học tự nhiên, công nghệ thông tin, kiến trúc và nhiều ngành khoa học - kỹ thuật.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình.",
+    "website": "https://husc.hueuni.edu.vn"
+  },
+  {
+    "name": "Trường Đại học Kinh tế - Đại học Huế",
+    "province": "Huế",
+    "majors": [
+      "Kinh tế",
+      "Quản trị kinh doanh",
+      "Tài chính"
+    ],
+    "description": "Đào tạo kinh tế, quản trị kinh doanh, tài chính và các lĩnh vực kinh doanh.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình.",
+    "website": "https://hce.hueuni.edu.vn"
+  },
+  {
+    "name": "Trường Đại học Y - Dược - Đại học Huế",
+    "province": "Huế",
+    "majors": [
+      "Y khoa",
+      "Dược",
+      "Điều dưỡng"
+    ],
+    "description": "Cơ sở đào tạo nhân lực y tế của Đại học Huế với các ngành thuộc lĩnh vực sức khỏe.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình.",
+    "website": "https://huemed-univ.edu.vn"
+  },
+  {
+    "name": "Đại học Cần Thơ",
+    "province": "Cần Thơ",
+    "majors": [
+      "Công nghệ thông tin",
+      "Kinh tế",
+      "Nông nghiệp",
+      "Sư phạm"
+    ],
+    "description": "Trường đại học đa ngành lớn ở Đồng bằng sông Cửu Long, có thế mạnh về công nghệ, kinh tế, nông nghiệp và sư phạm.",
+    "admissionNote": "Theo đề án tuyển sinh chính thức từng năm.",
+    "tuitionNote": "Học phí thay đổi theo chương trình.",
+    "website": "https://ctu.edu.vn"
+  }
+]

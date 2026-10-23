@@ -1,0 +1,735 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mục tiêu - NS AI</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="stars"></div>
+
+<header class="topbar">
+
+    <a class="brand" href="index.html">
+        <span>NS</span> NS AI
+    </a>
+
+    <nav>
+
+        <a href="index.html">Trang chủ</a>
+        <a href="thongtin.html">Thông tin</a>
+        <a href="diemso.html">Điểm số</a>
+        <a href="sothich.html">Sở thích</a>
+        <a href="tinhcach.html">Tính cách</a>
+        <a class="active" href="muc-tieu.html">Mục tiêu</a>
+        <a href="truong-hoc.html">Trường học</a>
+        <a href="ketqua.html">Kết quả</a>
+        <a href="chatbot.html">Trợ lí ảo</a>
+
+        <button class="session-reset" onclick="resetAllData()">
+            ↻ Phiên mới
+        </button>
+
+    </nav>
+
+</header>
+
+
+<main class="page">
+
+<section class="glass form-card wide">
+
+    <p class="eyebrow">CAREER GOAL</p>
+
+    <h1>Xác định mục tiêu</h1>
+
+    <p class="muted">
+        Hãy chia sẻ định hướng và ước mơ của bạn.
+        NS AI sẽ kết hợp thông tin này với điểm số,
+        sở thích và tính cách để hỗ trợ định hướng.
+    </p>
+
+
+    <!-- ================= MỤC TIÊU ================= -->
+
+    <div class="goal-profile">
+
+        <h2>🎯 Mục tiêu hiện tại</h2>
+
+        <p class="muted">
+            Những thông tin này giúp NS AI hiểu rõ hơn
+            về định hướng tương lai của bạn.
+        </p>
+
+
+        <label>
+            🏫 Trường bạn mong muốn
+
+            <input
+                type="text"
+                id="dreamSchool"
+                placeholder="Ví dụ: Đại học Bách khoa Hà Nội"
+            >
+        </label>
+
+
+        <label>
+            🎓 Ngành bạn mong muốn
+
+            <input
+                type="text"
+                id="dreamMajor"
+                placeholder="Ví dụ: Công nghệ thông tin"
+            >
+        </label>
+
+
+        <label>
+            💼 Nghề nghiệp bạn mơ ước
+
+            <input
+                type="text"
+                id="dreamCareer"
+                placeholder="Ví dụ: Kỹ sư AI, Bác sĩ, Giáo viên..."
+            >
+        </label>
+
+
+        <!-- ================= NƠI HỌC ================= -->
+
+        <label>
+            📍 Bạn muốn học ở đâu?
+
+            <input
+                type="text"
+                id="searchProvince"
+                placeholder="🔎 Tìm tỉnh / thành phố..."
+                autocomplete="off"
+            >
+
+            <select id="studyLocation">
+                <option value="">-- Chọn tỉnh / thành phố --</option>
+
+                <option>Hà Nội</option>
+                <option>Cao Bằng</option>
+                <option>Tuyên Quang</option>
+                <option>Điện Biên</option>
+                <option>Lai Châu</option>
+                <option>Sơn La</option>
+                <option>Lào Cai</option>
+                <option>Thái Nguyên</option>
+                <option>Lạng Sơn</option>
+                <option>Quảng Ninh</option>
+                <option>Bắc Ninh</option>
+                <option>Phú Thọ</option>
+                <option>Hải Phòng</option>
+                <option>Hưng Yên</option>
+                <option>Ninh Bình</option>
+                <option>Thanh Hóa</option>
+                <option>Nghệ An</option>
+                <option>Hà Tĩnh</option>
+                <option>Quảng Trị</option>
+                <option>Huế</option>
+                <option>Đà Nẵng</option>
+                <option>Quảng Ngãi</option>
+                <option>Gia Lai</option>
+                <option>Khánh Hòa</option>
+                <option>Đắk Lắk</option>
+                <option>Lâm Đồng</option>
+                <option>Đồng Nai</option>
+                <option>TP. Hồ Chí Minh</option>
+                <option>Tây Ninh</option>
+                <option>Đồng Tháp</option>
+                <option>Vĩnh Long</option>
+                <option>An Giang</option>
+                <option>Cần Thơ</option>
+                <option>Cà Mau</option>
+                <option>Chưa xác định</option>
+
+            </select>
+
+        </label>
+
+
+        <!-- ================= DU HỌC ================= -->
+
+        <label>
+            🌍 Bạn có mong muốn du học không?
+
+            <select id="studyAbroad">
+
+                <option value="Không">Không</option>
+
+                <option value="Có">Có</option>
+
+                <option value="Chưa xác định">
+                    Chưa xác định
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <!-- ================= ƯỚC MƠ ================= -->
+
+        <label>
+            🌟 Ước mơ / mục tiêu tương lai
+
+            <textarea
+                id="dreamGoal"
+                rows="4"
+                placeholder="Ví dụ: Em muốn trở thành kỹ sư AI và học tại một trường đại học lớn..."
+            ></textarea>
+
+        </label>
+
+    </div>
+
+
+    <!-- ================= THÔNG BÁO ================= -->
+
+    <div id="goalInfo" class="notice">
+
+        <strong>
+            🎯 Định hướng cá nhân
+        </strong>
+
+        <p>
+            Hãy điền mục tiêu, ngành học hoặc nghề nghiệp
+            mà bạn đang quan tâm. NS AI sẽ sử dụng thông tin
+            này để hỗ trợ phân tích.
+        </p>
+
+    </div>
+
+
+    <!-- ================= NGÀNH QUAN TÂM ================= -->
+
+    <h2>
+        Ngành bạn đang quan tâm
+    </h2>
+
+    <p class="muted">
+        Bạn có thể chọn một hoặc nhiều ngành.
+        Nếu chưa biết ngành nào, có thể bỏ qua.
+    </p>
+
+
+    <div id="majors" class="chips">
+
+        <button type="button" class="chip">
+            Công nghệ thông tin
+        </button>
+
+        <button type="button" class="chip">
+            Khoa học máy tính
+        </button>
+
+        <button type="button" class="chip">
+            Kỹ thuật
+        </button>
+
+        <button type="button" class="chip">
+            Kinh tế
+        </button>
+
+        <button type="button" class="chip">
+            Quản trị kinh doanh
+        </button>
+
+        <button type="button" class="chip">
+            Tài chính - Ngân hàng
+        </button>
+
+        <button type="button" class="chip">
+            Marketing
+        </button>
+
+        <button type="button" class="chip">
+            Luật
+        </button>
+
+        <button type="button" class="chip">
+            Y - Dược
+        </button>
+
+        <button type="button" class="chip">
+            Giáo dục
+        </button>
+
+        <button type="button" class="chip">
+            Ngoại ngữ
+        </button>
+
+        <button type="button" class="chip">
+            Truyền thông
+        </button>
+
+        <button type="button" class="chip">
+            Thiết kế
+        </button>
+
+        <button type="button" class="chip">
+            Kiến trúc
+        </button>
+
+        <button type="button" class="chip">
+            Khoa học tự nhiên
+        </button>
+
+        <button type="button" class="chip">
+            Khoa học xã hội
+        </button>
+
+    </div>
+
+
+    <!-- ================= NGÀNH KHÁC ================= -->
+
+    <label>
+
+        Ngành khác
+
+        <textarea
+            id="other"
+            rows="4"
+            placeholder="Ví dụ: Trí tuệ nhân tạo, An ninh mạng, Công nghệ ô tô..."
+        ></textarea>
+
+    </label>
+
+
+    <!-- ================= ĐÁNH GIÁ ================= -->
+
+    <section id="goalEvaluation" class="glass">
+
+        <p class="eyebrow">
+            NS AI CHECK
+        </p>
+
+        <h2>
+            Đánh giá mục tiêu
+        </h2>
+
+        <p id="evaluationText" class="muted">
+            Hãy nhập mục tiêu để xem thông tin và gợi ý.
+        </p>
+
+    </section>
+
+
+    <!-- ================= BUTTON ================= -->
+
+    <div class="actions">
+
+        <a
+            class="btn secondary"
+            href="tinhcach.html"
+        >
+            ← Quay lại
+        </a>
+
+        <button
+            class="btn primary"
+            type="button"
+            onclick="saveGoals()"
+        >
+            Lưu & tiếp tục →
+        </button>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<script src="main.js"></script>
+
+<script>
+
+/* =========================================
+   TÌM KIẾM TỈNH / THÀNH
+========================================= */
+
+const searchProvince =
+    document.getElementById("searchProvince");
+
+const studyLocation =
+    document.getElementById("studyLocation");
+
+const provinces =
+    Array.from(studyLocation.options).map(option => ({
+        value: option.value,
+        text: option.text
+    }));
+
+
+searchProvince.addEventListener("input", function () {
+
+    const keyword = this.value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+    studyLocation.innerHTML = "";
+
+    const filtered = provinces.filter(province => {
+
+        const text = province.text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+        return text.includes(keyword);
+
+    });
+
+
+    filtered.forEach(province => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = province.value;
+        option.textContent = province.text;
+
+        studyLocation.appendChild(option);
+
+    });
+
+
+    if (filtered.length === 0) {
+
+        const option =
+            document.createElement("option");
+
+        option.textContent =
+            "Không tìm thấy tỉnh/thành phố";
+
+        option.disabled = true;
+
+        studyLocation.appendChild(option);
+
+    }
+
+});
+
+
+/* =========================================
+   KHÔI PHỤC DỮ LIỆU ĐÃ LƯU
+========================================= */
+
+const oldGoals = read("goals") || {};
+
+
+document.getElementById("dreamSchool").value =
+    oldGoals.dreamSchool || "";
+
+document.getElementById("dreamMajor").value =
+    oldGoals.dreamMajor || "";
+
+document.getElementById("dreamCareer").value =
+    oldGoals.dreamCareer || "";
+
+document.getElementById("dreamGoal").value =
+    oldGoals.dreamGoal || "";
+
+document.getElementById("studyAbroad").value =
+    oldGoals.studyAbroad || "Không";
+
+if (oldGoals.studyLocation) {
+
+    document.getElementById("studyLocation").value =
+        oldGoals.studyLocation;
+
+}
+
+
+/* =========================================
+   NGÀNH QUAN TÂM
+========================================= */
+
+const savedMajors =
+    oldGoals.selected || [];
+
+document
+    .querySelectorAll(".chip")
+    .forEach(chip => {
+
+        if (
+            savedMajors.includes(
+                chip.textContent.trim()
+            )
+        ) {
+
+            chip.classList.add("selected");
+
+        }
+
+
+        chip.addEventListener("click", function () {
+
+            this.classList.toggle("selected");
+
+        });
+
+    });
+
+
+/* =========================================
+   ĐÁNH GIÁ MỤC TIÊU
+========================================= */
+
+function updateEvaluation() {
+
+    const school =
+        document.getElementById("dreamSchool").value.trim();
+
+    const major =
+        document.getElementById("dreamMajor").value.trim();
+
+    const career =
+        document.getElementById("dreamCareer").value.trim();
+
+    const location =
+        document.getElementById("studyLocation").value;
+
+    const abroad =
+        document.getElementById("studyAbroad").value;
+
+    const dream =
+        document.getElementById("dreamGoal").value.trim();
+
+
+    const evaluation =
+        document.getElementById("evaluationText");
+
+
+    const goalInfo =
+        document.getElementById("goalInfo");
+
+
+    let content = "";
+
+
+    if (!school &&
+        !major &&
+        !career &&
+        !location &&
+        !dream) {
+
+        content = `
+            <b>🎯 Bắt đầu xây dựng mục tiêu</b>
+            <br><br>
+            Hãy nhập một vài thông tin về trường,
+            ngành học, nghề nghiệp hoặc ước mơ của bạn.
+        `;
+
+    } else {
+
+        content = `
+            <b>🎯 Hồ sơ mục tiêu của bạn</b>
+            <br><br>
+        `;
+
+
+        if (school) {
+
+            content +=
+                `🏫 Trường mong muốn: <b>${school}</b><br>`;
+
+        }
+
+
+        if (major) {
+
+            content +=
+                `🎓 Ngành mong muốn: <b>${major}</b><br>`;
+
+        }
+
+
+        if (career) {
+
+            content +=
+                `💼 Nghề nghiệp: <b>${career}</b><br>`;
+
+        }
+
+
+        if (location) {
+
+            content +=
+                `📍 Nơi học: <b>${location}</b><br>`;
+
+        }
+
+
+        content +=
+            `<br>🌍 Du học: <b>${abroad}</b>`;
+
+
+        if (dream) {
+
+            content += `
+                <br><br>
+                🌟 Ước mơ:
+                <b>${dream}</b>
+            `;
+
+        }
+
+    }
+
+
+    evaluation.innerHTML = content;
+
+
+    goalInfo.innerHTML = `
+
+        <strong>
+            🎯 NS AI đang ghi nhận mục tiêu của bạn
+        </strong>
+
+        <p>
+            Hệ thống sẽ kết hợp mục tiêu với
+            điểm số, sở thích và tính cách
+            để hỗ trợ định hướng ngành nghề.
+        </p>
+
+    `;
+
+}
+
+
+/* =========================================
+   CẬP NHẬT KHI NHẬP
+========================================= */
+
+[
+    "dreamSchool",
+    "dreamMajor",
+    "dreamCareer",
+    "dreamGoal"
+].forEach(id => {
+
+    document
+        .getElementById(id)
+        .addEventListener(
+            "input",
+            updateEvaluation
+        );
+
+});
+
+
+document
+    .getElementById("studyLocation")
+    .addEventListener(
+        "change",
+        updateEvaluation
+    );
+
+
+document
+    .getElementById("studyAbroad")
+    .addEventListener(
+        "change",
+        updateEvaluation
+    );
+
+
+/* =========================================
+   LƯU MỤC TIÊU
+========================================= */
+
+function saveGoals() {
+
+    const selectedMajors = [
+
+        ...document.querySelectorAll(
+            ".chip.selected"
+        )
+
+    ].map(chip =>
+        chip.textContent.trim()
+    );
+
+
+    const data = {
+
+        dreamSchool:
+            document
+                .getElementById("dreamSchool")
+                .value
+                .trim(),
+
+        dreamMajor:
+            document
+                .getElementById("dreamMajor")
+                .value
+                .trim(),
+
+        dreamCareer:
+            document
+                .getElementById("dreamCareer")
+                .value
+                .trim(),
+
+        studyLocation:
+            document
+                .getElementById("studyLocation")
+                .value,
+
+        studyAbroad:
+            document
+                .getElementById("studyAbroad")
+                .value,
+
+        dreamGoal:
+            document
+                .getElementById("dreamGoal")
+                .value
+                .trim(),
+
+        selected:
+            selectedMajors,
+
+        other:
+            document
+                .getElementById("other")
+                .value
+                .trim()
+
+    };
+
+
+    save("goals", data);
+
+
+    window.location.href =
+        "ketqua.html";
+
+}
+
+
+/* =========================================
+   KHỞI TẠO
+========================================= */
+
+updateEvaluation();
+
+</script>
+
+</body>
+</html>
+```
