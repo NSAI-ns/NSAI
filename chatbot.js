@@ -377,6 +377,16 @@ function answer(q) {
     return 'Mình rất lo lắng khi nghe bạn chia sẻ cảm xúc này. Hãy dừng lại một chút và hít thở thật sâu nhé. Bạn vô cùng quý giá và không hề đơn độc. Hãy liên hệ ngay với người thân, thầy cô hoặc gọi tổng đài bảo vệ trẻ em 111 (miễn phí) hoặc cơ sở y tế gần nhất để luôn có người bên cạnh lắng nghe và bảo vệ bạn nhé.';
   }
 
+  // 1.00 CHÀO HỎI & LÀM QUEN CÁ NHÂN HÓA
+  if (/^(chào|xin chào|hello|hi|helo|alo|hai|chao|xin chao)\b/.test(s.trim())) {
+    recordTopic('greeting');
+    const uName = (typeof getCurrentUser === 'function' && getCurrentUser()) || c.p?.info?.name || 'bạn';
+    const topStr = c.top ? ` Hiện tại theo hồ sơ, bạn đang có thế mạnh nổi trội với ngành **${c.top.name}**.` : '';
+    return `Chào **${uName}**! Rất vui được gặp bạn! 💚🌌\n\n` +
+      `Mình là **NS AI Assistant** – trợ lý thông minh đồng hành cùng bạn trên hành trình định hướng nghề nghiệp, tra cứu đại học và giải tỏa áp lực thi cử.${topStr}\n\n` +
+      `Hôm nay bạn đang có câu hỏi hay muốn tâm sự điều gì cùng mình không? Hãy gõ câu hỏi hoặc bấm 🎙️ để nói nhé!`;
+  }
+
   // 1.0 MẤT ĐỘNG LỰC / HẾT ĐỘNG LỰC / TỤT MOOD / CHÁN HỌC / MÔNG LUNG (TƯ VẤN TÂM LÝ CHUYÊN SÂU)
   if (/mất động lực|hết động lực|thiếu động lực|không có động lực|chẳng có động lực|tụt mood|tụt cảm xúc|down mood|mất hứng|không có hứng|không còn hứng|chán nản|chán học|không muốn học|chán chả muốn học|lười học|muốn buông xuôi|buông xuôi|muốn từ bỏ|từ bỏ|nản quá|nản lòng|mông lung|mất phương hướng|học để làm gì|cố gắng vì điều gì|lấy lại động lực|bảo mất động lực/.test(s)) {
     recordTopic('motivation_recovery');
@@ -1068,6 +1078,470 @@ function answer(q) {
   return naturalReplies[(chatState.fallbackIndex - 1) % naturalReplies.length];
 }
 
+// =================== QUẢN LÝ LỊCH SỬ ĐOẠN CHAT (SIDEBAR THEO ẢNH) ===================
+
+const STORAGE_KEY_SESSIONS = 'ns_chat_sessions';
+const STORAGE_KEY_CURRENT = 'ns_current_chat_id';
+
+const DEFAULT_CHAT_SESSIONS = [
+  {
+    id: 'conv_1',
+    title: 'Thiết kế slide Vua Minh Mạng',
+    createdAt: '2026-11-01T10:00:00.000Z',
+    updatedAt: '2026-11-01T10:05:00.000Z',
+    messages: [
+      {
+        who: 'user',
+        text: 'Gợi ý cho mình bố cục và nội dung thiết kế slide thuyết trình Lịch sử về Vua Minh Mạng.'
+      },
+      {
+        who: 'bot',
+        text: 'Dưới đây là dàn ý gợi ý thiết kế slide ấn tượng về **Hoàng đế Minh Mạng (1791 - 1841)**:\n\n' +
+          '📌 **Slide 1: Trang bìa & Đặt vấn đề**\n' +
+          '• Tiêu đề: *Hoàng đế Minh Mạng - Vị vua canh tân và hoàn thiện thể chế Đại Nam*.\n' +
+          '• Hình ảnh: Chân dung vua Minh Mạng hoặc toàn cảnh Kinh thành Huế.\n\n' +
+          '📌 **Slide 2: Thân thế & Bối cảnh lịch sử**\n' +
+          '• Tên húy: Nguyễn Phúc Đảm, con thứ tư của vua Gia Long.\n' +
+          '• Lên ngôi năm 1820, trị vì 21 năm - giai đoạn nội trị quy củ và thịnh vượng nhất của vương triều Nguyễn.\n\n' +
+          '📌 **Slide 3: Cuộc cải cách hành chính quy mô toàn quốc (Trọng tâm)**\n' +
+          '• Xóa bỏ các đơn vị đồn trú tự trị lớn (Bắc Thành, Gia Định Thành).\n' +
+          '• Chia cả nước thành **30 tỉnh và 1 phủ Thừa Thiên** (đặt nền móng cho địa giới hành chính hiện đại).\n' +
+          '• Thiết lập cơ chế giám sát liêm chính: Nội các, Đô sát viện và Lục bộ chặt chẽ.\n\n' +
+          '📌 **Slide 4: Giáo dục, thi cử và bảo tồn văn hóa**\n' +
+          '• Khôi phục các kỳ thi Hội, thi Đình tuyển chọn hiền tài; củng cố Quốc Tử Giám.\n' +
+          '• Thành lập Lạc Tịnh viên, đốc thúc biên soạn bộ chính sử *Đại Nam thực lục*.\n\n' +
+          '📌 **Slide 5: Đánh giá toàn diện & Bài học lịch sử**\n' +
+          '• Điểm sáng: Khẳng định chủ quyền biển đảo (Hoàng Sa, Trường Sa), thể chế nhà nước tập quyền vững mạnh.\n' +
+          '• Hạn chế: Chính sách bế quan tỏa cảng, còn dè dặt trước các luồng tư tưởng mới từ phương Tây.\n\n' +
+          '💡 *Mẹo thiết kế slide:* Sử dụng tone màu vàng đồng hoàng gia (#c59b27) phối nền tối; mỗi slide tối đa 5-6 gạch đầu dòng kết hợp hình ảnh tư liệu để người xem dễ ghi nhớ!'
+      }
+    ]
+  },
+  {
+    id: 'conv_2',
+    title: 'Lời chào thân thiện',
+    createdAt: '2026-11-01T09:15:00.000Z',
+    updatedAt: '2026-11-01T09:18:00.000Z',
+    messages: [
+      {
+        who: 'user',
+        text: 'Chào NS AI! Hôm nay mình ghé thăm để làm quen nè.'
+      },
+      {
+        who: 'bot',
+        text: 'Chào bạn thân mến! Rất vui được gặp gỡ và đồng hành cùng bạn hôm nay! 💚🌌\n\n' +
+          'Mình là **NS AI** – trợ lý thông minh hỗ trợ định hướng nghề nghiệp và tư vấn tâm lý học đường. Dù bạn đang ấp ủ ước mơ về ngành nghề tương lai, băn khoăn về chọn tổ hợp xét tuyển, hay đang có những ngày mệt mỏi cần một nơi an yên để tâm sự, mình luôn ở đây lắng nghe bạn.\n\n' +
+          'Bạn đang muốn tìm hiểu về chủ đề gì trước tiên? Cứ thoải mái chia sẻ với mình nhé! ✨'
+      }
+    ]
+  },
+  {
+    id: 'conv_3',
+    title: 'Thống Kê Số Lượng Từ Văn Bản',
+    createdAt: '2026-10-31T16:20:00.000Z',
+    updatedAt: '2026-10-31T16:25:00.000Z',
+    messages: [
+      {
+        who: 'user',
+        text: 'Thống kê số lượng từ và phân tích mật độ từ khóa trong đoạn văn nghị luận xã hội này giúp em: "Việc theo đuổi đam mê thực sự chỉ có giá trị khi nó được tôi luyện cùng sự kiên trì và mang lại ý nghĩa tích cực cho cộng đồng xung quanh."'
+      },
+      {
+        who: 'bot',
+        text: '📊 **Kết quả phân tích & thống kê văn bản:**\n\n' +
+          '• **Tổng số từ:** 34 từ tiếng Việt\n' +
+          '• **Tổng số ký tự (cả khoảng trắng):** 178 ký tự\n' +
+          '• **Số câu:** 1 câu phức có mệnh đề điều kiện giả định\n' +
+          '• **Từ khóa trọng tâm:** *đam mê* (1), *kiên trì* (1), *giá trị* (1), *cộng đồng* (1)\n' +
+          '• **Đánh giá văn phong:** Ngắn gọn, súc tích, lập luận logic và có chiều sâu triết lý sống. Rất thích hợp dùng làm câu kết (chốt ý) cho bài văn nghị luận xã hội!'
+      }
+    ]
+  },
+  {
+    id: 'conv_4',
+    title: 'Tóm tắt nghệ thuật bài thơ Nhớ đồng',
+    createdAt: '2026-10-30T14:10:00.000Z',
+    updatedAt: '2026-10-30T14:18:00.000Z',
+    messages: [
+      {
+        who: 'user',
+        text: 'Tóm tắt các nét đặc sắc về mặt nghệ thuật trong bài thơ "Nhớ đồng" của tác giả Tố Hữu.'
+      },
+      {
+        who: 'bot',
+        text: '🌾 **Tóm tắt nghệ thuật bài thơ "Nhớ đồng" (Tố Hữu - Ngữ văn 11):**\n\n' +
+          '1. **Nghệ thuật xây dựng điệp khúc da diết:**\n' +
+          '   • Cụm từ *"Gì sâu bằng những trưa thương nhớ..."* và *"Gì sâu bằng những trưa hiu quạnh..."* được lặp đi lặp lại như một điệp khúc xoáy sâu vào tâm can, diễn tả nỗi nhớ cồn cào, quằn quại của người tù trẻ tuổi.\n\n' +
+          '2. **Nghệ thuật tương phản đối lập sắc nét:**\n' +
+          '   • Tương phản giữa thực tại ngột ngạt, tối tăm của bốn bức tường giam cầm với không gian bao la, rộn rã âm thanh và ngập tràn ánh sáng của đồng quê tự do bên ngoài.\n\n' +
+          '3. **Hình ảnh thơ bình dị, chân thực và giàu nhạc điệu:**\n' +
+          '   • Tác giả đưa vào thơ những hình ảnh thân thuộc: mùi rơm rạ, đồng lúa trổ đòng, bãi mía, con đò, bóng mẹ già lưng còng... thấm đẫm tình yêu quê hương đất nước.\n\n' +
+          '4. **Giọng điệu cảm xúc biến chuyển linh hoạt:**\n' +
+          '   • Khởi đầu từ nỗi nhớ thương man mác, lắng đọng dần chuyển thành niềm khao khát tự do mãnh liệt và ý chí kiên định của người chiến sĩ cách mạng.'
+      }
+    ]
+  },
+  {
+    id: 'conv_5',
+    title: 'Lời giải bài tập Sinh học 11',
+    createdAt: '2026-10-29T11:00:00.000Z',
+    updatedAt: '2026-10-29T11:10:00.000Z',
+    messages: [
+      {
+        who: 'user',
+        text: 'Một gen ở sinh vật nhân thực có 3000 nuclêôtit và có số liên kết hiđrô là 3900. Hãy xác định số lượng từng loại nuclêôtit của gen.'
+      },
+      {
+        who: 'bot',
+        text: '🧬 **Lời giải chi tiết bài tập Sinh học 11 (Cấu trúc phân tử ADN & Gen):**\n\n' +
+          '**1. Đề bài tóm tắt:**\n' +
+          '• Tổng số nuclêôtit của gen: $N = 3000$\n' +
+          '• Tổng số liên kết hiđrô: $H = 3900$\n\n' +
+          '**2. Áp dụng các hệ thức cơ bản của phân tử ADN:**\n' +
+          '• Theo nguyên tắc bổ sung: $A = T$ và $G = X$\n' +
+          '• Công thức tính tổng số nuclêôtit: $2A + 2G = N = 3000 \\Rightarrow A + G = 1500$ *(Phương trình 1)*\n' +
+          '• Công thức tính số liên kết hiđrô: $2A + 3G = H = 3900$ *(Phương trình 2)*\n\n' +
+          '**3. Giải hệ phương trình:**\n' +
+          '• Lấy (Phương trình 2) trừ (Phương trình 1):\n' +
+          '  $(2A + 3G) - (2A + 2G) = 3900 - 3000 \\Rightarrow G = 900$\n' +
+          '• Thay $G = 900$ vào (Phương trình 1):\n' +
+          '  $A = 1500 - 900 = 600$\n\n' +
+          '**4. Kết luận:**\n' +
+          '• $A = T = 600$ nuclêôtit (chiếm 20% tổng số Nu)\n' +
+          '• $G = X = 900$ nuclêôtit (chiếm 30% tổng số Nu)\n\n' +
+          '✅ Đáp án chính xác: $A = T = 600$; $G = X = 900$.'
+      }
+    ]
+  },
+  {
+    id: 'conv_6',
+    title: 'Rút gọn văn bản giữ nguyên',
+    createdAt: '2026-10-28T08:30:00.000Z',
+    updatedAt: '2026-10-28T08:35:00.000Z',
+    messages: [
+      {
+        who: 'user',
+        text: 'Rút gọn bài giới thiệu bản thân 300 từ khi tham gia phỏng vấn câu lạc bộ hoặc học bổng thành bản ngắn 1 phút nhưng giữ nguyên các ý chính.'
+      },
+      {
+        who: 'bot',
+        text: '✂️ **Bản rút gọn tối ưu chuẩn 60 giây (giữ trọn 3 luận điểm vàng):**\n\n' +
+          '*"Em chào Thầy/Cô và các anh chị! Em là [Họ tên], học sinh lớp 12 với định hướng theo đuổi lĩnh vực Công nghệ & Đổi mới sáng tạo. Trong 3 năm THPT, em duy trì GPA trên 8.5 và từng đảm nhận vai trò trưởng nhóm trong dự án nghiên cứu khoa học học sinh. Động lực lớn nhất khi em ứng tuyển là mong muốn học hỏi từ môi trường chuyên nghiệp và cống hiến khả năng giải quyết vấn đề của mình cho tập thể."*\n\n' +
+          '💡 **Ưu điểm của bản tóm tắt này:**\n' +
+          '• Đi thẳng vào bản sắc cá nhân (15 giây đầu)\n' +
+          '• Nêu bật bằng chứng học thuật & kỹ năng thực tế (30 giây giữa)\n' +
+          '• Khẳng định cam kết và thái độ cầu tiến (15 giây cuối).'
+      }
+    ]
+  }
+];
+
+function getChatSessions() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_SESSIONS);
+    if (!raw) return null;
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) && arr.length > 0 ? arr : null;
+  } catch (e) {
+    console.error('Error reading chat sessions:', e);
+    return null;
+  }
+}
+
+function saveChatSessions(sessions) {
+  try {
+    localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
+  } catch (e) {
+    console.error('Error saving chat sessions:', e);
+  }
+}
+
+function getCurrentChatId() {
+  return localStorage.getItem(STORAGE_KEY_CURRENT) || 'conv_1';
+}
+
+function setCurrentChatId(id) {
+  localStorage.setItem(STORAGE_KEY_CURRENT, id);
+}
+
+function initChatHistory() {
+  let sessions = getChatSessions();
+  if (!sessions || sessions.length === 0) {
+    sessions = JSON.parse(JSON.stringify(DEFAULT_CHAT_SESSIONS));
+    saveChatSessions(sessions);
+    setCurrentChatId(sessions[0].id);
+  }
+
+  let currentId = getCurrentChatId();
+  let currentSession = sessions.find(s => s.id === currentId);
+  if (!currentSession) {
+    currentSession = sessions[0];
+    currentId = currentSession.id;
+    setCurrentChatId(currentId);
+  }
+
+  renderSidebarUserProfile();
+  renderSidebarConversations();
+  loadSessionMessages(currentSession);
+}
+
+function loadSessionMessages(session) {
+  if (!session) return;
+  const box = document.getElementById('messages');
+  if (!box) return;
+
+  box.innerHTML = '';
+  const msgs = session.messages || [];
+
+  if (msgs.length === 0) {
+    addMsg('Chào bạn! Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Mình luôn ở đây để lắng nghe bạn tâm sự về áp lực thi cử, chuyện gia đình, những ngày mệt mỏi hay băn khoăn về chọn ngành, chọn trường. Bạn có thể gõ phím hoặc bấm nút 🎙️ Micro để tâm sự trực tiếp bằng giọng nói nhé! 💚🌌', 'bot');
+  } else {
+    msgs.forEach(m => {
+      addMsg(m.text, m.who);
+    });
+  }
+
+  const badge = document.getElementById('activeChatBadge');
+  if (badge) {
+    badge.textContent = session.title || 'Đoạn chat';
+    badge.title = session.title || 'Đoạn chat';
+  }
+}
+
+function renderSidebarConversations(filterText = '') {
+  const container = document.getElementById('conversationList');
+  if (!container) return;
+
+  const sessions = getChatSessions() || [];
+  const currentId = getCurrentChatId();
+  const filter = (filterText || '').trim().toLowerCase();
+
+  const filtered = filter
+    ? sessions.filter(s => (s.title || '').toLowerCase().includes(filter))
+    : sessions;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="conversation-empty">Không tìm thấy đoạn chat nào.</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  filtered.forEach(session => {
+    const item = document.createElement('div');
+    item.className = 'conversation-item' + (session.id === currentId ? ' active' : '');
+    item.title = session.title;
+
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'conversation-title-text';
+    titleSpan.textContent = session.title;
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'btn-delete-conv';
+    delBtn.title = 'Xóa cuộc trò chuyện';
+    delBtn.innerHTML = '🗑️';
+    delBtn.onclick = (e) => {
+      e.stopPropagation();
+      deleteChatSession(session.id);
+    };
+
+    item.appendChild(titleSpan);
+    item.appendChild(delBtn);
+
+    item.onclick = () => {
+      switchChatSession(session.id);
+    };
+
+    container.appendChild(item);
+  });
+}
+
+function switchChatSession(id) {
+  const sessions = getChatSessions() || [];
+  const target = sessions.find(s => s.id === id);
+  if (!target) return;
+
+  setCurrentChatId(id);
+  renderSidebarConversations();
+  loadSessionMessages(target);
+  toggleSidebarMobile(false);
+}
+
+function createNewChatSession() {
+  const sessions = getChatSessions() || [];
+  const newId = 'conv_' + Date.now();
+  const newSession = {
+    id: newId,
+    title: 'Đoạn chat mới',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    messages: [
+      {
+        who: 'bot',
+        text: 'Chào bạn! Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Hôm nay bạn đang có điều gì muốn chia sẻ hoặc câu hỏi nào cần mình hỗ trợ không? 💚🌌'
+      }
+    ]
+  };
+
+  sessions.unshift(newSession);
+  saveChatSessions(sessions);
+  setCurrentChatId(newId);
+
+  renderSidebarConversations();
+  loadSessionMessages(newSession);
+
+  const inputEl = document.getElementById('input');
+  if (inputEl) {
+    inputEl.focus();
+  }
+
+  toggleSidebarMobile(false);
+}
+
+function deleteChatSession(id) {
+  let sessions = getChatSessions() || [];
+  const target = sessions.find(s => s.id === id);
+  const targetTitle = target ? target.title : 'cuộc trò chuyện này';
+
+  if (!confirm(`Bạn có chắc chắn muốn xóa "${targetTitle}" khỏi danh sách lưu?`)) {
+    return;
+  }
+
+  sessions = sessions.filter(s => s.id !== id);
+  saveChatSessions(sessions);
+
+  const currentId = getCurrentChatId();
+  if (currentId === id) {
+    if (sessions.length > 0) {
+      setCurrentChatId(sessions[0].id);
+      loadSessionMessages(sessions[0]);
+    } else {
+      createNewChatSession();
+      return;
+    }
+  }
+
+  renderSidebarConversations();
+}
+
+function renderSidebarUserProfile() {
+  const avatarEl = document.getElementById('sidebarUserAvatar');
+  const nameEl = document.getElementById('sidebarUserName');
+  const subtextEl = document.getElementById('sidebarUserSubtext');
+
+  let userName = 'sơn trần thanh';
+  if (typeof getCurrentUser === 'function') {
+    const loggedUser = getCurrentUser();
+    if (loggedUser) {
+      userName = loggedUser;
+    }
+  }
+
+  if (nameEl) nameEl.textContent = userName;
+  if (avatarEl) {
+    const initial = userName.trim().charAt(0).toLowerCase() || 's';
+    avatarEl.textContent = initial;
+  }
+  if (subtextEl) {
+    subtextEl.textContent = 'Chuyên nghiên...';
+    subtextEl.title = 'Chuyên nghiên cứu & học tập';
+  }
+}
+
+function toggleSidebarFilter() {
+  const searchBox = document.getElementById('sidebarSearchBox');
+  const filterBtn = document.getElementById('sidebarFilterBtn');
+  const searchInput = document.getElementById('sidebarSearchInput');
+  if (!searchBox) return;
+
+  const isHidden = searchBox.style.display === 'none';
+  searchBox.style.display = isHidden ? 'block' : 'none';
+  if (filterBtn) {
+    filterBtn.classList.toggle('active', isHidden);
+  }
+
+  if (isHidden && searchInput) {
+    searchInput.focus();
+  } else if (!isHidden && searchInput) {
+    searchInput.value = '';
+    renderSidebarConversations('');
+  }
+}
+
+function handleSearchConversations(val) {
+  renderSidebarConversations(val);
+}
+
+function toggleSidebarMobile(forceState) {
+  const sidebar = document.getElementById('chatSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (!sidebar) return;
+
+  const shouldOpen = (typeof forceState === 'boolean')
+    ? forceState
+    : !sidebar.classList.contains('open');
+
+  sidebar.classList.toggle('open', shouldOpen);
+  if (backdrop) {
+    backdrop.classList.toggle('active', shouldOpen);
+  }
+}
+
+function saveMessageToCurrentSession(who, text) {
+  const sessions = getChatSessions() || [];
+  const currentId = getCurrentChatId();
+  const session = sessions.find(s => s.id === currentId);
+  if (!session) return;
+
+  if (!session.messages) session.messages = [];
+  session.messages.push({
+    who: who,
+    text: text,
+    time: new Date().toISOString()
+  });
+
+  // Tự động đặt tiêu đề theo câu hỏi đầu tiên của người dùng nếu là đoạn chat mới
+  if (who === 'user' && (!session.title || session.title === 'Đoạn chat mới')) {
+    const cleanTitle = text.replace(/[\r\n]+/g, ' ').trim();
+    session.title = cleanTitle.length > 28 ? cleanTitle.slice(0, 28) + '...' : cleanTitle;
+    const badge = document.getElementById('activeChatBadge');
+    if (badge) {
+      badge.textContent = session.title;
+      badge.title = session.title;
+    }
+  }
+
+  session.updatedAt = new Date().toISOString();
+  saveChatSessions(sessions);
+  renderSidebarConversations();
+}
+
+// =================== HIỆU ỨNG SUY NGHĨ & XỬ LÝ GỬI TIN NHẮN ===================
+
+function showThinkingIndicator() {
+  removeThinkingIndicator();
+  const box = document.getElementById('messages');
+  if (!box) return;
+
+  const d = document.createElement('div');
+  d.className = 'msg bot msg-thinking';
+  d.id = 'thinkingIndicator';
+  d.innerHTML = `
+    <div class="thinking-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <span style="font-size: 13px; color: #a78bfa; margin-left: 8px; font-weight: 500;">
+      NS AI đang suy nghĩ...
+    </span>
+  `;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+
+function removeThinkingIndicator() {
+  const el = document.getElementById('thinkingIndicator');
+  if (el) el.remove();
+}
+
 function send() {
   if (chatState.isSending) return;
 
@@ -1079,12 +1553,16 @@ function send() {
 
   chatState.isSending = true;
   addMsg(q, 'user');
+  saveMessageToCurrentSession('user', q);
   inputEl.value = '';
   inputEl.disabled = true;
 
-  // Hiệu ứng phản hồi tự nhiên (khoảng 250-350ms)
+  showThinkingIndicator();
+
+  // Hiệu ứng phản hồi suy nghĩ tự nhiên (khoảng 300-380ms)
   setTimeout(() => {
     try {
+      removeThinkingIndicator();
       let reply = answer(q);
 
       // Chống lặp câu trả lời giống hệt câu vừa trả lời
@@ -1094,15 +1572,20 @@ function send() {
 
       chatState.lastAnswer = reply;
       addMsg(reply, 'bot');
+      saveMessageToCurrentSession('bot', reply);
     } catch (err) {
       console.error(err);
-      addMsg('Mình đang gặp một chút gián đoạn khi xử lý, bạn hỏi lại giúp mình nhé! 😊', 'bot');
+      removeThinkingIndicator();
+      const errMsg = 'Mình đang gặp một chút gián đoạn khi xử lý, bạn hỏi lại giúp mình nhé! 😊';
+      addMsg(errMsg, 'bot');
+      saveMessageToCurrentSession('bot', errMsg);
     } finally {
+      removeThinkingIndicator();
       chatState.isSending = false;
       inputEl.disabled = false;
       inputEl.focus();
     }
-  }, 280);
+  }, 320);
 }
 
 function quick(q) {
@@ -1127,8 +1610,13 @@ function initChatInput() {
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initChatInput);
-} else {
+function initAllChatbot() {
   initChatInput();
+  initChatHistory();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAllChatbot);
+} else {
+  initAllChatbot();
 }

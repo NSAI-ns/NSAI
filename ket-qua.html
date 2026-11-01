@@ -70,12 +70,16 @@
 
         <div class="actions">
 
+            <a class="btn secondary" href="muc-tieu.html">
+                ← Điều chỉnh mục tiêu
+            </a>
+
             <a class="btn secondary" href="truong-hoc.html">
                 🏫 Xem tất cả trường trên cả nước
             </a>
 
             <a class="btn primary" href="chatbot.html">
-                🤖 Hỏi NS AI về phương thức tuyển sinh
+                ✨ Trò chuyện với Trợ lý NS AI về kết quả này
             </a>
 
         </div>
@@ -136,10 +140,15 @@ function matchMajorHighlight(majorName, targetCareer) {
     const c = (targetCareer.name || '').toLowerCase();
     const m = (majorName || '').toLowerCase();
     if (c.includes(m) || m.includes(c)) return true;
-    if ((c.includes('công nghệ') || c.includes('phần mềm') || c.includes('trí tuệ')) && (m.includes('công nghệ') || m.includes('máy tính') || m.includes('kỹ thuật') || m.includes('điện'))) return true;
-    if ((c.includes('kinh tế') || c.includes('quản trị') || c.includes('marketing') || c.includes('tài chính') || c.includes('logistics')) && (m.includes('kinh tế') || m.includes('quản trị') || m.includes('marketing') || m.includes('tài chính'))) return true;
-    if ((c.includes('y') || c.includes('dược') || c.includes('sức khỏe')) && (m.includes('y khoa') || m.includes('dược') || m.includes('điều dưỡng'))) return true;
-    if ((c.includes('sư phạm') || c.includes('giáo dục')) && (m.includes('sư phạm') || m.includes('ngữ văn') || m.includes('toán học'))) return true;
+    if ((c.includes('công nghệ') || c.includes('phần mềm') || c.includes('trí tuệ') || c.includes('máy tính')) && (m.includes('công nghệ') || m.includes('máy tính') || m.includes('khoa học') || m.includes('kỹ thuật') || m.includes('điện'))) return true;
+    if ((c.includes('kinh tế') || c.includes('quản trị') || c.includes('marketing') || c.includes('tài chính') || c.includes('logistics') || c.includes('thương mại')) && (m.includes('kinh tế') || m.includes('quản trị') || m.includes('marketing') || m.includes('tài chính') || m.includes('kinh doanh'))) return true;
+    if ((c.includes('y') || c.includes('dược') || c.includes('sức khỏe') || c.includes('y khoa')) && (m.includes('y khoa') || m.includes('dược') || m.includes('điều dưỡng'))) return true;
+    if ((c.includes('sư phạm') || c.includes('giáo dục')) && (m.includes('sư phạm') || m.includes('ngữ văn') || m.includes('toán học') || m.includes('khoa học'))) return true;
+    if ((c.includes('kỹ thuật') || c.includes('cơ điện tử') || c.includes('tự động')) && (m.includes('kỹ thuật') || m.includes('điện') || m.includes('cơ khí') || m.includes('khoa học'))) return true;
+    if ((c.includes('luật') || c.includes('ngoại giao') || c.includes('xã hội') || c.includes('truyền thông') || c.includes('báo chí')) && (m.includes('khoa học') || m.includes('kinh tế') || m.includes('ngôn ngữ') || m.includes('sư phạm'))) return true;
+    if ((c.includes('thiết kế') || c.includes('mỹ thuật') || c.includes('nghệ thuật') || c.includes('kiến trúc')) && (m.includes('kiến trúc') || m.includes('công nghệ') || m.includes('khoa học'))) return true;
+    if ((c.includes('du lịch') || c.includes('khách sạn') || c.includes('ẩm thực')) && (m.includes('kinh tế') || m.includes('quản trị') || m.includes('marketing'))) return true;
+    if ((c.includes('ngôn ngữ') || c.includes('biên dịch')) && (m.includes('ngôn ngữ') || m.includes('sư phạm') || m.includes('kinh tế'))) return true;
     return false;
 }
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -21,6 +21,7 @@
     <a href="truong-hoc.html">Trường học</a>
     <a href="ketqua.html">Kết quả</a>
     <a href="chatbot.html">Chatbot</a>
+    <a href="dangnhap.html" class="nav-auth-static">🔑 Đăng nhập</a>
     <button class="session-reset" onclick="resetAllData()">↻ Phiên mới</button>
   </nav>
 </header>
@@ -39,7 +40,84 @@
     <div class="actions">
       <a class="btn primary" href="thongtin.html">🚀 Bắt đầu định hướng</a>
       <a class="btn secondary" href="truong-hoc.html">🔎 Tìm trường</a>
+      <a class="btn secondary" href="#homeAuthSection">🔑 Đăng nhập / Tài khoản</a>
       <button class="btn secondary" onclick="resetAllData()">↻ Làm mới toàn bộ dữ liệu</button>
+    </div>
+  </section>
+
+  <!-- PHẦN ĐĂNG NHẬP / TÀI KHOẢN TRÊN TRANG CHỦ -->
+  <section class="home-auth-section" id="homeAuthSection">
+    <div class="glass auth-card home-auth-card">
+
+      <!-- TRƯỜNG HỢP 1: KHI CHƯA ĐĂNG NHẬP -->
+      <div id="homeAuthLoggedOut" style="display: block;">
+        <p class="eyebrow">TÀI KHOẢN NS AI</p>
+        <h2 id="homeAuthTitle" style="font-size: 24px; margin: 6px 0 8px;">Đăng nhập tài khoản</h2>
+        <p class="muted" style="margin: 0 0 16px; font-size: 13.5px; line-height: 1.5;">
+          Đăng nhập hoặc đăng ký tài khoản (chỉ cần Tên đăng nhập & Mật khẩu) để lưu trữ vĩnh viễn kết quả đánh giá nghề nghiệp của bạn.
+        </p>
+
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" id="homeTabLogin" onclick="switchHomeAuthTab('login')">
+            Đăng nhập
+          </button>
+          <button type="button" class="auth-tab" id="homeTabRegister" onclick="switchHomeAuthTab('register')">
+            Đăng ký tài khoản
+          </button>
+        </div>
+
+        <div id="homeAuthAlert" class="auth-alert" style="display: none;"></div>
+
+        <form class="auth-form" id="homeAuthForm" onsubmit="handleHomeAuthSubmit(event)">
+          <div class="form-group">
+            <label for="homeUsername">Tên đăng nhập</label>
+            <input type="text" id="homeUsername" placeholder="Nhập tên đăng nhập..." autocomplete="username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="homePassword">Mật khẩu</label>
+            <input type="password" id="homePassword" placeholder="Nhập mật khẩu..." autocomplete="current-password" required>
+          </div>
+
+          <div class="auth-hint" id="homeAuthHint">
+            💡 Chỉ cần Tên đăng nhập và Mật khẩu (tối thiểu 3 ký tự). Không yêu cầu email hay số điện thoại!
+          </div>
+
+          <button type="submit" class="btn primary" id="homeSubmitBtn" style="width: 100%; justify-content: center; padding: 13px; font-size: 15px; margin-top: 6px;">
+            🔑 Đăng nhập
+          </button>
+        </form>
+      </div>
+
+      <!-- TRƯỜNG HỢP 2: KHI ĐÃ ĐĂNG NHẬP -->
+      <div id="homeAuthLoggedIn" style="display: none;">
+        <div class="user-profile-header">
+          <div class="user-avatar-big">👤</div>
+          <div>
+            <h2 id="homeProfileUsername" style="font-size: 22px; margin: 0;">Tài khoản</h2>
+            <p style="color: #4ade80; font-size: 13.5px; margin: 4px 0 0; font-weight: 500;">
+              ✅ Đang đăng nhập & Hồ sơ đã được đồng bộ an toàn
+            </p>
+          </div>
+        </div>
+
+        <p class="muted" style="font-size: 13.5px; margin: 16px 0 20px; line-height: 1.5;">
+          Bạn đang sử dụng phiên làm việc được liên kết với tài khoản này. Mọi thay đổi về điểm số, sở thích, tính cách và trường đại học sẽ được tự động cập nhật liên tục.
+        </p>
+
+        <div class="actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <a class="btn primary" href="ketqua.html" style="flex: 1; min-width: 180px; justify-content: center;">
+            📊 Xem kết quả phân tích
+          </a>
+          <a class="btn secondary" href="thongtin.html" style="flex: 1; min-width: 160px; justify-content: center;">
+            🚀 Cập nhật hồ sơ
+          </a>
+          <button type="button" class="btn secondary" onclick="logoutUser()" style="color: #ff9d9d; border-color: rgba(255,100,100,0.3); min-width: 110px; justify-content: center;">
+            🚪 Đăng xuất
+          </button>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -67,5 +145,106 @@
 </main>
 
 <script src="main.js"></script>
+
+<script>
+let homeCurrentTab = 'login';
+
+function switchHomeAuthTab(tab) {
+  homeCurrentTab = tab;
+  const tabLogin = document.getElementById('homeTabLogin');
+  const tabRegister = document.getElementById('homeTabRegister');
+  const title = document.getElementById('homeAuthTitle');
+  const submitBtn = document.getElementById('homeSubmitBtn');
+  const alertBox = document.getElementById('homeAuthAlert');
+  const hint = document.getElementById('homeAuthHint');
+
+  if (alertBox) alertBox.style.display = 'none';
+
+  if (tab === 'login') {
+    if (tabLogin) tabLogin.classList.add('active');
+    if (tabRegister) tabRegister.classList.remove('active');
+    if (title) title.textContent = 'Đăng nhập tài khoản';
+    if (submitBtn) submitBtn.innerHTML = '🔑 Đăng nhập';
+    if (hint) hint.innerHTML = '💡 Chỉ cần Tên đăng nhập và Mật khẩu (tối thiểu 3 ký tự). Không yêu cầu email hay số điện thoại!';
+  } else {
+    if (tabLogin) tabLogin.classList.remove('active');
+    if (tabRegister) tabRegister.classList.add('active');
+    if (title) title.textContent = 'Đăng ký tài khoản mới';
+    if (submitBtn) submitBtn.innerHTML = '✨ Đăng ký ngay';
+    if (hint) hint.innerHTML = '✨ Đăng ký siêu tốc chỉ với 2 thông tin: <strong>Tên đăng nhập</strong> và <strong>Mật khẩu</strong>.';
+  }
+}
+
+function handleHomeAuthSubmit(e) {
+  e.preventDefault();
+  const u = (document.getElementById('homeUsername').value || '').trim();
+  const p = (document.getElementById('homePassword').value || '').trim();
+  const alertBox = document.getElementById('homeAuthAlert');
+
+  if (homeCurrentTab === 'login') {
+    const res = loginUser(u, p);
+    if (res.success) {
+      if (alertBox) {
+        alertBox.className = 'auth-alert success';
+        alertBox.textContent = res.message;
+        alertBox.style.display = 'block';
+      }
+      setTimeout(() => {
+        renderHomeAuthState();
+        if (typeof renderAuthTopbar === 'function') renderAuthTopbar();
+      }, 350);
+    } else {
+      if (alertBox) {
+        alertBox.className = 'auth-alert error';
+        alertBox.textContent = res.message;
+        alertBox.style.display = 'block';
+      }
+    }
+  } else {
+    const res = registerUser(u, p);
+    if (res.success) {
+      if (alertBox) {
+        alertBox.className = 'auth-alert success';
+        alertBox.textContent = res.message;
+        alertBox.style.display = 'block';
+      }
+      setTimeout(() => {
+        renderHomeAuthState();
+        if (typeof renderAuthTopbar === 'function') renderAuthTopbar();
+      }, 450);
+    } else {
+      if (alertBox) {
+        alertBox.className = 'auth-alert error';
+        alertBox.textContent = res.message;
+        alertBox.style.display = 'block';
+      }
+    }
+  }
+}
+
+function renderHomeAuthState() {
+  const loggedOutBox = document.getElementById('homeAuthLoggedOut');
+  const loggedInBox = document.getElementById('homeAuthLoggedIn');
+  if (!loggedOutBox || !loggedInBox) return;
+
+  const current = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (current) {
+    loggedOutBox.style.display = 'none';
+    loggedInBox.style.display = 'block';
+    const nameEl = document.getElementById('homeProfileUsername');
+    if (nameEl) nameEl.textContent = current;
+  } else {
+    loggedOutBox.style.display = 'block';
+    loggedInBox.style.display = 'none';
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderHomeAuthState);
+} else {
+  renderHomeAuthState();
+}
+</script>
+
 </body>
 </html>
