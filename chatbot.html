@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -8,7 +8,6 @@
 
 <title>Trợ lí ảo - NS AI</title>
 
-<!-- CSS cùng thư mục -->
 <link rel="stylesheet" href="style.css">
 
 </head>
@@ -73,7 +72,7 @@
             </h1>
 
             <p>
-                Trợ lý định hướng được cá nhân hóa theo hồ sơ của bạn
+                Trợ lý định hướng & tư vấn tâm lý học đường – Lắng nghe bằng giọng nói và thấu cảm cảm xúc
             </p>
 
         </div>
@@ -91,11 +90,10 @@
     <div id="messages" class="messages">
 
         <div class="msg bot">
-
-            Chào bạn! Mình đã sẵn sàng hỗ trợ dựa trên hồ sơ bạn đã nhập.
-            Bạn có thể hỏi về ngành học, điểm số, sở thích, tính cách,
-            mục tiêu hoặc trường học. 🌌
-
+            Chào bạn! Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Mình luôn ở đây để lắng nghe bạn tâm sự về áp lực thi cử, chuyện gia đình, những ngày mệt mỏi hay băn khoăn về chọn ngành, chọn trường. Bạn có thể gõ phím hoặc bấm nút 🎙️ Micro để tâm sự trực tiếp bằng giọng nói nhé! 💚🌌
+            <div class="msg-tools">
+                <button type="button" class="btn-read-msg" title="Đọc bằng giọng nói" onclick="speakMessage(this)">🔊 Nghe đọc</button>
+            </div>
         </div>
 
     </div>
@@ -105,37 +103,90 @@
 
     <div class="quick">
 
+        <button onclick="quick('Em bị mất động lực học tập, phải làm sao?')">
+            ⚡ Lấy lại động lực
+        </button>
+
+        <button onclick="quick('Bạn có tài liệu học tập và đề thi có giải chi tiết không?')">
+            📚 Tài liệu & Đề thi
+        </button>
+
+        <button onclick="quick('Làm sao để bớt lười và tập trung học?')">
+            ⏱️ Cai lười & Trì hoãn
+        </button>
+
+        <button onclick="quick('Tôi muốn được lắng nghe và tư vấn tâm lý')">
+            💚 Lắng nghe & Tâm sự
+        </button>
+
+        <button onclick="quick('Em đang bị áp lực từ bố mẹ và gia đình')">
+            👨‍👩‍👧 Áp lực gia đình
+        </button>
+
+        <button onclick="quick('Hướng dẫn em bài tập thở 4-7-8 để thư giãn')">
+            🧘 Bài tập thở 4-7-8
+        </button>
+
+        <button onclick="quick('Em cảm thấy buồn và mệt mỏi quá')">
+            🫂 Tâm sự nỗi buồn
+        </button>
+
+        <button onclick="quick('Làm sao để nói chuyện bằng giọng nói với bạn?')">
+            🎙️ Trò chuyện bằng giọng nói
+        </button>
+
         <button onclick="quick('Ngành nào phù hợp với em?')">
             🎯 Ngành phù hợp
         </button>
 
-        <button onclick="quick('Điểm của em có gì đáng chú ý?')">
-            📊 Phân tích điểm
+        <button onclick="quick('Ngành này nên theo tổ hợp gì?')">
+            📚 Tổ hợp môn nên theo
         </button>
 
-        <button onclick="quick('Tính cách của em như thế nào?')">
-            🧠 Tính cách
+        <button onclick="quick('Em sợ trượt đại học và điểm thi thấp')">
+            📈 Sợ trượt & Điểm thấp
         </button>
 
         <button onclick="quick('Tìm trường phù hợp với em.')">
             🏫 Tìm trường
         </button>
 
-        <button onclick="quick('Em đang áp lực học tập.')">
-            💬 Áp lực học tập
+        <button onclick="quick('Phân tích nhóm tính cách MBTI của em')">
+            🧠 Tính cách [MBTI]
         </button>
 
     </div>
 
 
-    <!-- Ô NHẬP -->
+    <!-- Ô NHẬP & TƯƠNG TÁC GIỌNG NÓI -->
 
     <div class="chat-input">
 
         <input
             id="input"
-            placeholder="Ví dụ: Ngành nào hợp với em?"
+            placeholder="Nhập tâm sự hoặc bấm micro 🎙️ để nói..."
+            autocomplete="off"
         >
+
+        <button
+            id="btnMic"
+            class="btn-mic"
+            type="button"
+            onclick="toggleSpeechRecognition()"
+            title="Bấm để nói (Lắng nghe bằng giọng nói)"
+        >
+            🎙️
+        </button>
+
+        <button
+            id="btnVoiceToggle"
+            class="btn-voice-toggle"
+            type="button"
+            onclick="toggleAutoSpeak()"
+            title="Bật/Tắt trợ lý đọc câu trả lời"
+        >
+            🔇
+        </button>
 
         <button
             class="btn primary"
@@ -145,6 +196,9 @@
         </button>
 
     </div>
+
+    <!-- TRẠNG THÁI NHẬN DIỆN GIỌNG NÓI -->
+    <div id="voiceStatus" class="voice-status" style="display: none;"></div>
 
 
     <p class="tiny">
@@ -163,12 +217,11 @@
 </main>
 
 
-<!-- JAVASCRIPT CÙNG THƯ MỤC -->
+<!-- JAVASCRIPT -->
 
 <script src="main.js"></script>
-
 <script src="phantich.js"></script>
-
+<script src="truonghoc.js"></script>
 <script src="chatbot.js"></script>
 
 
@@ -212,9 +265,8 @@ document.getElementById("personalProfile").innerHTML = `
     ${
         top
         ? `
-            Gợi ý hiện tại:
-            <strong>${top.name}</strong>
-            (${top.score}%).
+            Bạn phù hợp nhất với ngành:
+            <strong>${top.name}</strong>.
           `
         : ""
     }
@@ -226,4 +278,3 @@ document.getElementById("personalProfile").innerHTML = `
 
 </body>
 </html>
-```

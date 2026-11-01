@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -57,29 +56,49 @@ onclick="resetAllData()">
 
 <main class="page">
 
-<section class="glass form-card">
+<section class="glass form-card wide">
 
 <p class="eyebrow">BƯỚC 3</p>
 
-<h1>Sở thích</h1>
+<h1>Khám phá sở thích & đam mê</h1>
 
 <p class="muted">
-Chọn những lĩnh vực bạn thích và mô tả thêm nếu muốn.
+Hãy chọn tất cả những lĩnh vực bạn yêu thích hoặc thấy hào hứng. Càng chọn chi tiết, NS AI càng phân tích độ tương thích ngành nghề chính xác hơn!
 </p>
 
+<!-- THANH TÌM KIẾM NHANH & ĐẾM SỐ LƯỢNG ĐÃ CHỌN -->
+<div class="hobby-search-box">
+    <input
+        type="text"
+        id="hobbySearch"
+        placeholder="🔎 Tìm nhanh sở thích (ví dụ: game, vẽ, lập trình, nhạc, toán, kinh doanh, thể thao...)"
+        autocomplete="off"
+    >
+    <span id="selectedCount" class="selected-badge">Đã chọn: 0 sở thích</span>
+</div>
 
+<!-- CÁC TAB DANH MỤC LỌC NHANH -->
+<div class="hobby-category-tabs">
+    <button type="button" class="tab-btn active" data-cat="all" onclick="setCategory('all')">Tất cả (105)</button>
+    <button type="button" class="tab-btn" data-cat="tech" onclick="setCategory('tech')">💻 Công nghệ & Kỹ thuật</button>
+    <button type="button" class="tab-btn" data-cat="science" onclick="setCategory('science')">🔬 Khoa học & Y dược</button>
+    <button type="button" class="tab-btn" data-cat="art" onclick="setCategory('art')">🎨 Nghệ thuật & Sáng tạo</button>
+    <button type="button" class="tab-btn" data-cat="business" onclick="setCategory('business')">💼 Kinh doanh & Khởi nghiệp</button>
+    <button type="button" class="tab-btn" data-cat="social" onclick="setCategory('social')">🗣️ Xã hội & Ngôn ngữ</button>
+    <button type="button" class="tab-btn" data-cat="sport" onclick="setCategory('sport')">⚽ Thể thao & Rèn luyện</button>
+    <button type="button" class="tab-btn" data-cat="life" onclick="setCategory('life')">🌿 Đời sống & Trải nghiệm</button>
+</div>
+
+<!-- KHUNG HIỂN THỊ CÁC THẺ SỞ THÍCH -->
 <div id="chips" class="chips"></div>
 
 
 <label>
-
-Sở thích khác
-
+Sở thích / đam mê đặc thù khác (nếu có)
 <textarea
 id="custom"
-rows="5"
-placeholder="Ví dụ: lập trình, nghiên cứu, kinh doanh..."></textarea>
-
+rows="3"
+placeholder="Ví dụ: sưu tầm mô hình Gundam, chụp ảnh máy film vintage, làm bánh Pháp, nghiên cứu thiên văn..."></textarea>
 </label>
 
 
@@ -102,87 +121,228 @@ Lưu & tiếp tục →
 
 <script src="main.js"></script>
 
-
 <script>
 
-const hobbies = [
+// DANH SÁCH 103 SỞ THÍCH ĐA DẠNG DÀNH CHO HỌC SINH THPT
+const hobbiesList = [
+  // Nhóm 1: Công nghệ & Kỹ thuật
+  { name: '💻 Lập trình phần mềm', cat: 'tech' },
+  { name: '🤖 Trí tuệ nhân tạo (AI)', cat: 'tech' },
+  { name: '🎮 Chơi game & Esports', cat: 'tech' },
+  { name: '🕹️ Thiết kế & Lập trình game', cat: 'tech' },
+  { name: '🌐 Thiết kế website', cat: 'tech' },
+  { name: '📱 Ứng dụng di động (Mobile App)', cat: 'tech' },
+  { name: '🔒 An toàn thông tin & An ninh mạng', cat: 'tech' },
+  { name: '🤖 Chế tạo robot & Tự động hóa', cat: 'tech' },
+  { name: '🔧 Lắp ráp máy tính (PC Build)', cat: 'tech' },
+  { name: '📡 Mạch điện tử & Vi điều khiển', cat: 'tech' },
+  { name: '🚗 Ô tô & Động cơ cơ khí', cat: 'tech' },
+  { name: '✈️ Máy bay & Kỹ thuật hàng không', cat: 'tech' },
+  { name: '🏗️ Mô hình kiến trúc & Công trình', cat: 'tech' },
+  { name: '🖨️ In 3D & Tạo mẫu nhanh', cat: 'tech' },
+  { name: '⛓️ Công nghệ chuỗi khối (Blockchain)', cat: 'tech' },
+  { name: '🚀 Khám phá vũ trụ & Tên lửa', cat: 'tech' },
+  { name: '🎥 Làm video & Sáng tạo nội dung số', cat: 'tech' },
 
-'💻 Công nghệ',
-'🔬 Khoa học',
-'🧮 Toán học',
-'🎨 Nghệ thuật',
-'💼 Kinh doanh',
-'🗣️ Giao tiếp',
-'⚽ Thể thao',
-'📚 Đọc sách',
-'🌱 Môi trường',
-'🔧 Kỹ thuật',
-'🎮 Game',
-'✍️ Viết lách'
+  // Nhóm 2: Khoa học & Y dược
+  { name: '🔬 Thí nghiệm hóa học', cat: 'science' },
+  { name: '🧬 Sinh học phân tử & Di truyền', cat: 'science' },
+  { name: '🧮 Giải toán nâng cao & Đố vui logic', cat: 'science' },
+  { name: '🔭 Vật lý thiên văn & Vũ trụ học', cat: 'science' },
+  { name: '🩺 Y học & Sơ cấp cứu', cat: 'science' },
+  { name: '💊 Dược học & Thảo dược tự nhiên', cat: 'science' },
+  { name: '🌿 Bảo vệ môi trường & Khí hậu', cat: 'science' },
+  { name: '🐾 Chăm sóc động vật & Thú cưng', cat: 'science' },
+  { name: '🪴 Trồng cây & Làm vườn sinh thái', cat: 'science' },
+  { name: '🌊 Khám phá sinh vật biển', cat: 'science' },
+  { name: '📊 Phân tích dữ liệu & Thống kê số liệu', cat: 'science' },
+  { name: '🌦️ Dự báo thời tiết & Khí tượng', cat: 'science' },
+  { name: '🗺️ Địa chất học & Khảo cổ học', cat: 'science' },
+  { name: '🍏 Dinh dưỡng & Lối sống lành mạnh', cat: 'science' },
+  { name: '🧪 Công nghệ sinh học & Vi sinh', cat: 'science' },
 
+  // Nhóm 3: Sáng tạo & Nghệ thuật
+  { name: '🎨 Vẽ tranh màu nước & Sơn dầu', cat: 'art' },
+  { name: '🖌️ Vẽ Digital (Digital Art & Manga)', cat: 'art' },
+  { name: '🖥️ Thiết kế đồ họa (Graphic Design)', cat: 'art' },
+  { name: '📸 Chụp ảnh & Nhiếp ảnh đường phố', cat: 'art' },
+  { name: '🎬 Đạo diễn & Kịch bản phim', cat: 'art' },
+  { name: '👗 Thời trang & Thiết kế trang phục', cat: 'art' },
+  { name: '🛋️ Thiết kế nội thất & Nhà cửa', cat: 'art' },
+  { name: '✒️ Viết truyện & Tản văn', cat: 'art' },
+  { name: '🎹 Chơi đàn Piano & Organ', cat: 'art' },
+  { name: '🎸 Chơi đàn Guitar & Ukulele', cat: 'art' },
+  { name: '🎤 Ca hát & Thanh nhạc', cat: 'art' },
+  { name: '🎧 Phối nhạc điện tử (EDM / Beatmaking)', cat: 'art' },
+  { name: '💃 Nhảy hiện đại & Vũ đạo (Kpop / HipHop)', cat: 'art' },
+  { name: '🎭 Diễn xuất & Kịch nghệ', cat: 'art' },
+  { name: '🖋️ Luyện chữ đẹp & Calligraphy', cat: 'art' },
+  { name: '✂️ Làm đồ thủ công (Handmade & DIY)', cat: 'art' },
+  { name: '🏺 Nặn đất sét & Làm gốm', cat: 'art' },
+
+  // Nhóm 4: Kinh doanh & Khởi nghiệp
+  { name: '💼 Khởi nghiệp & Mô hình kinh doanh', cat: 'business' },
+  { name: '📈 Đầu tư tài chính & Chứng khoán', cat: 'business' },
+  { name: '🛍️ Bán hàng online & Thương mại điện tử', cat: 'business' },
+  { name: '📣 Marketing số & Quảng cáo truyền thông', cat: 'business' },
+  { name: '📊 Nghiên cứu hành vi người tiêu dùng', cat: 'business' },
+  { name: '💡 Phát triển ý tưởng sản phẩm mới', cat: 'business' },
+  { name: '🤝 Đàm phán & Kỹ năng thương lượng', cat: 'business' },
+  { name: '📱 Quản lý Fanpage & Mạng xã hội', cat: 'business' },
+  { name: '🏢 Quản lý đội nhóm & Nhân sự', cat: 'business' },
+  { name: '☕ Mở quán cà phê & Dịch vụ F&B', cat: 'business' },
+  { name: '📦 Logistics & Quản trị chuỗi cung ứng', cat: 'business' },
+  { name: '🪙 Quản lý tài chính cá nhân & Tiết kiệm', cat: 'business' },
+  { name: '👔 Tố chất lãnh đạo & Quản trị', cat: 'business' },
+  { name: '🌍 Kinh doanh quốc tế & Xuất nhập khẩu', cat: 'business' },
+
+  // Nhóm 5: Xã hội & Ngôn ngữ
+  { name: '🗣️ Thuyết trình & Diễn thuyết trước đám đông', cat: 'social' },
+  { name: '🌍 Học ngoại ngữ (Anh, Trung, Hàn, Nhật...)', cat: 'social' },
+  { name: '⚖️ Tranh biện học thuật (Debate)', cat: 'social' },
+  { name: '🤝 Giao tiếp & Mở rộng quan hệ xã hội', cat: 'social' },
+  { name: '📰 Làm báo chí & Phóng sự truyền hình', cat: 'social' },
+  { name: '📚 Đọc sách văn học & Triết học', cat: 'social' },
+  { name: '📜 Khám phá lịch sử thế giới & Việt Nam', cat: 'social' },
+  { name: '🌐 Giao lưu văn hóa quốc tế', cat: 'social' },
+  { name: '🧑‍🏫 Giảng dạy & Truyền cảm hứng học tập', cat: 'social' },
+  { name: '💖 Hoạt động tình nguyện & Thiện nguyện', cat: 'social' },
+  { name: '🧠 Tâm lý học & Thấu hiểu cảm xúc', cat: 'social' },
+  { name: '🏛️ Tìm hiểu pháp luật & Công lý xã hội', cat: 'social' },
+  { name: '🎙️ Thu âm Podcast & Radio tâm sự', cat: 'social' },
+  { name: '🕊️ Ngoại giao & Hợp tác quốc tế', cat: 'social' },
+
+  // Nhóm 6: Thể thao & Rèn luyện
+  { name: '⚽ Bóng đá', cat: 'sport' },
+  { name: '🏀 Bóng rổ', cat: 'sport' },
+  { name: '🏸 Cầu lông', cat: 'sport' },
+  { name: '🏊 Bơi lội', cat: 'sport' },
+  { name: '🏃 Chạy bộ & Điền kinh', cat: 'sport' },
+  { name: '🚴 Đạp xe đường trường', cat: 'sport' },
+  { name: '🧗 Leo núi thể thao & Trekking rừng', cat: 'sport' },
+  { name: '🥋 Võ thuật & Kỹ năng tự vệ', cat: 'sport' },
+  { name: '🧘 Tập Yoga & Thiền định', cat: 'sport' },
+  { name: '🏋️ Tập Gym & Thể hình (Fitness)', cat: 'sport' },
+  { name: '🛹 Trượt ván (Skateboarding)', cat: 'sport' },
+  { name: '♟️ Đấu cờ vua & Cờ tướng', cat: 'sport' },
+  { name: '🎯 Bắn cung & Bắn súng thể thao', cat: 'sport' },
+  { name: '🏐 Bóng chuyền', cat: 'sport' },
+
+  // Nhóm 7: Đời sống & Trải nghiệm
+  { name: '🍳 Nấu ăn & Nghệ thuật ẩm thực', cat: 'life' },
+  { name: '🧁 Làm bánh ngọt & Đồ tráng miệng', cat: 'life' },
+  { name: '☕ Thưởng thức cà phê & Pha chế Barista', cat: 'life' },
+  { name: '✈️ Đi phượt & Khám phá địa danh mới', cat: 'life' },
+  { name: '🏕️ Cắm trại (Camping & Glamping)', cat: 'life' },
+  { name: '🧩 Giải Rubik & Trò chơi trí tuệ IQ', cat: 'life' },
+  { name: '🎲 Chơi Board Game & Chiến thuật nhóm', cat: 'life' },
+  { name: '💄 Chăm sóc da & Nghệ thuật trang điểm', cat: 'life' },
+  { name: '📝 Viết Bullet Journal & Lập kế hoạch', cat: 'life' },
+  { name: '🎧 Sưu tầm đĩa than & Nghe Podcast', cat: 'life' },
+  { name: '📺 Xem phim điện ảnh & Trinh thám hình sự', cat: 'life' },
+  { name: '🧹 Tổ chức & Tối giản không gian sống', cat: 'life' },
+  { name: '🕯️ Làm nến thơm & Tinh dầu thiên nhiên', cat: 'life' },
+  { name: '🔮 Chiêm tinh học & Thẻ bài Tarot', cat: 'life' }
 ];
 
+// Khôi phục dữ liệu đã lưu
+const savedData = read('hobbies') || { selected: [], custom: '' };
+let currentCategory = 'all';
+let currentSearch = '';
 
-const old = read('hobbies') || {
+const selectedSet = new Set(savedData.selected || []);
 
-selected: [],
+const chipsBox = document.getElementById('chips');
+const searchInput = document.getElementById('hobbySearch');
+const countBadge = document.getElementById('selectedCount');
+const customInput = document.getElementById('custom');
 
-custom: ''
+customInput.value = savedData.custom || '';
 
-};
-
-
-const c = document.getElementById('chips');
-
-
-hobbies.forEach(h => {
-
-const b = document.createElement('button');
-
-b.className =
-'chip ' +
-(old.selected.includes(h) ? 'selected' : '');
-
-b.textContent = h;
-
-
-b.onclick = () => {
-
-b.classList.toggle('selected');
-
-};
-
-
-c.appendChild(b);
-
-});
-
-
-document.getElementById('custom').value =
-old.custom || '';
-
-
-function saveHobbies(){
-
-save('hobbies', {
-
-selected: [
-...document.querySelectorAll('.chip.selected')
-].map(x => x.textContent),
-
-custom:
-document.getElementById('custom').value
-
-});
-
-
-location.href = 'tinhcach.html';
-
+function updateCount() {
+  countBadge.textContent = `Đã chọn: ${selectedSet.size} sở thích`;
 }
+
+function normalizeStr(str) {
+  return (str || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd');
+}
+
+function renderChips() {
+  chipsBox.innerHTML = '';
+
+  const keyword = normalizeStr(currentSearch);
+
+  const filtered = hobbiesList.filter(item => {
+    // Lọc theo danh mục
+    const matchCat = (currentCategory === 'all') || (item.cat === currentCategory);
+    // Lọc theo từ khóa tìm kiếm
+    const matchSearch = !keyword || normalizeStr(item.name).includes(keyword);
+    return matchCat && matchSearch;
+  });
+
+  if (filtered.length === 0) {
+    chipsBox.innerHTML = '<div style="color:#aeb4d0; padding:15px; font-style:italic;">Không tìm thấy sở thích nào khớp với từ khóa tìm kiếm. Bạn có thể nhập thêm vào ô "Sở thích khác" bên dưới!</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip ' + (selectedSet.has(item.name) ? 'selected' : '');
+    btn.textContent = item.name;
+
+    btn.onclick = () => {
+      if (selectedSet.has(item.name)) {
+        selectedSet.delete(item.name);
+        btn.classList.remove('selected');
+      } else {
+        selectedSet.add(item.name);
+        btn.classList.add('selected');
+      }
+      updateCount();
+    };
+
+    chipsBox.appendChild(btn);
+  });
+}
+
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.hobby-category-tabs .tab-btn').forEach(btn => {
+    if (btn.dataset.cat === cat) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  renderChips();
+}
+
+searchInput.addEventListener('input', function() {
+  currentSearch = this.value.trim();
+  renderChips();
+});
+
+function saveHobbies() {
+  const data = {
+    selected: Array.from(selectedSet),
+    custom: customInput.value.trim()
+  };
+
+  save('hobbies', data);
+  location.href = 'tinhcach.html';
+}
+
+// Khởi chạy
+updateCount();
+renderChips();
 
 </script>
 
 </body>
 
 </html>
-```

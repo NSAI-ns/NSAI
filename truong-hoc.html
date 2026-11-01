@@ -171,11 +171,11 @@
 <!-- ================= MAIN JS ================= -->
 
 <script src="main.js"></script>
-
+<script src="truonghoc.js"></script>
 
 <script>
 
-let data = [];
+let data = Array.isArray(window.DEFAULT_SCHOOLS_DATA) ? window.DEFAULT_SCHOOLS_DATA : [];
 
 
 const q =
@@ -196,48 +196,42 @@ const profileHint =
 ========================================= */
 
 /*
-   truonghoc.json đang nằm cùng thư mục
-   với truong-hoc.html
+   Đọc file database trường học từ thư mục JS/data/
 */
 
-fetch("truonghoc.json")
-
-    .then(response => {
-
-        if (!response.ok) {
-            throw new Error("Không đọc được file JSON");
-        }
-
-        return response.json();
-
-    })
-
-    .then(result => {
-
-        data = result;
-
-        render();
-
-        updateProfileHint();
-
-    })
-
-    .catch(error => {
-
-        console.error(error);
-
-        schools.innerHTML = `
-            <div class="notice">
-                ⚠️ Không đọc được dữ liệu trường.
-                <br><br>
-                Hãy kiểm tra file
-                <b>truonghoc.json</b>
-                có nằm cùng thư mục với
-                <b>truong-hoc.html</b> hay không.
-            </div>
-        `;
-
-    });
+// Khởi tạo hiển thị dữ liệu trường học an toàn (ưu tiên dữ liệu từ truonghoc.js)
+if (Array.isArray(window.DEFAULT_SCHOOLS_DATA) && window.DEFAULT_SCHOOLS_DATA.length > 0) {
+    data = window.DEFAULT_SCHOOLS_DATA;
+    render();
+    updateProfileHint();
+} else {
+    fetch("truonghoc.json")
+        .then(r => r.json())
+        .then(res => {
+            data = res;
+            render();
+            updateProfileHint();
+        })
+        .catch(() => {
+            fetch("../JS/data/truonghoc.json")
+                .then(r => r.json())
+                .then(res => {
+                    data = res;
+                    render();
+                    updateProfileHint();
+                })
+                .catch(err => {
+                    console.warn("fetch truonghoc.json:", err);
+                    if (data.length === 0) {
+                        schools.innerHTML = `
+                            <div class="notice">
+                                ⚠️ Không đọc được dữ liệu trường học.
+                            </div>
+                        `;
+                    }
+                });
+        });
+}
 
 
 /* =========================================
@@ -650,4 +644,3 @@ document
 
 </body>
 </html>
-```

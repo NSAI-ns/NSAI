@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài khoản & Lưu hồ sơ - NS AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="stars"></div>
+
+<header class="topbar">
+    <a class="brand" href="index.html">
+        <span>NS</span> NS AI
+    </a>
+
+    <nav>
+        <a href="index.html">Trang chủ</a>
+        <a href="thongtin.html">Thông tin</a>
+        <a href="diemso.html">Điểm số</a>
+        <a href="sothich.html">Sở thích</a>
+        <a href="tinhcach.html">Tính cách</a>
+        <a href="muc-tieu.html">Mục tiêu</a>
+        <a href="truong-hoc.html">Trường học</a>
+        <a href="ketqua.html">Kết quả</a>
+        <a href="chatbot.html">Chatbot</a>
+        <button class="session-reset" onclick="resetAllData()">↻ Phiên mới</button>
+    </nav>
+</header>
+
+<main class="page">
+    <div class="auth-container">
+        <!-- KHUNG KHI ĐÃ ĐĂNG NHẬP -->
+        <section id="loggedInSection" class="glass auth-card user-profile-card" style="display: none;">
+            <div class="user-profile-header">
+                <div class="user-avatar-big">👤</div>
+                <div>
+                    <h2 id="profileUsername">Tài khoản</h2>
+                    <p>✅ Đã đồng bộ & lưu kết quả phân tích</p>
+                </div>
+            </div>
+
+            <p class="muted" style="font-size: 13.5px; margin-bottom: 14px;">
+                Dưới đây là tóm tắt hồ sơ phân tích đang được liên kết an toàn với tài khoản của bạn:
+            </p>
+
+            <div class="profile-stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">📍 Tỉnh thành & Lớp</div>
+                    <div class="stat-val" id="statProvinceGrade">Chưa cập nhật</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">📊 Điểm số học tập</div>
+                    <div class="stat-val" id="statScores">Chưa nhập điểm</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">🧠 Tính cách MBTI</div>
+                    <div class="stat-val" id="statPersonality">Chưa trắc nghiệm</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">🎯 Mục tiêu & Nguyện vọng</div>
+                    <div class="stat-val" id="statGoals">Chưa đặt mục tiêu</div>
+                </div>
+            </div>
+
+            <div class="actions" style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
+                <a class="btn primary" href="ketqua.html" style="width: 100%; text-align: center;">
+                    📊 Xem kết quả phân tích nghề nghiệp
+                </a>
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <a class="btn secondary" href="thongtin.html" style="flex: 1; text-align: center;">
+                        ✏️ Cập nhật thông tin
+                    </a>
+                    <button class="btn secondary" onclick="logoutUser()" style="flex: 1; text-align: center; color: #ff9d9d; border-color: rgba(255,100,100,0.3);">
+                        🚪 Đăng xuất
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- KHUNG ĐĂNG NHẬP / ĐĂNG KÝ (KHI CHƯA ĐĂNG NHẬP) -->
+        <section id="authFormSection" class="glass auth-card">
+            <p class="eyebrow">TÀI KHOẢN NS AI</p>
+            <h1 id="authTitle">Đăng nhập tài khoản</h1>
+            <p class="muted" style="font-size: 13px;">
+                Lưu trữ vĩnh viễn kết quả đánh giá điểm số, tính cách MBTI và gợi ý trường đại học.
+            </p>
+
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">
+                    Đăng nhập
+                </button>
+                <button type="button" class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">
+                    Đăng ký tài khoản
+                </button>
+            </div>
+
+            <!-- THÔNG BÁO LỖI / THÀNH CÔNG -->
+            <div id="authAlert" class="auth-alert"></div>
+
+            <!-- FORM ĐĂNG NHẬP -->
+            <form id="formLogin" class="auth-form" onsubmit="handleLoginSubmit(event)">
+                <div class="form-group">
+                    <label for="loginUser">Tên đăng nhập</label>
+                    <input type="text" id="loginUser" placeholder="Nhập tên đăng nhập của bạn" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPass">Mật khẩu</label>
+                    <input type="password" id="loginPass" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn primary auth-btn-full">
+                    🚀 Đăng nhập
+                </button>
+            </form>
+
+            <!-- FORM ĐĂNG KÝ (CHỈ YÊU CẦU TÊN ĐĂNG NHẬP & MẬT KHẨU) -->
+            <form id="formRegister" class="auth-form" style="display: none;" onsubmit="handleRegisterSubmit(event)">
+                <div class="form-group">
+                    <label for="regUser">Tên đăng nhập</label>
+                    <input type="text" id="regUser" placeholder="Chọn tên đăng nhập (tối thiểu 3 ký tự)" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPass">Mật khẩu</label>
+                    <input type="password" id="regPass" placeholder="Nhập mật khẩu (tối thiểu 3 ký tự)" autocomplete="new-password" required>
+                </div>
+
+                <div class="auth-hint">
+                    ✨ <strong>Đăng ký siêu nhanh:</strong> Chỉ cần tên đăng nhập & mật khẩu, không yêu cầu email hay số điện thoại. Toàn bộ thông tin bạn đã nhập từ đầu sẽ được lưu ngay vào tài khoản!
+                </div>
+
+                <button type="submit" class="btn primary auth-btn-full">
+                    ✨ Đăng ký & Lưu hồ sơ
+                </button>
+            </form>
+        </section>
+    </div>
+</main>
+
+<script src="main.js"></script>
+
+<script>
+let currentTab = 'login';
+
+function showAlert(message, type = 'error') {
+    const alertBox = document.getElementById('authAlert');
+    if (!alertBox) return;
+    alertBox.textContent = message;
+    alertBox.className = `auth-alert ${type}`;
+    alertBox.style.display = 'block';
+}
+
+function clearAlert() {
+    const alertBox = document.getElementById('authAlert');
+    if (!alertBox) return;
+    alertBox.style.display = 'none';
+    alertBox.textContent = '';
+}
+
+function switchAuthTab(tab) {
+    currentTab = tab;
+    clearAlert();
+
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
+    const formLogin = document.getElementById('formLogin');
+    const formRegister = document.getElementById('formRegister');
+    const authTitle = document.getElementById('authTitle');
+
+    if (tab === 'login') {
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        formLogin.style.display = 'flex';
+        formRegister.style.display = 'none';
+        authTitle.textContent = 'Đăng nhập tài khoản';
+    } else {
+        tabRegister.classList.add('active');
+        tabLogin.classList.remove('active');
+        formRegister.style.display = 'flex';
+        formLogin.style.display = 'none';
+        authTitle.textContent = 'Đăng ký tài khoản';
+    }
+}
+
+function handleLoginSubmit(e) {
+    e.preventDefault();
+    clearAlert();
+
+    const user = document.getElementById('loginUser').value;
+    const pass = document.getElementById('loginPass').value;
+
+    const res = loginUser(user, pass);
+    if (!res.success) {
+        showAlert(res.message, 'error');
+        return;
+    }
+
+    showAlert(res.message, 'success');
+    renderAuthTopbar();
+    setTimeout(() => {
+        checkUserSession();
+    }, 600);
+}
+
+function handleRegisterSubmit(e) {
+    e.preventDefault();
+    clearAlert();
+
+    const user = document.getElementById('regUser').value;
+    const pass = document.getElementById('regPass').value;
+
+    const res = registerUser(user, pass);
+    if (!res.success) {
+        showAlert(res.message, 'error');
+        return;
+    }
+
+    showAlert(res.message, 'success');
+    renderAuthTopbar();
+    setTimeout(() => {
+        checkUserSession();
+    }, 700);
+}
+
+function checkUserSession() {
+    const current = getCurrentUser();
+    const loggedInSec = document.getElementById('loggedInSection');
+    const authFormSec = document.getElementById('authFormSection');
+
+    if (current) {
+        if (authFormSec) authFormSec.style.display = 'none';
+        if (loggedInSec) loggedInSec.style.display = 'block';
+
+        const nameEl = document.getElementById('profileUsername');
+        if (nameEl) nameEl.textContent = `Tài khoản: ${current}`;
+
+        // Nạp và hiển thị tóm tắt hồ sơ
+        const p = typeof getProfile === 'function' ? getProfile() : {};
+        const info = p.info || {};
+        const scores = p.scores || {};
+        const vals = Object.values(scores);
+        const avg = vals.length ? (vals.reduce((a, b) => a + Number(b), 0) / vals.length).toFixed(1) : null;
+
+        // Tỉnh & lớp
+        const provGrade = [];
+        if (info.province) provGrade.push(info.province);
+        if (info.grade) provGrade.push(`Lớp ${info.grade}`);
+        const provGradeText = provGrade.length ? provGrade.join(' • ') : 'Chưa nhập thông tin';
+        const provGradeEl = document.getElementById('statProvinceGrade');
+        if (provGradeEl) provGradeEl.textContent = provGradeText;
+
+        // Điểm số
+        const scoresEl = document.getElementById('statScores');
+        if (scoresEl) {
+            scoresEl.textContent = vals.length ? `${vals.length} môn (Điểm TB: ${avg})` : 'Chưa nhập điểm môn học';
+        }
+
+        // Tính cách MBTI & Câu tự trả lời
+        const personalityEl = document.getElementById('statPersonality');
+        if (personalityEl) {
+            const hasOpenQ = p.selfReflect && (p.selfReflect.strengths || p.selfReflect.idealEnv || p.selfReflect.vision);
+            const openTag = hasOpenQ ? ' • ✍️ Đã có câu tự trả lời' : '';
+            if (p.mbti) {
+                personalityEl.textContent = `[${p.mbti.type}] ${p.mbti.title || ''}${openTag}`;
+            } else if (p.answers && p.answers.length) {
+                personalityEl.textContent = `${p.personality || 'Đã làm trắc nghiệm'}${openTag}`;
+            } else {
+                personalityEl.textContent = hasOpenQ ? '✍️ Đã có câu tự trả lời' : 'Chưa làm trắc nghiệm';
+            }
+        }
+
+        // Mục tiêu
+        const goalsEl = document.getElementById('statGoals');
+        if (goalsEl) {
+            const g = p.goals || {};
+            const goalText = g.dreamMajor || g.dreamCareer || ((g.selected && g.selected.length) ? g.selected.join(', ') : 'Chưa đặt mục tiêu');
+            goalsEl.textContent = goalText;
+        }
+
+    } else {
+        if (loggedInSec) loggedInSec.style.display = 'none';
+        if (authFormSec) authFormSec.style.display = 'block';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkUserSession();
+});
+</script>
+
+</body>
+</html>

@@ -7,7 +7,6 @@
 
     <title>Kết quả AI - NS AI</title>
 
-    <!-- CSS cùng thư mục -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -44,13 +43,17 @@
 
     <section class="glass form-card wide">
 
-        <p class="eyebrow">NS AI ANALYSIS</p>
+        <p class="eyebrow">NS CAREER FIT ANALYSIS</p>
 
-        <h1>Kết quả định hướng</h1>
+        <h1>Bạn phù hợp với ngành gì?</h1>
 
         <p class="muted">
-            Điểm phù hợp là chỉ số tham khảo được tính từ dữ liệu bạn đã nhập.
+            Dựa trên sự kết hợp giữa điểm số các môn học, sở thích và xu hướng tính cách của bạn, NS AI phân tích các ngành nghề bạn phù hợp nhất:
         </p>
+
+
+        <!-- Trạng thái lưu hồ sơ tài khoản -->
+        <div id="accountBanner" class="account-status-banner"></div>
 
 
         <!-- Thông tin tổng quan -->
@@ -61,14 +64,18 @@
         <div id="results" class="result-list"></div>
 
 
+        <!-- GỢI Ý TRƯỜNG ĐẠI HỌC PHÙ HỢP THEO MỤC TIÊU & VÙNG MIỀN -->
+        <div id="schoolRecommendations" class="school-rec-section"></div>
+
+
         <div class="actions">
 
             <a class="btn secondary" href="truong-hoc.html">
-                🏫 Tìm trường phù hợp
+                🏫 Xem tất cả trường trên cả nước
             </a>
 
             <a class="btn primary" href="chatbot.html">
-                🤖 Hỏi NS AI
+                🤖 Hỏi NS AI về phương thức tuyển sinh
             </a>
 
         </div>
@@ -78,63 +85,394 @@
 </main>
 
 
-<!-- JS cùng thư mục -->
+<!-- JS -->
 <script src="main.js"></script>
+<script src="truonghoc.js"></script>
 <script src="phantich.js"></script>
 
 <script>
 
 const r = analyzeCareer();
+const topCareer = r.results && r.results.length ? r.results[0] : null;
+const p = typeof getProfile === 'function' ? getProfile() : {};
+const allSchools = window.DEFAULT_SCHOOLS_DATA || [];
+const userProvince = r.province || '';
 
+// ==========================================
+// HÀM HỖ TRỢ XÁC ĐỊNH VÙNG MIỀN & TRƯỜNG PHÙ HỢP
+// ==========================================
+function getProvinceRegion(province) {
+    if (!province) return { name: 'Toàn quốc', hubs: ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Huế'] };
+    const p = province.toLowerCase();
+    
+    const central = [
+        'huế', 'thừa thiên huế', 'đà nẵng', 'quảng nam', 'quảng ngãi', 'bình định',
+        'phú yên', 'khánh hòa', 'ninh thuận', 'bình thuận', 'quảng trị', 'quảng bình',
+        'hà tĩnh', 'nghệ an', 'thanh hóa', 'kon tum', 'gia lai', 'đắk lắk', 'đắk nông', 'lâm đồng'
+    ];
+    const south = [
+        'tp. hồ chí minh', 'hồ chí minh', 'tphcm', 'sài gòn', 'bình dương', 'đồng nai',
+        'bà rịa - vũng tàu', 'long an', 'tiền giang', 'bến tre', 'trà vinh', 'vĩnh long',
+        'đồng tháp', 'an giang', 'kiên giang', 'cần thơ', 'hậu giang', 'sóc trăng',
+        'bạc liêu', 'cà mau', 'tây ninh', 'bình phước'
+    ];
+    const north = [
+        'hà nội', 'hải phòng', 'quảng ninh', 'bắc ninh', 'thái nguyên', 'nam định',
+        'phú thọ', 'hải dương', 'vĩnh phúc', 'hưng yên', 'hà nam', 'ninh bình',
+        'thái bình', 'bắc giang', 'lào cai', 'yên bái', 'điện biên', 'hòa bình',
+        'lai châu', 'sơn la', 'hà giang', 'cao bằng', 'bắc kạn', 'lạng sơn', 'tuyên quang'
+    ];
+
+    if (central.some(cp => p.includes(cp))) return { name: 'Miền Trung & Tây Nguyên', hubs: ['Huế', 'Đà Nẵng'] };
+    if (south.some(sp => p.includes(sp))) return { name: 'Miền Nam', hubs: ['TP. Hồ Chí Minh', 'Cần Thơ'] };
+    if (north.some(np => p.includes(np))) return { name: 'Miền Bắc', hubs: ['Hà Nội'] };
+    return { name: 'Toàn quốc', hubs: ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Huế'] };
+}
+
+const regionInfo = getProvinceRegion(userProvince);
+
+function matchMajorHighlight(majorName, targetCareer) {
+    if (!targetCareer) return false;
+    const c = (targetCareer.name || '').toLowerCase();
+    const m = (majorName || '').toLowerCase();
+    if (c.includes(m) || m.includes(c)) return true;
+    if ((c.includes('công nghệ') || c.includes('phần mềm') || c.includes('trí tuệ')) && (m.includes('công nghệ') || m.includes('máy tính') || m.includes('kỹ thuật') || m.includes('điện'))) return true;
+    if ((c.includes('kinh tế') || c.includes('quản trị') || c.includes('marketing') || c.includes('tài chính') || c.includes('logistics')) && (m.includes('kinh tế') || m.includes('quản trị') || m.includes('marketing') || m.includes('tài chính'))) return true;
+    if ((c.includes('y') || c.includes('dược') || c.includes('sức khỏe')) && (m.includes('y khoa') || m.includes('dược') || m.includes('điều dưỡng'))) return true;
+    if ((c.includes('sư phạm') || c.includes('giáo dục')) && (m.includes('sư phạm') || m.includes('ngữ văn') || m.includes('toán học'))) return true;
+    return false;
+}
+
+function getSchoolsForCareer(careerName, province, limit = 3) {
+    const all = window.DEFAULT_SCHOOLS_DATA || [];
+    const region = getProvinceRegion(province);
+    const uProv = (province || '').toLowerCase();
+    const cName = (careerName || '').toLowerCase();
+
+    const scored = all.map(sch => {
+        let score = 0;
+        const schProv = sch.province.toLowerCase();
+        const isDirectLocal = uProv && (schProv.includes(uProv) || uProv.includes(schProv));
+        const isRegionHub = region.hubs.some(h => schProv.includes(h.toLowerCase()));
+
+        if (isDirectLocal) score += 60;
+        else if (isRegionHub) score += 40;
+        else score += 15;
+
+        let hasMajor = false;
+        for (const m of sch.majors) {
+            if (matchMajorHighlight(m, { name: careerName })) {
+                score += 55;
+                hasMajor = true;
+                break;
+            }
+        }
+
+        if (sch.description.toLowerCase().includes(cName)) score += 15;
+
+        return {
+            ...sch,
+            score,
+            isDirectLocal,
+            isRegionHub,
+            hasMajor
+        };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, limit);
+}
+
+// 1. RENDER THÔNG TIN TỔNG QUAN & LẬP LUẬN ĐÁNH GIÁ (DỰA VÀO ĐÂU ĐỂ ĐƯA RA KẾT QUẢ)
+const bannerTopSchools = topCareer ? getSchoolsForCareer(topCareer.name, userProvince, 3) : [];
 
 document.getElementById("summary").innerHTML = `
     <div class="notice">
-        📍 ${r.province || "Chưa chọn tỉnh"}
+        📍 <b>Khu vực:</b> ${r.province || "Chưa chọn tỉnh"}
         ·
-        🎯 ${
-            r.goals.length
-                ? r.goals.join(", ")
-                : "Chưa xác định ngành"
-        }
+        🎯 <b>Định hướng:</b> ${r.goalText || (r.goals && r.goals.length ? r.goals.join(", ") : "Khám phá ngành nghề")}
+        ${p.mbti ? ` · 🧠 <b>MBTI:</b> <span style="color:#c084fc;font-weight:700;">${p.mbti.type}</span> (${p.mbti.title})` : ''}
     </div>
+
+    ${topCareer ? `
+        <div class="best-match-banner">
+            <div class="banner-title">🌟 KẾT QUẢ ĐÁNH GIÁ NỔI BẬT NHẤT:</div>
+            <h2>Bạn phù hợp nhất với ngành: <span>${topCareer.name}</span></h2>
+            <p style="color: #e2e8f0; font-size: 14px; margin: 8px 0 0 0;">
+                Mức độ đánh giá: <strong>${topCareer.fitLevel}</strong> · Tổ hợp xét tuyển khuyến nghị: <strong>${topCareer.bestCombo}</strong>
+            </p>
+        </div>
+
+        <!-- KHUNG MINH BẠCH LẬP LUẬN: DỰA VÀO ĐÂU ĐỂ ĐƯA RA KẾT QUẢ RỒI MỚI GỢI Ý TRƯỜNG -->
+        <div class="reasoning-container">
+            <div class="reasoning-head">
+                <span class="reasoning-badge">🔬 MINH BẠCH CƠ SỞ ĐÁNH GIÁ</span>
+                <div class="reasoning-title">Dựa vào cơ sở nào mà NS AI nhận định bạn phù hợp với ngành ${topCareer.name}?</div>
+                <p class="reasoning-subtitle">
+                    Hệ thống không phỏng đoán ngẫu nhiên mà đối chiếu 4 trụ cột dữ liệu thực tế của bạn trước khi đưa ra gợi ý trường học:
+                </p>
+            </div>
+
+            <div class="reasoning-grid">
+                <!-- Căn cứ 1: Năng lực học tập & Điểm số -->
+                <div class="reasoning-card">
+                    <div class="reasoning-card-top">
+                        <div class="reasoning-icon">📊</div>
+                        <div class="reasoning-card-title">1. Năng lực học tập & Điểm số</div>
+                    </div>
+                    <div class="reasoning-card-detail">
+                        ${topCareer.evidence ? topCareer.evidence.academic : `Điểm phù hợp dựa trên năng lực các môn học và tổ hợp ${topCareer.bestCombo}.`}
+                    </div>
+                </div>
+
+                <!-- Căn cứ 2: Tính cách & MBTI -->
+                <div class="reasoning-card">
+                    <div class="reasoning-card-top">
+                        <div class="reasoning-icon">🧠</div>
+                        <div class="reasoning-card-title">2. Xu hướng tính cách & MBTI</div>
+                    </div>
+                    <div class="reasoning-card-detail">
+                        ${topCareer.evidence ? topCareer.evidence.mbti : `Phong cách tư duy phù hợp với đặc thù ngành ${topCareer.name}.`}
+                    </div>
+                </div>
+
+                <!-- Căn cứ 3: Đam mê & Sở thích -->
+                <div class="reasoning-card">
+                    <div class="reasoning-card-top">
+                        <div class="reasoning-icon">❤️</div>
+                        <div class="reasoning-card-title">3. Đam mê & Sở thích cá nhân</div>
+                    </div>
+                    <div class="reasoning-card-detail">
+                        ${topCareer.evidence ? topCareer.evidence.hobby : `Đam mê tự nhiên mang lại hứng thú học tập lâu dài.`}
+                    </div>
+                </div>
+
+                <!-- Căn cứ 4: Tiếng nói tự thân (Câu hỏi tự trả lời) -->
+                <div class="reasoning-card">
+                    <div class="reasoning-card-top">
+                        <div class="reasoning-icon">✍️</div>
+                        <div class="reasoning-card-title">4. Tiếng nói tự thân (Câu tự trả lời)</div>
+                    </div>
+                    <div class="reasoning-card-detail">
+                        ${topCareer.evidence ? topCareer.evidence.selfReflect : `Bạn có thể bổ sung câu trả lời tự luận tại bước Khám phá tính cách để AI phân tích sâu hơn.`}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tổng kết lập luận -->
+            <div class="reasoning-conclusion-box">
+                <div class="reasoning-conclusion-icon">✅</div>
+                <p class="reasoning-conclusion-text">
+                    <strong>Tổng kết lập luận:</strong> Sự hội tụ giữa năng lực học tập, đặc trưng tư duy [${p.mbti ? p.mbti.type : 'MBTI'}], sở thích tự nhiên và mục tiêu cá nhân khẳng định đây là ngành nghề có xác suất thành công và mức độ hài lòng cao nhất cho bạn.
+                </p>
+            </div>
+
+            <!-- CẦU NỐI CHUYỂN TIẾP: RỒI MỚI ĐƯA RA CÁC TRƯỜNG -->
+            <div class="reasoning-transition-to-schools">
+                <div class="reasoning-transition-text">
+                    🏫 Dựa trên toàn bộ cơ sở phân tích vững chắc ở trên, dưới đây là các trường đại học đào tạo thế mạnh dành cho bạn:
+                </div>
+                <div class="banner-schools" style="margin-top: 10px; width: 100%;">
+                    ${bannerTopSchools.map(s => `
+                        <a href="${s.website || '#'}" target="_blank" rel="noopener" class="banner-school-tag">
+                            ${s.name} (${s.isDirectLocal ? '📍 Địa phương' : s.province})
+                        </a>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    ` : ''}
 `;
 
 
+// 2. RENDER TỪNG CARD NGÀNH - HIỂN THỊ CĂN CỨ RỒI MỚI GỢI Ý TRƯỜNG
 document.getElementById("results").innerHTML =
-    r.results.map((x, i) => `
+    r.results.map((x, i) => {
+        const cardSchools = getSchoolsForCareer(x.name, userProvince, 3);
 
-        <div class="result-card">
+        return `
+            <div class="result-card ${i === 0 ? 'top-card' : ''}">
 
-            <div class="result-head">
+                <div class="result-head">
 
-                <b>
-                    ${i + 1}. ${x.name}
-                </b>
+                    <b>
+                        ${i + 1}. ${x.name}
+                    </b>
 
-                <strong>
-                    ${x.score}%
-                </strong>
+                    <span class="fit-badge ${i === 0 ? 'top' : (i < 3 ? 'high' : 'good')}">
+                        ${x.fitLevel || (i === 0 ? '🌟 Phù hợp nhất' : (i < 3 ? '✨ Phù hợp rất cao' : '👍 Khá phù hợp'))}
+                    </span>
+
+                </div>
+
+                <!-- CĂN CỨ ĐÁNH GIÁ CHI TIẾT -->
+                <div class="card-evidence-box" style="background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 13px 15px; margin: 12px 0 14px 0; font-size: 13px; line-height: 1.55;">
+                    <div style="font-weight: 700; color: #a5b4fc; margin-bottom: 6px;">🔍 Căn cứ đánh giá ngành ${x.name}:</div>
+                    <div style="margin-bottom: 5px;">• <strong>Học lực & Điểm số:</strong> ${x.evidence ? x.evidence.academic : x.reason}</div>
+                    <div style="margin-bottom: 5px;">• <strong>Đặc trưng tính cách:</strong> ${x.evidence ? x.evidence.mbti : ''}</div>
+                    <div>• <strong>Sở thích tương thích:</strong> ${x.evidence ? x.evidence.hobby : ''}</div>
+                </div>
+
+                ${x.combinations && x.combinations.length ? `
+                    <div class="combo-section">
+                        <div class="combo-label">
+                            📚 <b>Tổ hợp xét tuyển nên theo:</b>
+                        </div>
+                        <div class="combo-badges">
+                            ${x.combinations.map(c => `<span class="combo-badge">${c}</span>`).join('')}
+                        </div>
+                        ${x.advice ? `<div class="combo-advice">💡 <strong>Lời khuyên:</strong> ${x.advice}</div>` : ''}
+                    </div>
+                ` : ''}
+
+                <!-- GỢI Ý TRƯỜNG ĐÀO TẠO THEO CĂN CỨ TRÊN -->
+                <div class="card-schools-section">
+                    <div class="card-schools-label">
+                        🏫 <b>Trường đại học đào tạo ngành ${x.name} (${userProvince ? userProvince + ' & khu vực' : 'toàn quốc'}):</b>
+                    </div>
+                    <div class="card-schools-list">
+                        ${cardSchools.map(s => `
+                            <div class="school-inline-item">
+                                <div class="school-inline-info">
+                                    <span class="school-inline-name">${s.name}</span>
+                                    <span class="location-tag ${s.isDirectLocal ? 'local' : ''}">
+                                        ${s.isDirectLocal ? '📍 Tại địa phương' : `📍 ${s.province}`}
+                                    </span>
+                                </div>
+                                ${s.website ? `
+                                    <a class="school-inline-link" href="${s.website}" target="_blank" rel="noopener">
+                                        Xem trường ↗
+                                    </a>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
 
             </div>
+        `;
+    }).join("");
 
 
-            <div class="progress">
+// 3. RENDER BẢNG TỔNG QUAN CHI TIẾT CÁC TRƯỜNG HÀNG ĐẦU DÀNH CHO BẠN
+const overallScored = allSchools.map(sch => {
+    let score = 0;
+    const schProv = sch.province.toLowerCase();
+    const uProv = userProvince.toLowerCase();
+    const isDirectLocal = uProv && (schProv.includes(uProv) || uProv.includes(schProv));
+    const isRegionHub = regionInfo.hubs.some(h => schProv.includes(h.toLowerCase()));
 
-                <i style="width:${x.score}%"></i>
+    if (isDirectLocal) score += 60;
+    else if (isRegionHub) score += 40;
+    else score += 15;
 
-            </div>
+    let hasTargetMajor = false;
+    for (const m of sch.majors) {
+        if (matchMajorHighlight(m, topCareer)) {
+            score += 50;
+            hasTargetMajor = true;
+            break;
+        }
+    }
 
+    if (topCareer && sch.description.toLowerCase().includes(topCareer.name.toLowerCase())) {
+        score += 15;
+    }
 
+    return {
+        ...sch,
+        matchScore: score,
+        isDirectLocal,
+        isRegionHub,
+        hasTargetMajor
+    };
+});
+
+overallScored.sort((a, b) => b.matchScore - a.matchScore);
+const topOverallSchools = overallScored.slice(0, 3);
+
+if (topOverallSchools.length) {
+    document.getElementById("schoolRecommendations").innerHTML = `
+        <div class="school-rec-header">
+            <h2>🏫 Danh sách trường đại học tiêu biểu dành cho bạn</h2>
             <p>
-                ${x.reason}
+                Dựa trên toàn bộ cơ sở phân tích năng lực học tập, tính cách và tiếng nói tự thân ở trên, dưới đây là các trường đại học thế mạnh đào tạo ngành <strong>${topCareer ? topCareer.name : 'phù hợp nhất'}</strong> 
+                ưu tiên tại khu vực <strong>${userProvince || 'Toàn quốc'}</strong> (${regionInfo.name}):
             </p>
-
         </div>
 
-    `).join("");
+        <div class="school-rec-grid">
+            ${topOverallSchools.map(sch => `
+                <div class="school-rec-card ${sch.isDirectLocal ? 'primary-match' : ''}">
+                    <div>
+                        <div class="school-card-top">
+                            <div class="school-card-name">${sch.name}</div>
+                            <span class="location-tag ${sch.isDirectLocal ? 'local' : ''}">
+                                ${sch.isDirectLocal ? '📍 Tại địa phương' : `📍 ${sch.province}`}
+                            </span>
+                        </div>
+
+                        <div class="school-card-majors">
+                            ${sch.majors.map(m => `
+                                <span class="school-major-chip ${matchMajorHighlight(m, topCareer) ? 'highlight' : ''}">
+                                    ${m}
+                                </span>
+                            `).join('')}
+                        </div>
+
+                        <p class="school-card-desc">
+                            ${sch.description}
+                        </p>
+                    </div>
+
+                    <div class="school-card-footer">
+                        <span style="font-size: 12px; color: #94a3b8;">${sch.tuitionNote || 'Học phí theo quy định'}</span>
+                        ${sch.website ? `
+                            <a href="${sch.website}" target="_blank" rel="noopener">
+                                🌐 Website trường →
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// ==========================================
+// HIỂN THỊ BANNER TRẠNG THÁI TÀI KHOẢN
+// ==========================================
+const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+const bannerEl = document.getElementById("accountBanner");
+if (bannerEl) {
+    if (currentUser) {
+        bannerEl.className = "account-status-banner logged-in";
+        bannerEl.innerHTML = `
+            <div class="banner-left">
+                <div class="banner-icon">🛡️</div>
+                <div class="banner-content">
+                    <strong>Đã lưu vào tài khoản: ${typeof escapeHtml === 'function' ? escapeHtml(currentUser) : currentUser}</strong>
+                    <p>Toàn bộ điểm số, MBTI và định hướng của bạn đã được tự động lưu trữ an toàn.</p>
+                </div>
+            </div>
+            <a href="dangnhap.html" class="banner-btn">👤 Quản lý hồ sơ</a>
+        `;
+    } else {
+        bannerEl.className = "account-status-banner guest";
+        bannerEl.innerHTML = `
+            <div class="banner-left">
+                <div class="banner-icon">💡</div>
+                <div class="banner-content">
+                    <strong>Bạn đang xem với tư cách Khách</strong>
+                    <p>Đăng ký tài khoản (chỉ cần Tên & Mật khẩu) để lưu kết quả phân tích này và xem lại bất cứ lúc nào!</p>
+                </div>
+            </div>
+            <a href="dangnhap.html" class="banner-btn primary">🔑 Đăng nhập / Đăng ký</a>
+        `;
+    }
+}
 
 </script>
 
 </body>
 </html>
-```

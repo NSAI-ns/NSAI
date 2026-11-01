@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Khám phá tính cách - NS AI</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="stars"></div>
+
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <span>NS</span> NS AI
+  </a>
+
+  <nav>
+    <a href="index.html">Trang chủ</a>
+    <a href="thongtin.html">Thông tin</a>
+    <a href="diemso.html">Điểm số</a>
+    <a href="sothich.html">Sở thích</a>
+    <a class="active" href="tinhcach.html">Tính cách</a>
+    <a href="muc-tieu.html">Mục tiêu</a>
+    <a href="truong-hoc.html">Trường học</a>
+    <a href="ketqua.html">Kết quả</a>
+    <a href="chatbot.html">Chatbot</a>
+
+    <button class="session-reset" onclick="resetAllData()">
+      ↻ Phiên mới
+    </button>
+  </nav>
+</header>
+
+<main class="page">
+
+<section class="glass form-card wide">
+
+<p class="eyebrow">BƯỚC 4</p>
+
+<h1>Khám phá tính cách</h1>
+
+<p class="muted">
+  Bộ câu hỏi gồm 2 phần: <strong>Trắc nghiệm (A, B, C, D và đáp án E tự trả lời)</strong> giúp định hình nhóm tính cách MBTI, kết hợp cùng <strong>Câu hỏi tự trả lời chuyên sâu</strong> giúp AI thấu hiểu năng lực và khát vọng của riêng bạn.
+</p>
+
+<!-- PHẦN I: TRẮC NGHIỆM (A, B, C, D, E) -->
+<div style="margin-bottom: 28px;">
+  <h2 style="font-size: 19px; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+    📋 Phần I: Trắc nghiệm tính cách (Có đáp án E tự do trả lời)
+  </h2>
+  <p class="muted" style="font-size: 13.5px; margin-top: 0;">
+    Chọn phương án có sẵn (A, B, C, D) hoặc chọn <strong>đáp án E (Khác)</strong> và gõ trực tiếp câu trả lời của bạn:
+  </p>
+  <div id="questions"></div>
+</div>
+
+<!-- PHẦN II: CÂU HỎI TỰ TRẢ LỜI -->
+<div class="open-questions-section">
+  <div class="open-section-header">
+    <h2>✍️ Phần II: Câu hỏi tự bộc lộ bản thân (Tự trả lời)</h2>
+    <p>
+      Hãy chia sẻ thêm bằng lời văn của chính bạn để AI có thêm dữ liệu thực tế giải thích cơ sở phân tích trước khi gợi ý trường học:
+    </p>
+  </div>
+
+  <div class="open-q-card">
+    <div class="open-q-title">
+      <span>Câu 1: Điểm mạnh & Hoạt động bạn cảm thấy tự tin nhất</span>
+      <span class="open-q-badge">Tự luận</span>
+    </div>
+    <div class="open-q-hint">
+      Bạn cảm thấy mình làm tốt nhất hoặc hào hứng nhất ở lĩnh vực/hoạt động nào? (Ví dụ: giải bài tập logic, tự mày mò phần mềm/code, viết lách, giao tiếp thuyết phục, sáng tạo nghệ thuật, nghiên cứu sinh học, hay tổ chức sự kiện...)
+    </div>
+    <textarea id="openStrength" class="open-q-textarea" placeholder="Nhập câu trả lời của bạn (ví dụ: Em thích mày mò tìm hiểu công nghệ, tự học lập trình và tạo ra website/app...)"></textarea>
+  </div>
+
+  <div class="open-q-card">
+    <div class="open-q-title">
+      <span>Câu 2: Môi trường làm việc & Phong cách lý tưởng</span>
+      <span class="open-q-badge">Tự luận</span>
+    </div>
+    <div class="open-q-hint">
+      Sau 5-10 năm nữa, bạn muốn làm việc trong một môi trường như thế nào? (Ví dụ: công ty công nghệ năng động, phòng nghiên cứu độc lập, bệnh viện tận tâm, giảng đường, cơ quan pháp luật, hoặc tự khởi nghiệp kinh doanh...)
+    </div>
+    <textarea id="openIdealEnv" class="open-q-textarea" placeholder="Nhập câu trả lời của bạn (ví dụ: Em thích môi trường hiện đại, cởi mở, tự do sáng tạo và đồng nghiệp hỗ trợ nhau...)"></textarea>
+  </div>
+
+  <div class="open-q-card">
+    <div class="open-q-title">
+      <span>Câu 3: Mục tiêu lớn nhất & Giá trị muốn đóng góp</span>
+      <span class="open-q-badge">Tự luận</span>
+    </div>
+    <div class="open-q-hint">
+      Điều bạn mong muốn đạt được hoặc mang lại cho bản thân, gia đình và cộng đồng qua công việc tương lai là gì?
+    </div>
+    <textarea id="openVision" class="open-q-textarea" placeholder="Nhập câu trả lời của bạn (ví dụ: Em muốn tạo ra các sản phẩm công nghệ có ích cho cộng đồng, giải quyết các vấn đề thực tế và phát triển bản thân...)"></textarea>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn primary" onclick="finish()">
+    Lưu & tiếp tục →
+  </button>
+</div>
+
+</section>
+
+</main>
+
+<!-- MODAL KẾT QUẢ TÍNH CÁCH -->
+<div id="personalityModal" class="mbti-result-modal" style="display: none;">
+  <div class="mbti-result-card">
+    <p class="eyebrow">KẾT QUẢ PHÂN TÍCH TÍNH CÁCH</p>
+    <div id="modalCode" class="mbti-badge-large">INTP</div>
+    <h2 id="modalTitle" style="color: #fff; margin-bottom: 8px;">Nhà tư duy logic</h2>
+    <p id="modalTrait" style="color: #a5b4fc; font-weight: 600; margin-bottom: 12px; font-size: 15px;">
+      Thiên về tư duy logic và phân tích
+    </p>
+    <p id="modalDesc" style="color: #cbd5e1; margin: 0 0 24px; line-height: 1.6; font-size: 14px;">
+      Mô tả phong cách tính cách...
+    </p>
+    <div class="actions" style="justify-content: center; margin-top: 10px;">
+      <button class="btn primary" onclick="goToNextStep()">
+        Tiếp tục sang Mục tiêu 🎯
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="main.js"></script>
+
+<script>
+
+const questionsData = [
+  {
+    title: 'Khi gặp một bài toán hoặc một thử thách khó trong học tập, bạn thường...',
+    options: [
+      'Phân tích đề bài, bẻ nhỏ vấn đề và tìm cách giải logic từng bước một.',
+      'Hỏi ý kiến bạn bè hoặc thầy cô để cùng nhau trao đổi, tìm hướng giải quyết.',
+      'Thử một góc nhìn hoàn toàn mới, một công thức hoặc cách tiếp cận sáng tạo.',
+      'Đọc kỹ lại sách giáo khoa, làm theo các bước đã học một cách cẩn trọng, kiên nhẫn.'
+    ]
+  },
+  {
+    title: 'Khi tham gia làm việc nhóm hoặc hoạt động tập thể, vai trò tự nhiên nhất của bạn là...',
+    options: [
+      'Người phân tích nhiệm vụ, xây dựng kế hoạch và kiểm tra tính hợp lý của công việc.',
+      'Người kết nối các thành viên, lắng nghe ý kiến và duy trì không khí đoàn kết.',
+      'Người đưa ra các ý tưởng mới mẻ, đề xuất những giải pháp độc đáo cho cả nhóm.',
+      'Người hỗ trợ phía sau, cẩn thận hoàn thành đúng hạn các phần việc được giao.'
+    ]
+  },
+  {
+    title: 'Bạn cảm thấy bị thu hút và tự tin nhất với kiểu công việc nào trong tương lai?',
+    options: [
+      'Làm việc với số liệu, hệ thống logic, thuật toán hoặc công nghệ kỹ thuật cao.',
+      'Làm việc với con người: tư vấn, giảng dạy, giao tiếp, chăm sóc hoặc đàm phán.',
+      'Làm việc sáng tạo: thiết kế, truyền thông, nghệ thuật hoặc khởi nghiệp đổi mới.',
+      'Làm việc trong môi trường ổn định, có quy trình rõ ràng, kỷ luật và bài bản.'
+    ]
+  },
+  {
+    title: 'Khi tiếp cận một chủ đề hoặc vấn đề mới lạ, phản xạ đầu tiên của bạn là...',
+    options: [
+      'Tìm hiểu tài liệu, số liệu để phân tích bản chất và quy luật vận hành của nó.',
+      'Trao đổi với mọi người xung quanh để xem họ suy nghĩ và cảm nhận như thế nào.',
+      'Tự do thử nghiệm, hình dung ra những ứng dụng và khả năng thú vị chưa ai nghĩ tới.',
+      'Quan sát kỹ lưỡng, cân nhắc tính thực tế trước khi bắt tay vào thực hiện.'
+    ]
+  },
+  {
+    title: 'Sau một tuần học tập bận rộn, cách bạn nạp lại năng lượng hiệu quả nhất là...',
+    options: [
+      'Tự nghiên cứu, đọc sách hoặc tìm hiểu về một chủ đề kiến thức bạn tò mò.',
+      'Tụ tập ăn uống, đi cà phê và trò chuyện sôi nổi cùng nhóm bạn thân.',
+      'Nghe nhạc, vẽ tranh, chụp ảnh hoặc tự do làm những điều ngẫu hứng.',
+      'Dọn dẹp góc học tập ngăn nắp, xem phim yêu thích và nghỉ ngơi yên tĩnh.'
+    ]
+  },
+  {
+    title: 'Điều gì khiến bạn cảm thấy tự hào và có động lực học tập nhất?',
+    options: [
+      'Tự mình tìm ra lời giải cho một câu hỏi hóc búa mà ít người giải được.',
+      'Được mọi người xung quanh tin tưởng chia sẻ và giúp đỡ bạn bè cùng tiến bộ.',
+      'Tạo ra một sản phẩm, bài viết hay tác phẩm mang đậm phong cách cá nhân.',
+      'Hoàn thành xuất sắc mục tiêu đề ra đúng thời hạn với sự chuẩn xác cao.'
+    ]
+  },
+  {
+    title: 'Khi gặp một kết quả kiểm tra hoặc việc làm chưa như mong đợi, bạn thường...',
+    options: [
+      'Tỉnh táo phân tích nguyên nhân xem mình đã sai ở đâu để khắc phục triệt để.',
+      'Chia sẻ với người thân hoặc bạn bè để nhận lời khuyên và giải tỏa tâm lý.',
+      'Xem đó là bài học thú vị, nhanh chóng tìm ra một hướng đi hoặc cách tiếp cận khác.',
+      'Tự chấn chỉnh bản thân, kiên trì luyện tập và quyết tâm làm lại đến khi thành công.'
+    ]
+  },
+  {
+    title: 'Môi trường học tập lý tưởng nhất đối với bạn là nơi...',
+    options: [
+      'Đề cao tư duy logic, tính chuyên môn sâu và tự do nghiên cứu độc lập.',
+      'Thân thiện, ấm áp, nhiều sự kết nối, tương tác và cùng nhau hỗ trợ.',
+      'Năng động, linh hoạt, tôn trọng sự sáng tạo và không bị gò bó quy chuẩn.',
+      'Có hệ thống rõ ràng, kỷ luật, công bằng và tôn trọng các cam kết chung.'
+    ]
+  },
+  {
+    title: 'Khi đưa ra một quyết định quan trọng, bạn thường dựa vào...',
+    options: [
+      'Sự phân tích lý tính, các bằng chứng xác thực và xác suất thành công.',
+      'Cảm xúc, sự thấu hiểu và tác động của quyết định đó đến những người liên quan.',
+      'Cảm hứng, trực giác và những cơ hội tiềm năng có thể mở ra trong tương lai.',
+      'Kinh nghiệm thực tế, lời khuyên của người đi trước và các quy định sẵn có.'
+    ]
+  },
+  {
+    title: 'Bạn mong muốn được thầy cô và bạn bè đánh giá cao nhất về...',
+    options: [
+      'Khả năng tư duy logic, sự am hiểu và trí tuệ sắc bén.',
+      'Tấm lòng chân thành, sự thấu hiểu và kỹ năng kết nối mọi người.',
+      'Óc sáng tạo phong phú, sự độc đáo và khả năng tạo ra sự khác biệt.',
+      'Sự đáng tin cậy, tính kiên nhẫn, trung thực và tinh thần trách nhiệm cao.'
+    ]
+  }
+];
+
+const letters = ['A', 'B', 'C', 'D', 'E'];
+const old = read('personalityAnswers') || [];
+const oldCustom = read('personalityCustomAnswers') || {};
+const box = document.getElementById('questions');
+
+function safeAttr(s) {
+  if (!s) return '';
+  return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+let html = '';
+
+questionsData.forEach((q, i) => {
+  const isOldVal = (old[i] != null && old[i] >= 0 && old[i] <= 4) ? old[i] : null;
+  const customVal = oldCustom[i] || '';
+
+  html += `
+    <div class="question" id="qBox${i}">
+      <h3>Câu ${i + 1}: ${q.title}</h3>
+  `;
+
+  // Các phương án A, B, C, D
+  q.options.forEach((optText, optIdx) => {
+    html += `
+      <label class="radio">
+        <input
+          type="radio"
+          name="q${i}"
+          value="${optIdx}"
+          ${isOldVal === optIdx ? 'checked' : ''}
+          onchange="onRadioChange(${i}, ${optIdx})"
+        >
+        <div class="radio-content">
+          <span class="radio-letter">${letters[optIdx]}</span>
+          <div>${optText}</div>
+        </div>
+      </label>
+    `;
+  });
+
+  // ĐÁP ÁN E: KHÁC (KÈM Ô NHẬP TỰ TRẢ LỜI ĐẶT NGOÀI LABEL)
+  html += `
+    <div class="radio radio-custom-option" id="radioBoxE${i}">
+      <label class="custom-radio-top" for="radioE${i}">
+        <input
+          type="radio"
+          name="q${i}"
+          value="4"
+          id="radioE${i}"
+          ${isOldVal === 4 ? 'checked' : ''}
+          onchange="onRadioChange(${i}, 4)"
+        >
+        <span class="radio-letter">E</span>
+        <span class="custom-radio-text">Khác (Nhập phương án / suy nghĩ riêng của bạn):</span>
+      </label>
+      <div class="custom-input-wrap">
+        <input
+          type="text"
+          id="customAnswer${i}"
+          class="custom-answer-input"
+          placeholder="Gõ câu trả lời riêng của bạn cho câu hỏi này..."
+          value="${safeAttr(customVal)}"
+          onclick="event.stopPropagation(); selectOptionE(${i});"
+          onfocus="event.stopPropagation(); selectOptionE(${i});"
+          oninput="event.stopPropagation(); selectOptionE(${i});"
+        >
+      </div>
+    </div>
+  `;
+
+  html += `</div>`;
+});
+
+box.innerHTML = html;
+
+function selectOptionE(index) {
+  const radio = document.getElementById(`radioE${index}`);
+  if (radio && !radio.checked) {
+    radio.checked = true;
+  }
+}
+
+function onRadioChange(qIndex, optIndex) {
+  if (optIndex === 4) {
+    const input = document.getElementById(`customAnswer${qIndex}`);
+    if (input) {
+      setTimeout(() => input.focus(), 50);
+    }
+  }
+}
+
+// Nạp lại các câu hỏi tự trả lời đã lưu trước đó nếu có
+const savedReflect = read('personalitySelfReflect') || {};
+if (savedReflect.strengths) document.getElementById('openStrength').value = savedReflect.strengths;
+if (savedReflect.idealEnv) document.getElementById('openIdealEnv').value = savedReflect.idealEnv;
+if (savedReflect.vision) document.getElementById('openVision').value = savedReflect.vision;
+
+function finish() {
+  const ans = [];
+  const customAnswers = {};
+
+  for (let i = 0; i < questionsData.length; i++) {
+    const checked = document.querySelector(`input[name=q${i}]:checked`);
+    if (!checked) {
+      alert(`Bạn hãy trả lời câu hỏi trắc nghiệm số ${i + 1} nhé!`);
+      const target = document.getElementById(`qBox${i}`);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+    const val = Number(checked.value);
+    ans.push(val);
+
+    if (val === 4) {
+      const inputEl = document.getElementById(`customAnswer${i}`);
+      const txt = (inputEl ? inputEl.value : '').trim();
+      if (!txt) {
+        alert(`Bạn đã chọn đáp án E (Khác) ở Câu ${i + 1}. Vui lòng nhập câu trả lời của bạn vào ô bên cạnh nhé!`);
+        if (inputEl) {
+          inputEl.focus();
+          inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+      customAnswers[i] = txt;
+    }
+  }
+
+  // 1. Lưu câu trả lời trắc nghiệm & câu trả lời E riêng
+  save('personalityAnswers', ans);
+  save('personalityCustomAnswers', customAnswers);
+
+  // 2. Lưu câu hỏi tự trả lời phần II
+  const selfReflect = {
+    strengths: (document.getElementById('openStrength').value || '').trim(),
+    idealEnv: (document.getElementById('openIdealEnv').value || '').trim(),
+    vision: (document.getElementById('openVision').value || '').trim()
+  };
+  save('personalitySelfReflect', selfReflect);
+
+  // 3. Tính toán kết quả tính cách & MBTI
+  const mbti = computeMBTI(ans);
+  if (mbti) {
+    save('mbtiType', mbti.type);
+    save('mbtiData', mbti);
+
+    // Hiển thị modal kết quả
+    document.getElementById('modalCode').innerText = mbti.type;
+    document.getElementById('modalTitle').innerText = mbti.title;
+    document.getElementById('modalTrait').innerText = mbti.vietnameseTrait.toUpperCase();
+    document.getElementById('modalDesc').innerText = mbti.desc;
+    document.getElementById('personalityModal').style.display = 'flex';
+  } else {
+    location.href = 'muc-tieu.html';
+  }
+}
+
+function goToNextStep() {
+  location.href = 'muc-tieu.html';
+}
+
+</script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Thông tin - NS AI</title>
 
-<!-- ĐÃ SỬA ĐƯỜNG DẪN CSS -->
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -47,17 +46,12 @@ cá nhân hóa kết quả và chatbot.
 
 <div class="info-box">
 <b>📍 Tỉnh/thành</b>
-<span>Giúp gợi ý trường thuận tiện hơn.</span>
+<span>Giúp gợi ý trường đại học thuận tiện theo khu vực.</span>
 </div>
 
 <div class="info-box">
 <b>🎓 Lớp</b>
-<span>Giúp đặt kết quả trong đúng bối cảnh học tập.</span>
-</div>
-
-<div class="info-box">
-<b>🎯 Mục tiêu</b>
-<span>Giúp hệ thống ưu tiên đúng hướng bạn đang quan tâm.</span>
+<span>Giúp đặt kết quả và lộ trình trong đúng bối cảnh học tập.</span>
 </div>
 
 </div>
@@ -126,23 +120,6 @@ autocomplete="off">
 </label>
 
 
-<label>Mục tiêu hiện tại
-
-<select id="goal">
-
-<option>Khám phá ngành phù hợp</option>
-
-<option>Đã có ngành mục tiêu</option>
-
-<option>Đang tìm trường đại học</option>
-
-<option>Chưa biết mình muốn gì</option>
-
-</select>
-
-</label>
-
-
 <div class="actions">
 
 <button
@@ -159,8 +136,6 @@ Lưu & tiếp tục →
 
 </main>
 
-
-<!-- ĐÃ SỬA ĐƯỜNG DẪN JS -->
 
 <script src="main.js"></script>
 
@@ -230,10 +205,7 @@ function saveInfo(){
         document.getElementById('province').value,
 
         grade:
-        document.getElementById('grade').value,
-
-        goal:
-        document.getElementById('goal').value
+        document.getElementById('grade').value
 
     };
 
@@ -259,4 +231,3 @@ loadInfo();
 
 </body>
 </html>
-```

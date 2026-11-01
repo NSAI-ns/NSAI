@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Chạy trực tiếp (F5 mở Chrome)",
+            "file": "${workspaceFolder}/khkt/HTML/index.html"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Chạy qua Live Server (Port 5500)",
+            "url": "http://localhost:5500/khkt/HTML/index.html",
+            "webRoot": "${workspaceFolder}"
+        }
+    ]
+}

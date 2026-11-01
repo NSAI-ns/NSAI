@@ -1,0 +1,168 @@
+﻿
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Điểm số - NS AI</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="stars"></div>
+
+<header class="topbar">
+
+<a class="brand" href="index.html">
+<span>NS</span> NS AI
+</a>
+
+<nav>
+
+<a href="index.html">Trang chủ</a>
+
+<a href="thongtin.html">Thông tin</a>
+
+<a class="active" href="diemso.html">Điểm số</a>
+
+<a href="sothich.html">Sở thích</a>
+
+<a href="tinhcach.html">Tính cách</a>
+
+<a href="muc-tieu.html">Mục tiêu</a>
+
+<a href="truong-hoc.html">Trường học</a>
+
+<a href="ketqua.html">Kết quả</a>
+
+<a href="chatbot.html">Chatbot</a>
+
+<button
+class="session-reset"
+onclick="resetAllData()">
+
+↻ Phiên mới
+
+</button>
+
+</nav>
+
+</header>
+
+
+<main class="page">
+
+<section class="glass form-card">
+
+<p class="eyebrow">BƯỚC 2</p>
+
+<h1>Điểm các môn</h1>
+
+<p class="muted">
+Môn không học hoặc chưa có điểm có thể để trống.
+Điểm trống sẽ không được tính.
+</p>
+
+
+<div id="scores" class="score-grid"></div>
+
+
+<div class="actions">
+
+<button
+class="btn primary"
+onclick="saveScores()">
+
+Lưu & tiếp tục →
+
+</button>
+
+</div>
+
+</section>
+
+</main>
+
+
+<script src="main.js"></script>
+
+
+<script>
+
+const subjects = [
+
+'Toán',
+'Vật lý',
+'Hóa học',
+'Sinh học',
+'Tin học',
+'Ngữ văn',
+'Tiếng Anh',
+'Lịch sử',
+'Địa lý',
+'GDKT&PL'
+
+];
+
+
+const old = read('scores') || {};
+
+const box = document.getElementById('scores');
+
+
+subjects.forEach((s,i) => {
+
+const key = 's' + i;
+
+box.innerHTML += `
+
+<label>
+
+${s}
+
+<input
+id="${key}"
+type="number"
+min="0"
+max="10"
+step="0.1"
+placeholder="Để trống nếu không học"
+value="${old[s] ?? ''}">
+
+</label>
+
+`;
+
+});
+
+
+function saveScores(){
+
+const d = {};
+
+subjects.forEach((s,i) => {
+
+let v =
+document.getElementById('s'+i).value;
+
+if(v !== '')
+d[s] = Number(v);
+
+});
+
+
+save('scores',d);
+
+location.href = 'sothich.html';
+
+}
+
+</script>
+
+</body>
+</html>
