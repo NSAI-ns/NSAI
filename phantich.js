@@ -2,12 +2,12 @@
  * NS AI - Thuật toán phân tích định hướng nghề nghiệp công bằng & khoa học
  * Đánh giá đa chiều dựa trên 5 trụ cột:
  * 1. Điểm số môn học (Tương thích theo tổ hợp môn xét tuyển thực tế tại các trường ĐH)
- * 2. Sở thích & Đam mê tự nhiên (Phân tách rõ sở thích giải trí và đam mê chuyên môn)
+ * 2. Sở thích & Đam mê tự nhiên (Bao quát trọn vẹn toàn bộ 50 sở thích thực tế)
  * 3. Xu hướng tính cách MBTI & Phong cách tư duy
  * 4. Tiếng nói tự thân (Câu hỏi tự bộc lộ & Đáp án tự do E)
  * 5. Mục tiêu & Nguyện vọng cụ thể của học sinh (Ưu tiên cao nhất khi học sinh đã có định hướng rõ)
  *
- * Đảm bảo: KHÔNG thiên vị bất kỳ ngành nghề nào. Mọi ngành đều có xuất phát điểm công bằng.
+ * Đảm bảo: TUYỆT ĐỐI KHÔNG THIÊN VỊ bất kỳ ngành nào (kể cả CNTT). Mọi ngành đều có cơ hội và xuất phát điểm công bằng.
  */
 
 function analyzeCareer() {
@@ -20,12 +20,9 @@ function analyzeCareer() {
   const goals = typeof read === 'function' ? (read('goals') || { selected: [], other: '' }) : { selected: [], other: '' };
 
   const vals = Object.values(scores).filter(v => v !== '' && v != null && !isNaN(v)).map(Number);
-  const generalAvg = vals.length
-    ? vals.reduce((a, b) => a + b, 0) / vals.length
-    : null;
+  const generalAvg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
 
   const allHobbyText = ((hobbies.selected || []).join(' ') + ' ' + (hobbies.custom || '')).toLowerCase();
-
   const customValues = Object.values(customAnswers).filter(Boolean);
   const openText = (
     (selfReflect.strengths || '') + ' ' +
@@ -42,7 +39,15 @@ function analyzeCareer() {
     goals.dreamGoal || ''
   ].join(' ').toLowerCase();
 
-  // Hàm tính điểm học lực theo môn xét tuyển thực tế (Tối đa 22 điểm)
+  // Kiểm tra xem người dùng đã thực sự cung cấp dữ liệu định hướng chưa
+  const hasUserScores = vals.length > 0;
+  const hasUserHobbies = (hobbies.selected && hobbies.selected.length > 0) || !!(hobbies.custom && hobbies.custom.trim());
+  const hasUserGoals = (goals.selected && goals.selected.length > 0) || !!(goals.dreamMajor && goals.dreamMajor.trim()) || !!(goals.dreamCareer && goals.dreamCareer.trim()) || !!(goals.dreamGoal && goals.dreamGoal.trim());
+  const mbti = typeof computeMBTI === 'function' ? computeMBTI(answers) : null;
+  const hasUserMbti = !!mbti && Array.isArray(answers) && answers.length >= 4;
+  const isDefaultOverview = !hasUserScores && !hasUserHobbies && !hasUserGoals && !hasUserMbti;
+
+  // 1. Tính điểm học lực theo môn xét tuyển thực tế (Tối đa 22 điểm)
   function calcAcademicFit(subjectGroupList) {
     if (!vals.length) return 12; // Mức sàn trung tính khi chưa nhập điểm
 
@@ -58,14 +63,15 @@ function analyzeCareer() {
 
     if (matchedScores.length > 0) {
       const avg = matchedScores.reduce((a, b) => a + b, 0) / matchedScores.length;
-      return (avg / 10) * 22;
+      // Trọng số hoàn chỉnh tổ hợp: 3 môn khớp được 100% điểm; nếu chỉ khớp 1 môn thì có độ hoàn chỉnh tương ứng
+      const completeness = Math.min(1, matchedScores.length / 3);
+      return (avg / 10) * 22 * (0.75 + 0.25 * completeness);
     }
 
-    // Nếu có điểm nhưng không trúng môn của ngành này, dùng điểm TB chung (nhân hệ số 0.65)
-    return generalAvg != null ? (generalAvg / 10) * 14 : 12;
+    return generalAvg != null ? (generalAvg / 10) * 13 : 12;
   }
 
-  // Hàm tính độ tương thích sở thích (Tối đa 18 điểm, game đơn thuần không bị ngộ nhận là CNTT)
+  // 2. Tính độ tương thích sở thích (Tối đa 20 điểm)
   function calcHobbyFit(keywords, entertainmentKeywords = []) {
     if (!allHobbyText) return 0;
 
@@ -83,56 +89,57 @@ function analyzeCareer() {
 
     let score = 0;
     if (directMatches > 0) {
-      score = 8 + (directMatches - 1) * 3.5;
+      score = 8.5 + (directMatches - 1) * 3.5;
     }
     if (entMatches > 0) {
-      score += Math.min(3, entMatches * 1.5);
+      score += Math.min(4, entMatches * 2);
     }
-    return Math.min(18, score);
+    return Math.min(20, score);
   }
 
-  // Hàm tính độ tương thích mục tiêu / ước mơ đã chọn (Tối đa 24 điểm - Tôn trọng tuyệt đối nguyện vọng học sinh)
+  // 3. Tính độ tương thích mục tiêu / ước mơ đã chọn (Tối đa 25 điểm - Tôn trọng tuyệt đối định hướng của học sinh)
   function calcGoalFit(keywords) {
     if (!wantedGoalText) return 0;
     const hasMatch = keywords.some(k => wantedGoalText.includes(k.toLowerCase()));
-    return hasMatch ? 24 : 0;
+    return hasMatch ? 25 : 0;
   }
 
-  // Hàm tính độ tương thích MBTI (Tối đa 12 điểm)
-  const mbti = typeof computeMBTI === 'function' ? computeMBTI(answers) : null;
+  // 4. Tính độ tương thích MBTI (Tối đa 12 điểm)
   function calcMBTI(preferredPairs) {
-    if (!mbti) return 5; // Mức trung tính
+    if (!mbti) return 5;
     const t = mbti.type;
     let matchCount = 0;
     preferredPairs.forEach(pair => {
-      if (pair.length === 2 && t.includes(pair[0]) && t.includes(pair[1])) {
-        matchCount += 2;
+      if (pair.length === 4 && t === pair) {
+        matchCount += 3; // Khớp chính xác cả 4 chữ cái (vd: 'INTJ' === 'INTJ')
+      } else if (pair.length === 2 && t.includes(pair[0]) && t.includes(pair[1])) {
+        matchCount += 2; // Khớp cặp 2 chiều kích (vd: 'NT' trong 'INTJ')
       } else if (pair.length === 1 && t.includes(pair)) {
-        matchCount += 1;
+        matchCount += 0.8; // Khớp 1 chiều kích
       }
     });
-    return Math.min(12, 4 + matchCount * 3);
+    return Math.min(12, 4 + matchCount * 2.2);
   }
 
-  // Hàm tính độ tương thích câu trả lời tự bộc lộ (Tối đa 10 điểm)
+  // 5. Tính độ tương thích câu trả lời tự bộc lộ (Tối đa 10 điểm)
   function calcReflectFit(keywords) {
     if (!openText) return 0;
     const matches = keywords.filter(k => openText.includes(k.toLowerCase())).length;
     return matches > 0 ? Math.min(10, 5 + (matches - 1) * 2.5) : 0;
   }
 
-  // Danh mục 12 ngành đào tạo chuẩn mực tại các trường Đại học Việt Nam
-  // TẤT CẢ các ngành đều bắt đầu từ base 40 đồng đều, tuyệt đối không ưu tiên thiên vị!
+  // Danh mục 12 nhóm ngành đào tạo chuẩn mực tại các trường Đại học Việt Nam
+  // TẤT CẢ các ngành đều bắt đầu từ base 40 đồng đều, tuyệt đối không thiên vị!
   const careersDefinition = [
     {
       name: 'Công nghệ thông tin & Lập trình phần mềm',
       base: 40,
-      subjectGroups: [['Toán'], ['Vật lý'], ['Tiếng Anh', 'Tin học']],
-      hobbyKeys: ['lập trình', 'code', 'website', 'phần mềm', 'ứng dụng web', 'app mobile', 'an ninh mạng', 'bảo mật', 'phần cứng', 'lắp ráp pc'],
+      subjectGroups: [['Toán'], ['Tin học', 'Vật lý'], ['Tiếng Anh', 'Công nghệ công nghiệp']],
+      hobbyKeys: ['lập trình', 'phát triển phần mềm', 'code', 'website', 'ứng dụng di động', 'app mobile', 'an toàn thông tin', 'an ninh mạng', 'vi mạch', 'phần cứng máy tính', 'lắp ráp pc'],
       entHobbyKeys: ['game', 'esports'],
-      goalKeys: ['công nghệ thông tin', 'cntt', 'lập trình', 'it', 'phần mềm', 'developer', 'an ninh mạng', 'coder', 'web', 'app'],
-      mbtiPairs: ['NT', 'T', 'IN', 'INTJ', 'INTP', 'ENTP', 'ISTP'],
-      reflectKeys: ['công nghệ', 'lập trình', 'code', 'phần mềm', 'máy tính', 'ai', 'dữ liệu', 'app'],
+      goalKeys: ['công nghệ thông tin', 'cntt', 'lập trình', 'it', 'phần mềm', 'developer', 'an ninh mạng', 'coder', 'web', 'app mobile'],
+      mbtiPairs: ['INTJ', 'INTP', 'ENTP', 'ISTP', 'NT'],
+      reflectKeys: ['công nghệ', 'lập trình', 'code', 'phần mềm', 'máy tính', 'bảo mật', 'thuật toán'],
       combinations: ['A00 (Toán, Lý, Hóa)', 'A01 (Toán, Lý, Anh)', 'D01 (Toán, Văn, Anh)', 'D07 (Toán, Hóa, Anh)'],
       bestCombo: 'A00 hoặc A01',
       advice: 'Nên ưu tiên khối A00 hoặc A01 nếu có thế mạnh tự nhiên; hoặc D01 nếu tự tin môn Tiếng Anh.'
@@ -140,12 +147,12 @@ function analyzeCareer() {
     {
       name: 'Kinh tế / Quản trị kinh doanh & Marketing',
       base: 40,
-      subjectGroups: [['Toán'], ['Tiếng Anh'], ['Ngữ văn']],
-      hobbyKeys: ['kinh doanh', 'khởi nghiệp', 'tài chính', 'chứng khoán', 'marketing', 'bán hàng', 'thương mại', 'logistics', 'đàm phán', 'quản lý', 'nghiên cứu hành vi', 'lãnh đạo'],
-      entHobbyKeys: ['chiến thuật', 'board game'],
-      goalKeys: ['kinh tế', 'quản trị kinh doanh', 'qtkd', 'marketing', 'tài chính', 'ngân hàng', 'kinh doanh', 'logistics', 'doanh nhân', 'ceo', 'thương mại', 'xuất nhập khẩu'],
-      mbtiPairs: ['ET', 'E', 'ES', 'ENTJ', 'ESTJ', 'ENFJ', 'ESFJ'],
-      reflectKeys: ['kinh doanh', 'khởi nghiệp', 'tài chính', 'quản lý', 'marketing', 'doanh nghiệp', 'lãnh đạo'],
+      subjectGroups: [['Toán'], ['Tiếng Anh'], ['Ngữ văn', 'Địa lý', 'GDKT&PL', 'Giáo dục công dân']],
+      hobbyKeys: ['khởi nghiệp', 'quản trị kinh doanh', 'đầu tư', 'chứng khoán', 'tài chính', 'bán hàng', 'e-commerce', 'thương mại', 'marketing', 'quảng cáo', 'tiếp thị số', 'quản lý đội nhóm', 'kỹ năng lãnh đạo', 'logistics', 'chuỗi cung ứng', 'kế toán', 'kiểm toán', 'thuế tài chính', 'kinh doanh', 'cờ vua', 'thể thao trí tuệ', 'board game', 'chiến thuật nhóm'],
+      entHobbyKeys: ['chiến thuật', 'board game', 'cà phê'],
+      goalKeys: ['kinh tế', 'quản trị kinh doanh', 'qtkd', 'marketing', 'tài chính', 'ngân hàng', 'kinh doanh', 'logistics', 'doanh nhân', 'ceo', 'thương mại', 'kế toán', 'kiểm toán', 'xuất nhập khẩu', 'tài chính - ngân hàng'],
+      mbtiPairs: ['ENTJ', 'ESTJ', 'ESTP', 'ENTP', 'ENFJ', 'ESFJ', 'ET', 'ES'],
+      reflectKeys: ['kinh doanh', 'khởi nghiệp', 'tài chính', 'quản lý', 'marketing', 'doanh nghiệp', 'lãnh đạo', 'đầu tư', 'thương mại'],
       combinations: ['A01 (Toán, Lý, Anh)', 'D01 (Toán, Văn, Anh)', 'A00 (Toán, Lý, Hóa)', 'D07 (Toán, Hóa, Anh)'],
       bestCombo: 'D01 hoặc A01',
       advice: 'Khối D01 và A01 có chỉ tiêu lớn nhất tại các trường như Ngoại thương, Kinh tế Quốc dân, UEH.'
@@ -153,12 +160,12 @@ function analyzeCareer() {
     {
       name: 'Y khoa / Dược học & Khoa học sức khỏe',
       base: 40,
-      subjectGroups: [['Sinh học'], ['Hóa học'], ['Toán']],
-      hobbyKeys: ['y học', 'dược', 'sức khỏe', 'thảo dược', 'bệnh', 'sơ cấp cứu', 'dinh dưỡng', 'sinh học', 'hóa học', 'thực nghiệm'],
-      entHobbyKeys: ['chăm sóc', 'thú cưng'],
-      goalKeys: ['bác sĩ', 'y khoa', 'y đa khoa', 'dược sĩ', 'dược', 'y tế', 'điều dưỡng', 'nha sĩ', 'răng hàm mặt', 'bệnh viện', 'cứu người'],
-      mbtiPairs: ['IF', 'IS', 'ISFJ', 'INFJ', 'ISTJ', 'ISFP', 'ESFJ'],
-      reflectKeys: ['bác sĩ', 'y tế', 'chữa bệnh', 'cứu người', 'dược', 'sức khỏe', 'bệnh viện', 'y khoa'],
+      subjectGroups: [['Sinh học', 'Công nghệ nông nghiệp'], ['Hóa học'], ['Toán', 'Tiếng Anh', 'Công nghệ nông nghiệp']],
+      hobbyKeys: ['y học', 'y tế', 'khám chữa bệnh', 'dược học', 'thảo dược', 'hóa dược', 'nghiên cứu khoa học', 'chăm sóc động vật', 'thú cưng', 'môi trường', 'sinh thái', 'yoga', 'thiền định', 'sức khỏe tinh thần', 'tập gym', 'thể hình', 'fitness', 'thể thao', 'phục hồi chức năng', 'nông nghiệp công nghệ cao', 'công nghệ sinh học'],
+      entHobbyKeys: ['chăm sóc', 'thú cưng', 'sức khỏe'],
+      goalKeys: ['bác sĩ', 'y khoa', 'y đa khoa', 'dược sĩ', 'dược', 'y tế', 'điều dưỡng', 'nha sĩ', 'răng hàm mặt', 'y - dược', 'bệnh viện', 'cứu người', 'thú y', 'y học cổ truyền'],
+      mbtiPairs: ['ISFJ', 'INFJ', 'ISTJ', 'ISFP', 'ESFJ', 'ENFJ', 'IS', 'IF'],
+      reflectKeys: ['bác sĩ', 'y tế', 'chữa bệnh', 'cứu người', 'dược', 'sức khỏe', 'bệnh viện', 'y khoa', 'chăm sóc', 'sinh học', 'nông nghiệp'],
       combinations: ['B00 (Toán, Hóa, Sinh)', 'A00 (Toán, Lý, Hóa)', 'D07 (Toán, Hóa, Anh)'],
       bestCombo: 'B00',
       advice: 'Khối B00 là con đường cốt lõi cho Y đa khoa; ngành Dược mở rộng thêm xét tuyển khối A00 và D07.'
@@ -166,12 +173,12 @@ function analyzeCareer() {
     {
       name: 'Khoa học máy tính & Trí tuệ nhân tạo (AI)',
       base: 40,
-      subjectGroups: [['Toán'], ['Tin học', 'Vật lý'], ['Tiếng Anh']],
-      hobbyKeys: ['ai', 'trí tuệ nhân tạo', 'machine learning', 'dữ liệu', 'khoa học', 'thuật toán', 'data science', 'toán nâng cao', 'robot'],
-      entHobbyKeys: ['rubik', 'đố vui logic'],
-      goalKeys: ['trí tuệ nhân tạo', 'ai', 'khoa học máy tính', 'khoa học dữ liệu', 'data scientist', 'machine learning', 'kỹ sư ai'],
-      mbtiPairs: ['NT', 'IN', 'INTP', 'INTJ', 'ENTP'],
-      reflectKeys: ['ai', 'trí tuệ nhân tạo', 'dữ liệu', 'khoa học', 'toán', 'robot', 'thuật toán'],
+      subjectGroups: [['Toán'], ['Tin học', 'Vật lý'], ['Tiếng Anh', 'Công nghệ công nghiệp']],
+      hobbyKeys: ['trí tuệ nhân tạo', 'ai', 'dữ liệu', 'khoa học dữ liệu', 'toán học', 'tư duy logic', 'nghiên cứu khoa học', 'thiên văn học', 'khám phá vũ trụ', 'cờ vua', 'thể thao trí tuệ', 'machine learning', 'robot'],
+      entHobbyKeys: ['đố vui logic', 'rubik'],
+      goalKeys: ['trí tuệ nhân tạo', 'ai', 'khoa học máy tính', 'khoa học dữ liệu', 'data scientist', 'machine learning', 'kỹ sư ai', 'khoa học tự nhiên'],
+      mbtiPairs: ['INTP', 'INTJ', 'ENTP', 'ISTP', 'NT', 'IN'],
+      reflectKeys: ['ai', 'trí tuệ nhân tạo', 'dữ liệu', 'khoa học', 'toán', 'robot', 'thuật toán', 'machine learning'],
       combinations: ['A00 (Toán, Lý, Hóa)', 'A01 (Toán, Lý, Anh)', 'D01 (Toán, Văn, Anh)'],
       bestCombo: 'A00 hoặc A01',
       advice: 'Môn Toán tư duy logic và thuật toán là chìa khóa then chốt cho ngành AI & Khoa học dữ liệu.'
@@ -179,25 +186,25 @@ function analyzeCareer() {
     {
       name: 'Kỹ thuật / Cơ điện tử & Tự động hóa',
       base: 40,
-      subjectGroups: [['Toán'], ['Vật lý'], ['Hóa học', 'Tin học']],
-      hobbyKeys: ['kỹ thuật', 'cơ khí', 'ô tô', 'máy bay', 'chế tạo', 'mạch điện', 'in 3d', 'lắp ráp', 'tự động', 'robot'],
-      entHobbyKeys: ['đồ chơi số', 'diy'],
-      goalKeys: ['kỹ thuật', 'cơ khí', 'chế tạo', 'ô tô', 'điện', 'tự động hóa', 'cơ điện tử', 'kỹ sư', 'hàng không'],
-      mbtiPairs: ['ST', 'ISTJ', 'ISTP', 'ESTP', 'INTJ'],
-      reflectKeys: ['kỹ thuật', 'cơ khí', 'chế tạo', 'máy móc', 'ô tô', 'robot', 'lắp ráp'],
+      subjectGroups: [['Toán'], ['Vật lý'], ['Công nghệ công nghiệp', 'Tin học', 'Hóa học', 'Tiếng Anh']],
+      hobbyKeys: ['cơ khí', 'ô tô', 'chế tạo máy móc', 'điện tử', 'vi mạch', 'phần cứng máy tính', 'kiến trúc', 'kỹ thuật xây dựng', 'thiên văn học', 'vũ trụ', 'thiết kế nội thất', 'môi trường', 'năng lượng', 'công nghệ công nghiệp'],
+      entHobbyKeys: ['lắp ráp', 'mô hình', 'diy'],
+      goalKeys: ['kỹ thuật', 'cơ khí', 'chế tạo', 'ô tô', 'điện', 'tự động hóa', 'cơ điện tử', 'kỹ sư', 'hàng không', 'kiến trúc', 'xây dựng'],
+      mbtiPairs: ['ISTP', 'ISTJ', 'ESTP', 'INTJ', 'ENTJ', 'ST'],
+      reflectKeys: ['kỹ thuật', 'cơ khí', 'chế tạo', 'máy móc', 'ô tô', 'robot', 'lắp ráp', 'điện tử', 'công trình', 'công nghệ'],
       combinations: ['A00 (Toán, Lý, Hóa)', 'A01 (Toán, Lý, Anh)', 'C01 (Toán, Văn, Lý)'],
       bestCombo: 'A00 hoặc A01',
-      advice: 'Nên tập trung tối đa vào cặp môn Toán - Lý để xét tuyển vào các trường kỹ thuật hàng đầu.'
+      advice: 'Nên tập trung tối đa vào khối Tự nhiên (Toán - Lý - Công nghệ công nghiệp/Hóa/Anh) để xét tuyển vào các trường kỹ thuật hàng đầu.'
     },
     {
       name: 'Luật / Ngoại giao & Khoa học xã hội',
       base: 40,
-      subjectGroups: [['Ngữ văn'], ['Tiếng Anh'], ['Lịch sử', 'Giáo dục công dân']],
-      hobbyKeys: ['luật', 'công lý', 'pháp luật', 'tranh biện', 'thuyết trình', 'ngoại giao', 'lịch sử', 'triết học', 'xã hội'],
-      entHobbyKeys: ['đọc sách'],
-      goalKeys: ['luật', 'luật sư', 'pháp lý', 'thẩm phán', 'kiểm sát', 'tòa án', 'ngoại giao', 'nhân quyền', 'chính trị'],
-      mbtiPairs: ['TJ', 'ENTJ', 'INTJ', 'ENFJ', 'ESTJ'],
-      reflectKeys: ['luật', 'công lý', 'pháp luật', 'tranh biện', 'thuyết trình', 'ngoại giao'],
+      subjectGroups: [['Ngữ văn'], ['Lịch sử', 'GDKT&PL', 'Giáo dục công dân'], ['Tiếng Anh', 'Toán']],
+      hobbyKeys: ['pháp luật', 'tranh biện', 'công lý xã hội', 'lịch sử', 'triết học', 'nghiên cứu xã hội', 'thuyết trình', 'diễn thuyết', 'giao lưu văn hóa quốc tế', 'võ thuật', 'kỹ năng tự vệ'],
+      entHobbyKeys: ['đọc sách', 'tranh biện'],
+      goalKeys: ['luật', 'luật sư', 'pháp lý', 'thẩm phán', 'kiểm sát', 'tòa án', 'ngoại giao', 'nhân quyền', 'chính trị', 'khoa học xã hội'],
+      mbtiPairs: ['ENTJ', 'INTJ', 'ESTJ', 'ENFJ', 'INFJ', 'TJ'],
+      reflectKeys: ['luật', 'công lý', 'pháp luật', 'tranh biện', 'thuyết trình', 'ngoại giao', 'chính sách', 'xã hội'],
       combinations: ['D01 (Toán, Văn, Anh)', 'C00 (Văn, Sử, Địa)', 'A01 (Toán, Lý, Anh)', 'D14 (Văn, Sử, Anh)'],
       bestCombo: 'D01 hoặc C00',
       advice: 'Khối D01 mang lại cơ hội xét tuyển rộng nhất; khối C00 có lợi thế lớn với ngành Luật và Tòa án.'
@@ -206,11 +213,11 @@ function analyzeCareer() {
       name: 'Truyền thông / Báo chí & Quan hệ công chúng (PR)',
       base: 40,
       subjectGroups: [['Ngữ văn'], ['Tiếng Anh'], ['Lịch sử', 'Toán']],
-      hobbyKeys: ['báo chí', 'truyền thông', 'podcast', 'nội dung', 'phóng sự', 'viết lách', 'mc', 'truyền hình', 'phát thanh', 'quảng cáo'],
-      entHobbyKeys: ['mạng xã hội', 'nghe podcast'],
-      goalKeys: ['báo chí', 'truyền thông', 'nhà báo', 'biên tập viên', 'pr', 'quan hệ công chúng', 'copywriter', 'content creator', 'mc'],
-      mbtiPairs: ['EN', 'ENFP', 'ENTP', 'ENFJ', 'ESFP'],
-      reflectKeys: ['báo chí', 'truyền thông', 'viết lách', 'sáng tạo nội dung', 'podcast'],
+      hobbyKeys: ['viết lách', 'báo chí', 'sáng tạo nội dung số', 'nhiếp ảnh', 'quay phim', 'dựng video', 'thuyết trình', 'diễn thuyết', 'mc dẫn chương trình', 'ca hát', 'thanh nhạc', 'biểu diễn', 'chơi nhạc cụ', 'sáng tác âm nhạc', 'nhảy hiện đại', 'vũ đạo', 'marketing', 'quảng cáo', 'trò chơi điện tử', 'gaming'],
+      entHobbyKeys: ['mạng xã hội', 'podcast', 'tiktok', 'youtube', 'xem phim', 'game'],
+      goalKeys: ['báo chí', 'truyền thông', 'nhà báo', 'biên tập viên', 'pr', 'quan hệ công chúng', 'copywriter', 'content creator', 'mc', 'truyền thông'],
+      mbtiPairs: ['ENFP', 'ENTP', 'ENFJ', 'ESFP', 'INFP', 'EN'],
+      reflectKeys: ['báo chí', 'truyền thông', 'viết lách', 'sáng tạo nội dung', 'podcast', 'mc', 'quảng bá', 'kể chuyện'],
       combinations: ['D01 (Toán, Văn, Anh)', 'C00 (Văn, Sử, Địa)', 'D14 (Văn, Sử, Anh)'],
       bestCombo: 'D01 hoặc C00',
       advice: 'Ngành truyền thông đòi hỏi khả năng sáng tạo ngôn từ sắc bén kết hợp cùng kỹ năng số hóa.'
@@ -218,12 +225,12 @@ function analyzeCareer() {
     {
       name: 'Sư phạm & Quản lý giáo dục',
       base: 40,
-      subjectGroups: [['Ngữ văn', 'Toán'], ['Tiếng Anh', 'Lịch sử', 'Vật lý']],
-      hobbyKeys: ['giảng dạy', 'truyền cảm hứng', 'giáo dục', 'dạy học', 'học sinh', 'sư phạm', 'kèm cặp', 'chia sẻ'],
-      entHobbyKeys: ['đọc sách'],
-      goalKeys: ['giáo viên', 'sư phạm', 'giảng viên', 'dạy học', 'thầy giáo', 'cô giáo', 'giáo dục'],
-      mbtiPairs: ['FJ', 'ESFJ', 'ENFJ', 'ISFJ', 'INFJ'],
-      reflectKeys: ['dạy học', 'giảng dạy', 'giáo dục', 'truyền cảm hứng', 'học sinh', 'sư phạm'],
+      subjectGroups: [['Ngữ văn', 'Toán'], ['Tiếng Anh', 'Lịch sử', 'GDKT&PL', 'Giáo dục công dân'], ['Vật lý', 'Hóa học', 'Sinh học', 'Công nghệ công nghiệp', 'Công nghệ nông nghiệp']],
+      hobbyKeys: ['giảng dạy', 'đào tạo', 'truyền cảm hứng', 'hoạt động tình nguyện', 'phát triển cộng đồng', 'thể thao đồng đội', 'thể thao cá nhân', 'bóng đá', 'bơi lội', 'võ thuật', 'ca hát', 'thanh nhạc', 'toán học', 'lịch sử', 'triết học'],
+      entHobbyKeys: ['đọc sách', 'kèm cặp'],
+      goalKeys: ['giáo viên', 'sư phạm', 'giảng viên', 'dạy học', 'thầy giáo', 'cô giáo', 'giáo dục', 'huấn luyện viên'],
+      mbtiPairs: ['ESFJ', 'ENFJ', 'ISFJ', 'INFJ', 'ESTJ', 'FJ'],
+      reflectKeys: ['dạy học', 'giảng dạy', 'giáo dục', 'truyền cảm hứng', 'học sinh', 'sư phạm', 'đào tạo'],
       combinations: ['C00 (Văn, Sử, Địa)', 'D01 (Toán, Văn, Anh)', 'A00 (Toán, Lý, Hóa)', 'B00 (Toán, Hóa, Sinh)'],
       bestCombo: 'Tùy bộ môn chuyên ngành',
       advice: 'Chọn tổ hợp có môn bạn muốn giảng dạy (Dạy Toán - A00/A01; Dạy Văn/Sử - C00/D01; Dạy Ngoại ngữ - D01).'
@@ -231,12 +238,12 @@ function analyzeCareer() {
     {
       name: 'Thiết kế đồ họa / Mỹ thuật số & Đa phương tiện',
       base: 40,
-      subjectGroups: [['Tiếng Anh'], ['Ngữ văn'], ['Toán', 'Tin học']],
-      hobbyKeys: ['vẽ', 'vẽ tranh', 'digital art', 'đồ họa', 'thiết kế', 'graphic design', 'chụp ảnh', 'nhiếp ảnh', 'kịch bản', 'manga', 'thời trang', 'nội thất', 'làm phim', 'video'],
-      entHobbyKeys: ['xem phim', 'game'],
-      goalKeys: ['thiết kế đồ họa', 'designer', 'graphic design', 'họa sĩ', 'thiết kế', 'digital art', 'ui/ux', 'dựng phim', 'hoạt hình', 'kiến trúc'],
-      mbtiPairs: ['FP', 'ISFP', 'INFP', 'ENFP', 'INTP'],
-      reflectKeys: ['thiết kế', 'nghệ thuật', 'đồ họa', 'sáng tạo', 'hình ảnh', 'mỹ thuật'],
+      subjectGroups: [['Toán'], ['Tin học', 'Công nghệ công nghiệp', 'Vật lý'], ['Tiếng Anh', 'Ngữ văn']],
+      hobbyKeys: ['hội họa', 'vẽ tranh', 'mỹ thuật số', 'thiết kế đồ họa', 'đa phương tiện', 'nhiếp ảnh', 'quay phim', 'dựng video', 'thiết kế thời trang', 'làm đẹp', 'thiết kế nội thất', 'không gian sống', 'kiến trúc', 'thiết kế website', 'trò chơi điện tử', 'gaming', 'esports'],
+      entHobbyKeys: ['xem phim', 'game', 'anime', 'manga'],
+      goalKeys: ['thiết kế đồ họa', 'designer', 'graphic design', 'họa sĩ', 'thiết kế', 'digital art', 'ui/ux', 'dựng phim', 'hoạt hình', 'kiến trúc', 'thời trang', 'nội thất'],
+      mbtiPairs: ['ISFP', 'INFP', 'ENFP', 'INTP', 'ISTP', 'FP'],
+      reflectKeys: ['thiết kế', 'nghệ thuật', 'đồ họa', 'sáng tạo', 'hình ảnh', 'mỹ thuật', 'thẩm mỹ', 'không gian'],
       combinations: ['D01 (Toán, Văn, Anh)', 'V00 (Toán, Lý, Vẽ)', 'H00 (Văn, Vẽ, Vẽ)', 'A01 (Toán, Lý, Anh)'],
       bestCombo: 'D01 hoặc V00',
       advice: 'Rất phù hợp với bạn trẻ có gu thẩm mỹ cao, đam mê nghệ thuật thị giác và truyền thông số.'
@@ -244,12 +251,12 @@ function analyzeCareer() {
     {
       name: 'Tâm lý học & Dịch vụ tham vấn / Xã hội',
       base: 40,
-      subjectGroups: [['Ngữ văn'], ['Sinh học'], ['Tiếng Anh', 'Toán']],
-      hobbyKeys: ['tâm lý', 'tâm lý học', 'thấu hiểu cảm xúc', 'lắng nghe', 'tâm sự', 'tư vấn', 'thiện nguyện', 'hoạt động tình nguyện'],
-      entHobbyKeys: ['yoga', 'thiền định'],
-      goalKeys: ['tâm lý', 'tâm lý học', 'chuyên viên tâm lý', 'tư vấn tâm lý', 'trị liệu', 'tham vấn'],
-      mbtiPairs: ['NF', 'INFJ', 'INFP', 'ENFJ', 'ISFJ'],
-      reflectKeys: ['tâm lý', 'thấu hiểu', 'lắng nghe', 'chia sẻ', 'chữa lành', 'con người'],
+      subjectGroups: [['Ngữ văn'], ['Sinh học', 'Công nghệ nông nghiệp', 'Tiếng Anh'], ['Toán', 'GDKT&PL', 'Giáo dục công dân']],
+      hobbyKeys: ['tâm lý học', 'thấu hiểu cảm xúc con người', 'hoạt động tình nguyện', 'phát triển cộng đồng', 'yoga', 'thiền định', 'sức khỏe tinh thần', 'chăm sóc động vật', 'thú cưng', 'lắng nghe', 'tâm sự'],
+      entHobbyKeys: ['thiền định', 'yoga', 'viết nhật ký'],
+      goalKeys: ['tâm lý', 'tâm lý học', 'chuyên viên tâm lý', 'tư vấn tâm lý', 'trị liệu', 'tham vấn', 'công tác xã hội'],
+      mbtiPairs: ['INFJ', 'INFP', 'ENFJ', 'ISFJ', 'ENFP', 'NF'],
+      reflectKeys: ['tâm lý', 'thấu hiểu', 'lắng nghe', 'chia sẻ', 'chữa lành', 'con người', 'cảm xúc'],
       combinations: ['D01 (Toán, Văn, Anh)', 'B00 (Toán, Hóa, Sinh)', 'C00 (Văn, Sử, Địa)'],
       bestCombo: 'D01 hoặc B00',
       advice: 'Nhu cầu chuyên viên tư vấn tâm lý học đường và trị liệu cảm xúc đang tăng trưởng nhanh chóng.'
@@ -258,11 +265,11 @@ function analyzeCareer() {
       name: 'Du lịch / Quản trị khách sạn & Dịch vụ F&B',
       base: 40,
       subjectGroups: [['Tiếng Anh'], ['Địa lý', 'Ngữ văn'], ['Lịch sử', 'Toán']],
-      hobbyKeys: ['du lịch', 'đi phượt', 'khám phá', 'khách sạn', 'nấu ăn', 'ẩm thực', 'làm bánh', 'cà phê', 'barista', 'cắm trại'],
-      entHobbyKeys: ['phượt', 'camping'],
-      goalKeys: ['du lịch', 'quản trị khách sạn', 'khách sạn', 'hướng dẫn viên', 'resort', 'nhà hàng', 'f&b', 'đầu bếp', 'lữ hành'],
-      mbtiPairs: ['ES', 'ESFP', 'ESTP', 'ESFJ', 'ENFP'],
-      reflectKeys: ['du lịch', 'khách sạn', 'ẩm thực', 'trải nghiệm', 'giao tiếp'],
+      hobbyKeys: ['du lịch', 'đi phượt', 'trải nghiệm khám phá', 'nấu ăn', 'nghệ thuật ẩm thực', 'pha chế đồ uống', 'thưởng thức cà phê', 'quản trị dịch vụ khách sạn', 'nhà hàng', 'cắm trại', 'dã ngoại ngoài trời', 'học ngoại ngữ', 'giao lưu văn hóa quốc tế', 'thể thao', 'fitness'],
+      entHobbyKeys: ['phượt', 'camping', 'thưởng thức cà phê', 'ẩm thực'],
+      goalKeys: ['du lịch', 'quản trị khách sạn', 'khách sạn', 'hướng dẫn viên', 'resort', 'nhà hàng', 'f&b', 'đầu bếp', 'lữ hành', 'dịch vụ'],
+      mbtiPairs: ['ESFP', 'ESTP', 'ESFJ', 'ENFP', 'ISFP', 'ES'],
+      reflectKeys: ['du lịch', 'khách sạn', 'ẩm thực', 'trải nghiệm', 'giao tiếp', 'dịch vụ', 'khám phá'],
       combinations: ['D01 (Toán, Văn, Anh)', 'D14 (Văn, Sử, Anh)', 'D15 (Văn, Địa, Anh)', 'C00 (Văn, Sử, Địa)'],
       bestCombo: 'D01 hoặc D14',
       advice: 'Khả năng ngoại ngữ tốt và sự năng động, mến khách là lợi thế cạnh tranh hàng đầu.'
@@ -270,12 +277,12 @@ function analyzeCareer() {
     {
       name: 'Ngôn ngữ học & Biên phiên dịch quốc tế',
       base: 40,
-      subjectGroups: [['Tiếng Anh'], ['Ngữ văn'], ['Lịch sử', 'Địa lý']],
-      hobbyKeys: ['học ngoại ngữ', 'tiếng anh', 'tiếng trung', 'tiếng hàn', 'tiếng nhật', 'giao lưu văn hóa', 'đọc sách ngoại văn', 'dịch thuật'],
-      entHobbyKeys: ['xem phim nước ngoài'],
-      goalKeys: ['ngôn ngữ', 'ngôn ngữ anh', 'biên dịch', 'phiên dịch', 'dịch thuật', 'tiếng trung', 'tiếng hàn', 'tiếng nhật', 'ngoại ngữ'],
-      mbtiPairs: ['IN', 'INFJ', 'INFP', 'ENFP', 'ISFP'],
-      reflectKeys: ['ngoại ngữ', 'ngôn ngữ', 'tiếng anh', 'dịch thuật', 'văn hóa quốc tế'],
+      subjectGroups: [['Tiếng Anh'], ['Ngữ văn'], ['Lịch sử', 'Địa lý', 'Toán']],
+      hobbyKeys: ['học ngoại ngữ', 'giao lưu văn hóa quốc tế', 'viết lách', 'báo chí', 'đọc sách ngoại văn', 'dịch thuật', 'thuyết trình', 'du lịch'],
+      entHobbyKeys: ['xem phim nước ngoài', 'nghe nhạc ngoại', 'đọc sách'],
+      goalKeys: ['ngôn ngữ', 'ngôn ngữ anh', 'biên dịch', 'phiên dịch', 'dịch thuật', 'tiếng trung', 'tiếng hàn', 'tiếng nhật', 'ngoại ngữ', 'ngôn ngữ học'],
+      mbtiPairs: ['INFJ', 'INFP', 'ENFP', 'ISFP', 'INTJ', 'IN'],
+      reflectKeys: ['ngoại ngữ', 'ngôn ngữ', 'tiếng anh', 'dịch thuật', 'văn hóa quốc tế', 'song ngữ'],
       combinations: ['D01 (Toán, Văn, Anh)', 'D14 (Văn, Sử, Anh)', 'D15 (Văn, Địa, Anh)'],
       bestCombo: 'D01 (Ngoại ngữ nhân hệ số 2)',
       advice: 'Thế mạnh vượt trội về ngoại ngữ mở ra cơ hội làm việc trong các tập đoàn đa quốc gia và tổ chức ngoại giao.'
@@ -309,15 +316,30 @@ function analyzeCareer() {
     };
   });
 
-  // Sắp xếp giảm dần theo điểm số phù hợp
-  result.sort((a, b) => b.score - a.score);
+  // Sắp xếp giảm dần theo điểm số phù hợp với cơ chế giải quyết đồng điểm khoa học & khách quan
+  result.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    // 1. Ưu tiên mục tiêu rõ ràng của học sinh
+    if (b.goalFit !== a.goalFit) return b.goalFit - a.goalFit;
+    // 2. Ưu tiên đam mê sở thích thực tế
+    if (b.hobbyFit !== a.hobbyFit) return b.hobbyFit - a.hobbyFit;
+    // 3. Ưu tiên năng lực học tập theo môn thế mạnh
+    if (b.academicFit !== a.academicFit) return b.academicFit - a.academicFit;
+    // 4. Ưu tiên độ tương thích MBTI
+    if (b.mbtiFit !== a.mbtiFit) return b.mbtiFit - a.mbtiFit;
+    return 0;
+  });
 
   // Gán nhãn độ phù hợp
   result.forEach((x, idx) => {
-    if (idx === 0) x.fitLevel = '🌟 Phù hợp nhất';
-    else if (idx === 1) x.fitLevel = '✨ Phù hợp rất cao';
-    else if (idx === 2) x.fitLevel = '✨ Phù hợp cao';
-    else x.fitLevel = '👍 Khá phù hợp';
+    if (isDefaultOverview) {
+      x.fitLevel = 'Khám phá tổng quan';
+    } else {
+      if (idx === 0) x.fitLevel = '🌟 Phù hợp nhất';
+      else if (idx === 1) x.fitLevel = '✨ Phù hợp rất cao';
+      else if (idx === 2) x.fitLevel = '✨ Phù hợp cao';
+      else x.fitLevel = '👍 Khá phù hợp';
+    }
   });
 
   // Xây dựng lập luận chi tiết, minh bạch cho từng ngành
@@ -396,6 +418,7 @@ function analyzeCareer() {
     goals: goals.selected || [],
     goalText: displayGoal,
     selfReflect: selfReflect,
+    isDefaultOverview: isDefaultOverview,
     results: result.slice(0, 6)
   };
 }

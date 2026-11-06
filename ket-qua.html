@@ -48,8 +48,24 @@
         <h1>Bạn phù hợp với ngành gì?</h1>
 
         <p class="muted">
-            Dựa trên sự kết hợp giữa điểm số các môn học, sở thích và xu hướng tính cách của bạn, NS AI phân tích các ngành nghề bạn phù hợp nhất:
+            Dựa trên sự kết hợp toàn diện giữa điểm số, sở thích, xu hướng tính cách và mục tiêu cá nhân, NS AI tổng hợp bức tranh định hướng nghề nghiệp dành riêng cho bạn:
         </p>
+
+        <!-- Thanh công cụ & Nút Xuất PDF / In hồ sơ -->
+        <div class="result-toolbar" style="display: flex; gap: 10px; margin: 16px 0 20px; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn primary print-btn" onclick="window.print()" style="cursor: pointer; background: linear-gradient(135deg, #2563eb, #7c3aed); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35); font-weight: 600;">
+                📄 In phiếu định hướng (PDF)
+            </button>
+            <a class="btn secondary" href="thongtin.html">
+                🔄 Cập nhật lại thông tin
+            </a>
+            <a class="btn secondary" href="truong-hoc.html">
+                🏫 Xem các trường đào tạo phù hợp
+            </a>
+            <a class="btn secondary" href="chatbot.html">
+                🤖 Hỏi NS AI về phương thức tuyển sinh
+            </a>
+        </div>
 
 
         <!-- Trạng thái lưu hồ sơ tài khoản -->
@@ -70,16 +86,20 @@
 
         <div class="actions">
 
-            <a class="btn secondary" href="muc-tieu.html">
-                ← Điều chỉnh mục tiêu
-            </a>
+            <button type="button" class="btn primary print-btn" onclick="window.print()" style="cursor: pointer; background: linear-gradient(135deg, #2563eb, #7c3aed); font-weight: 600;">
+                📄 In phiếu định hướng (PDF)
+            </button>
 
             <a class="btn secondary" href="truong-hoc.html">
-                🏫 Xem tất cả trường trên cả nước
+                🏫 Xem các trường đào tạo phù hợp
             </a>
 
             <a class="btn primary" href="chatbot.html">
-                ✨ Trò chuyện với Trợ lý NS AI về kết quả này
+                🤖 Hỏi NS AI về phương thức tuyển sinh
+            </a>
+
+            <a class="btn secondary" href="thongtin.html">
+                🔄 Cập nhật lại thông tin
             </a>
 
         </div>
@@ -195,20 +215,45 @@ function getSchoolsForCareer(careerName, province, limit = 3) {
 // 1. RENDER THÔNG TIN TỔNG QUAN & LẬP LUẬN ĐÁNH GIÁ (DỰA VÀO ĐÂU ĐỂ ĐƯA RA KẾT QUẢ)
 const bannerTopSchools = topCareer ? getSchoolsForCareer(topCareer.name, userProvince, 3) : [];
 
+const methodMap = {
+    'thpt': 'Tốt nghiệp THPT',
+    'hocba': 'Học bạ THPT',
+    'dgnl': 'ĐGNL (ĐHQG)',
+    'dgtd': 'ĐGTD (Bách Khoa)',
+    'ielts': 'Chứng chỉ quốc tế (IELTS/SAT)',
+    'tuyenthang': 'Tuyển thẳng'
+};
+const rawMethods = (p.goals && p.goals.admissionMethods) ? p.goals.admissionMethods : [];
+const displayMethods = rawMethods.map(m => methodMap[m] || m);
+
 document.getElementById("summary").innerHTML = `
     <div class="notice">
         📍 <b>Khu vực:</b> ${r.province || "Chưa chọn tỉnh"}
         ·
         🎯 <b>Định hướng:</b> ${r.goalText || (r.goals && r.goals.length ? r.goals.join(", ") : "Khám phá ngành nghề")}
         ${p.mbti ? ` · 🧠 <b>MBTI:</b> <span style="color:#c084fc;font-weight:700;">${p.mbti.type}</span> (${p.mbti.title})` : ''}
+        ${displayMethods.length ? ` · 📋 <b>Phương thức xét tuyển:</b> <span style="color:#67e8f9;font-weight:600;">${displayMethods.join(', ')}</span>` : ''}
     </div>
 
-    ${topCareer ? `
+    ${r.isDefaultOverview ? `
+        <div class="best-match-banner" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); border: 1.5px solid rgba(168, 85, 247, 0.45); border-radius: 16px; padding: 22px; margin: 18px 0;">
+            <div class="banner-title" style="color: #cbd5e1; font-weight: 700; letter-spacing: 0.5px;">🧭 BẠN ĐANG XEM DANH MỤC KHÁM PHÁ TỔNG QUAN</div>
+            <h2 style="font-size: 20px; color: #ffffff; margin: 10px 0 8px;">Chưa đủ dữ liệu để cá nhân hóa kết quả chính xác</h2>
+            <p style="color: #cbd5e1; font-size: 14px; margin: 0 0 16px 0; line-height: 1.6;">
+                Bạn chưa nhập Điểm số, Sở thích cá nhân hoặc Mục tiêu cụ thể. Danh sách bên dưới là các nhóm ngành đại học tiêu biểu để bạn tham khảo. Hãy hoàn thành bài khảo sát để NS AI phân tích chính xác theo năng lực và tính cách của riêng bạn nhé!
+            </p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                <a href="thongtin.html" class="btn primary" style="display: inline-block; padding: 10px 22px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px;">
+                    👉 Bắt đầu làm bài định hướng từ Bước 1
+                </a>
+            </div>
+        </div>
+    ` : (topCareer ? `
         <div class="best-match-banner">
             <div class="banner-title">🌟 KẾT QUẢ ĐÁNH GIÁ NỔI BẬT NHẤT:</div>
             <h2>Bạn phù hợp nhất với ngành: <span>${topCareer.name}</span></h2>
             <p style="color: #e2e8f0; font-size: 14px; margin: 8px 0 0 0;">
-                Mức độ đánh giá: <strong>${topCareer.fitLevel}</strong> · Tổ hợp xét tuyển khuyến nghị: <strong>${topCareer.bestCombo}</strong>
+                Mức độ đánh giá: <strong>${topCareer.fitLevel} (${topCareer.score || 95}% tương thích)</strong> · Tổ hợp xét tuyển khuyến nghị: <strong>${topCareer.bestCombo}</strong>
             </p>
         </div>
 
@@ -290,7 +335,7 @@ document.getElementById("summary").innerHTML = `
                 </div>
             </div>
         </div>
-    ` : ''}
+    ` : '')}
 `;
 
 
@@ -312,6 +357,21 @@ document.getElementById("results").innerHTML =
                         ${x.fitLevel || (i === 0 ? '🌟 Phù hợp nhất' : (i < 3 ? '✨ Phù hợp rất cao' : '👍 Khá phù hợp'))}
                     </span>
 
+                </div>
+
+                <!-- THANH TIẾN ĐỘ PHẦN TRĂM (%) MỨC ĐỘ PHÙ HỢP -->
+                <div class="fit-progress-box" style="margin: 12px 0 14px; padding: 10px 14px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; font-size: 13px;">
+                        <span style="color: #cbd5e1; font-weight: 500;">
+                            📊 Mức độ phù hợp tổng hợp:
+                        </span>
+                        <span style="color: ${i === 0 ? '#4ade80' : (i < 3 ? '#60a5fa' : '#a78bfa')}; font-weight: 700; font-size: 15px;">
+                            ${x.score || 85}%
+                        </span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden;">
+                        <div style="width: ${x.score || 85}%; height: 100%; background: ${i === 0 ? 'linear-gradient(90deg, #10b981, #34d399)' : (i < 3 ? 'linear-gradient(90deg, #6366f1, #60a5fa)' : 'linear-gradient(90deg, #8b5cf6, #c084fc)')}; border-radius: 999px; transition: width 0.8s ease;"></div>
+                    </div>
                 </div>
 
                 <!-- CĂN CỨ ĐÁNH GIÁ CHI TIẾT -->

@@ -149,7 +149,7 @@
 
     <div id="messages" class="messages">
 
-        <div class="msg bot">
+        <div class="msg bot" id="initialBotGreeting">
             Chào bạn! Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Mình luôn ở đây để lắng nghe bạn tâm sự về áp lực thi cử, chuyện gia đình, những ngày mệt mỏi hay băn khoăn về chọn ngành, chọn trường. Bạn có thể gõ phím hoặc bấm nút 🎙️ Micro để tâm sự trực tiếp bằng giọng nói nhé! 💚🌌
             <div class="msg-tools">
                 <button type="button" class="btn-read-msg" title="Đọc bằng giọng nói" onclick="speakMessage(this)">🔊 Nghe đọc</button>
@@ -159,61 +159,66 @@
     </div>
 
 
-    <!-- CÂU HỎI NHANH -->
+    <!-- CÂU HỎI NHANH THEO NHÓM -->
 
-    <div class="quick">
+    <div class="quick-groups" style="margin: 12px 0; display: flex; flex-direction: column; gap: 10px;">
 
-        <button onclick="quick('Em bị mất động lực học tập, phải làm sao?')">
-            ⚡ Lấy lại động lực
-        </button>
+        <!-- Nhóm 1: Hướng nghiệp & Tuyển sinh -->
+        <div class="quick-group">
+            <div style="font-size: 12.5px; font-weight: 700; color: #a5b4fc; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                <span>🎓</span> Hỏi về Hướng nghiệp &amp; Tuyển sinh
+            </div>
+            <div class="quick" style="margin: 0;">
+                <button type="button" onclick="quick('Ngành nào phù hợp với em?')">
+                    🎯 Ngành phù hợp
+                </button>
+                <button type="button" onclick="quick('Tìm trường phù hợp với em.')">
+                    🏫 Tìm trường
+                </button>
+                <button type="button" onclick="quick('Ngành này nên theo tổ hợp gì?')">
+                    📚 Tổ hợp môn nên theo
+                </button>
+                <button type="button" onclick="quick('Phân tích nhóm tính cách MBTI của em')">
+                    🧠 Tính cách [MBTI]
+                </button>
+                <button type="button" onclick="quick('Bạn có tài liệu học tập và đề thi có giải chi tiết không?')">
+                    📚 Tài liệu &amp; Đề thi
+                </button>
+                <button type="button" onclick="quick('Em sợ trượt đại học và điểm thi thấp')">
+                    📈 Sợ trượt &amp; Điểm thấp
+                </button>
+            </div>
+        </div>
 
-        <button onclick="quick('Bạn có tài liệu học tập và đề thi có giải chi tiết không?')">
-            📚 Tài liệu & Đề thi
-        </button>
-
-        <button onclick="quick('Làm sao để bớt lười và tập trung học?')">
-            ⏱️ Cai lười & Trì hoãn
-        </button>
-
-        <button onclick="quick('Tôi muốn được lắng nghe và tư vấn tâm lý')">
-            💚 Lắng nghe & Tâm sự
-        </button>
-
-        <button onclick="quick('Em đang bị áp lực từ bố mẹ và gia đình')">
-            👨‍👩‍👧 Áp lực gia đình
-        </button>
-
-        <button onclick="quick('Hướng dẫn em bài tập thở 4-7-8 để thư giãn')">
-            🧘 Bài tập thở 4-7-8
-        </button>
-
-        <button onclick="quick('Em cảm thấy buồn và mệt mỏi quá')">
-            🫂 Tâm sự nỗi buồn
-        </button>
-
-        <button onclick="quick('Làm sao để nói chuyện bằng giọng nói với bạn?')">
-            🎙️ Trò chuyện bằng giọng nói
-        </button>
-
-        <button onclick="quick('Ngành nào phù hợp với em?')">
-            🎯 Ngành phù hợp
-        </button>
-
-        <button onclick="quick('Ngành này nên theo tổ hợp gì?')">
-            📚 Tổ hợp môn nên theo
-        </button>
-
-        <button onclick="quick('Em sợ trượt đại học và điểm thi thấp')">
-            📈 Sợ trượt & Điểm thấp
-        </button>
-
-        <button onclick="quick('Tìm trường phù hợp với em.')">
-            🏫 Tìm trường
-        </button>
-
-        <button onclick="quick('Phân tích nhóm tính cách MBTI của em')">
-            🧠 Tính cách [MBTI]
-        </button>
+        <!-- Nhóm 2: Tâm lý & Giải tỏa áp lực -->
+        <div class="quick-group">
+            <div style="font-size: 12.5px; font-weight: 700; color: #6ee7b7; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                <span>💚</span> Tâm sự &amp; Giải tỏa áp lực học đường
+            </div>
+            <div class="quick" style="margin: 0;">
+                <button type="button" onclick="quick('Em bị mất động lực học tập, phải làm sao?')">
+                    ⚡ Lấy lại động lực
+                </button>
+                <button type="button" onclick="quick('Tôi muốn được lắng nghe và tư vấn tâm lý')">
+                    💚 Lắng nghe &amp; Tâm sự
+                </button>
+                <button type="button" onclick="quick('Em đang bị áp lực từ bố mẹ và gia đình')">
+                    👨‍👩‍👧 Áp lực gia đình
+                </button>
+                <button type="button" onclick="quick('Làm sao để bớt lười và tập trung học?')">
+                    ⏱️ Cai lười &amp; Trì hoãn
+                </button>
+                <button type="button" onclick="quick('Hướng dẫn em bài tập thở 4-7-8 để thư giãn')">
+                    🧘 Bài tập thở 4-7-8
+                </button>
+                <button type="button" onclick="quick('Em cảm thấy buồn và mệt mỏi quá')">
+                    🫂 Tâm sự nỗi buồn
+                </button>
+                <button type="button" onclick="quick('Làm sao để nói chuyện bằng giọng nói với bạn?')">
+                    🎙️ Trò chuyện bằng giọng nói
+                </button>
+            </div>
+        </div>
 
     </div>
 
@@ -261,15 +266,17 @@
     <div id="voiceStatus" class="voice-status" style="display: none;"></div>
 
 
-    <p class="tiny">
-
-        Chatbot sử dụng dữ liệu bạn đã nhập trong NS Career AI
-        để cá nhân hóa câu trả lời.
-
-        Đây là công cụ hỗ trợ tham khảo, không thay thế chuyên gia
-        tâm lý hoặc tư vấn tuyển sinh chính thức.
-
+    <p class="tiny" style="margin-top: 14px; line-height: 1.6;">
+        Chatbot sử dụng dữ liệu bạn đã nhập trong NS AI để cá nhân hóa câu trả lời. Đây là công cụ hỗ trợ tham khảo, không thay thế chuyên gia tâm lý hoặc tư vấn tuyển sinh chính thức. Nếu bạn gặp căng thẳng tâm lý nghiêm trọng, hãy liên hệ <strong>Phòng Tư vấn Tâm lý Học đường</strong> hoặc <strong>Tổng đài Quốc gia 111</strong> (miễn phí 24/7).
     </p>
+
+    <!-- THÔNG ĐIỆP ĐẠO ĐỨC AI & AN TOÀN TÂM LÝ -->
+    <div class="chat-ethics-notice" style="margin-top: 10px; padding: 10px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; font-size: 12.5px; line-height: 1.55; color: #93c5fd; display: flex; align-items: flex-start; gap: 8px;">
+        <span style="font-size: 15px; line-height: 1.2;">💙</span>
+        <div>
+            <strong>Thông điệp Đạo đức AI &amp; An toàn tâm lý:</strong> NS AI luôn lắng nghe bạn. Nếu bạn đang gặp khủng hoảng tâm lý nghiêm trọng, hãy liên hệ <strong>Phòng Tư vấn Tâm lý Học đường</strong> hoặc <strong>Tổng đài Quốc gia 111</strong> (miễn phí 24/7) để được hỗ trợ trực tiếp.
+        </div>
+    </div>
 
 </section>
 
@@ -289,6 +296,17 @@
 <script>
 
 const p = getProfile();
+
+// Cập nhật lời chào ban đầu theo tên học sinh (nếu có)
+const initGreetingEl = document.getElementById("initialBotGreeting");
+if (initGreetingEl && typeof getInitialGreetingMessage === "function") {
+    initGreetingEl.innerHTML = `
+        ${getInitialGreetingMessage()}
+        <div class="msg-tools">
+            <button type="button" class="btn-read-msg" title="Đọc bằng giọng nói" onclick="speakMessage(this)">🔊 Nghe đọc</button>
+        </div>
+    `;
+}
 
 const analysis = analyzeCareer();
 

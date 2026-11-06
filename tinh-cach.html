@@ -39,21 +39,36 @@
 
 <section class="glass form-card wide">
 
-<p class="eyebrow">BƯỚC 4</p>
+<p class="eyebrow">BƯỚC 4 · CƠ SỞ KHOA HỌC TÂM LÝ</p>
 
-<h1>Khám phá tính cách</h1>
+<h1>Trắc nghiệm tính cách &amp; Định hướng nghề nghiệp (RIASEC &amp; MBTI)</h1>
 
 <p class="muted">
-  Bộ câu hỏi gồm 2 phần: <strong>Trắc nghiệm (A, B, C, D và đáp án E tự trả lời)</strong> giúp định hình nhóm tính cách MBTI, kết hợp cùng <strong>Câu hỏi tự trả lời chuyên sâu</strong> giúp AI thấu hiểu năng lực và khát vọng của riêng bạn.
+  Ứng dụng <strong>mô hình hướng nghiệp quốc tế Holland (RIASEC)</strong> kết hợp <strong>16 nhóm tính cách MBTI</strong> để nhận diện chính xác phong cách tư duy, môi trường làm việc lý tưởng và năng lực tiềm ẩn của bạn.
 </p>
 
-<!-- PHẦN I: TRẮC NGHIỆM (A, B, C, D, E) -->
+<!-- THANH TIẾN TRÌNH TRẢ LỜI CÂU HỎI (PROGRESS BAR) -->
+<div class="test-progress-box" style="margin: 16px 0 24px; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+    <span style="font-size: 13px; font-weight: 700; color: #cbd5e1; display: flex; align-items: center; gap: 6px;">
+      <span>📊</span> Tiến trình hoàn thành trắc nghiệm:
+    </span>
+    <span id="progressText" style="font-size: 13px; font-weight: 700; color: #34d399;">
+      Đã trả lời: 0/10 câu hỏi (0%)
+    </span>
+  </div>
+  <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden;">
+    <div id="progressBarFill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); border-radius: 999px; transition: width 0.35s ease;"></div>
+  </div>
+</div>
+
+<!-- PHẦN I: TRẮC NGHIỆM PHÂN LOẠI -->
 <div style="margin-bottom: 28px;">
   <h2 style="font-size: 19px; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-    📋 Phần I: Trắc nghiệm tính cách (Có đáp án E tự do trả lời)
+    📋 Phần I: Trắc nghiệm phân loại tính cách RIASEC &amp; MBTI (Có đáp án E tự do)
   </h2>
   <p class="muted" style="font-size: 13.5px; margin-top: 0;">
-    Chọn phương án có sẵn (A, B, C, D) hoặc chọn <strong>đáp án E (Khác)</strong> và gõ trực tiếp câu trả lời của bạn:
+    Mỗi câu hỏi đo lường một khía cạnh tâm lý học đường. Hãy chọn phương án (A, B, C, D) phản ánh đúng con người tự nhiên của bạn nhất, hoặc chọn <strong>đáp án E</strong> để tự nhập câu trả lời:
   </p>
   <div id="questions"></div>
 </div>
@@ -61,9 +76,9 @@
 <!-- PHẦN II: CÂU HỎI TỰ TRẢ LỜI -->
 <div class="open-questions-section">
   <div class="open-section-header">
-    <h2>✍️ Phần II: Câu hỏi tự bộc lộ bản thân (Tự trả lời)</h2>
+    <h2>✍️ Phần II: Câu hỏi tự bộc lộ bản thân (Tự luận)</h2>
     <p>
-      Hãy chia sẻ thêm bằng lời văn của chính bạn để AI có thêm dữ liệu thực tế giải thích cơ sở phân tích trước khi gợi ý trường học:
+      Hãy chia sẻ thêm bằng lời văn của chính bạn để AI có thêm dữ liệu thực tế giải thích cơ sở phân tích trước khi gợi ý ngành nghề:
     </p>
   </div>
 
@@ -103,10 +118,10 @@
 
 <div class="actions">
   <a href="sothich.html" class="btn secondary">
-    ← Quay lại
+    ← Quay lại Bước 3 (Sở thích)
   </a>
   <button class="btn primary" onclick="finish()">
-    Lưu & tiếp tục →
+    Lưu &amp; tiếp tục sang Bước 5 (Mục tiêu) →
   </button>
 </div>
 
@@ -117,18 +132,22 @@
 <!-- MODAL KẾT QUẢ TÍNH CÁCH -->
 <div id="personalityModal" class="mbti-result-modal" style="display: none;">
   <div class="mbti-result-card">
-    <p class="eyebrow">KẾT QUẢ PHÂN TÍCH TÍNH CÁCH</p>
+    <p class="eyebrow">KẾT QUẢ PHÂN LOẠI TÍNH CÁCH</p>
     <div id="modalCode" class="mbti-badge-large">INTP</div>
-    <h2 id="modalTitle" style="color: #fff; margin-bottom: 8px;">Nhà tư duy logic</h2>
-    <p id="modalTrait" style="color: #a5b4fc; font-weight: 600; margin-bottom: 12px; font-size: 15px;">
-      Thiên về tư duy logic và phân tích
+    <h2 id="modalTitle" style="color: #fff; margin-bottom: 6px;">Nhà tư duy logic</h2>
+    <p id="modalTrait" style="color: #a5b4fc; font-weight: 600; margin-bottom: 12px; font-size: 14.5px;">
+      Thiên về tư duy logic và phân tích sắc bén
     </p>
-    <p id="modalDesc" style="color: #cbd5e1; margin: 0 0 24px; line-height: 1.6; font-size: 14px;">
+
+    <!-- 4 CHIỀU KÍCH PHÂN LOẠI MBTI -->
+    <div id="modalDimensions" class="mbti-dimensions-grid"></div>
+
+    <p id="modalDesc" style="color: #cbd5e1; margin: 0 0 20px; line-height: 1.6; font-size: 13.5px;">
       Mô tả phong cách tính cách...
     </p>
     <div class="actions" style="justify-content: center; margin-top: 10px;">
       <button class="btn primary" onclick="goToNextStep()">
-        Tiếp tục sang Mục tiêu 🎯
+        Tiếp tục sang Bước 5 (Mục tiêu) 🎯 →
       </button>
     </div>
   </div>
@@ -138,95 +157,226 @@
 
 <script>
 
+// BỘ 10 CÂU HỎI PHÂN LOẠI TÍNH CÁCH CHUYÊN SÂU
 const questionsData = [
   {
-    title: 'Khi gặp một bài toán hoặc một thử thách khó trong học tập, bạn thường...',
+    category: 'Nguồn năng lượng & Phong cách giao tiếp (E vs I)',
+    title: 'Khi đối diện với môi trường tập thể hoặc sau một ngày học tập bận rộn, bạn nhận thấy bản thân...',
     options: [
-      'Phân tích đề bài, bẻ nhỏ vấn đề và tìm cách giải logic từng bước một.',
-      'Hỏi ý kiến bạn bè hoặc thầy cô để cùng nhau trao đổi, tìm hướng giải quyết.',
-      'Thử một góc nhìn hoàn toàn mới, một công thức hoặc cách tiếp cận sáng tạo.',
-      'Đọc kỹ lại sách giáo khoa, làm theo các bước đã học một cách cẩn trọng, kiên nhẫn.'
+      {
+        tag: 'Hướng ngoại chủ động (E)',
+        text: 'Cảm thấy tràn đầy năng lượng, thích bắt chuyện, kết nối và hào hứng tham gia các hoạt động tập thể sôi nổi.'
+      },
+      {
+        tag: 'Hướng nội độc lập (I)',
+        text: 'Cần không gian riêng yên tĩnh một mình để sạc lại năng lượng; thấy thoải mái nhất khi chỉ ở cạnh vài người bạn thân.'
+      },
+      {
+        tag: 'Giao tiếp linh hoạt (Ambivert)',
+        text: 'Tự tin thuyết trình và giao tiếp lưu loát khi có mục tiêu rõ ràng, nhưng sau đó vẫn ưu tiên thời gian suy ngẫm độc lập.'
+      },
+      {
+        tag: 'Lắng nghe & Quan sát (I)',
+        text: 'Thích đóng vai trò quan sát tinh tế, lắng nghe thấu hiểu người khác hơn là trở thành tâm điểm của sự chú ý.'
+      }
     ]
   },
   {
-    title: 'Khi tham gia làm việc nhóm hoặc hoạt động tập thể, vai trò tự nhiên nhất của bạn là...',
+    category: 'Cách tiếp nhận thông tin & Quan sát thế giới (S vs N)',
+    title: 'Khi tiếp cận một chủ đề kiến thức mới hoặc một hiện tượng đời sống, điều đầu tiên thu hút bạn là...',
     options: [
-      'Người phân tích nhiệm vụ, xây dựng kế hoạch và kiểm tra tính hợp lý của công việc.',
-      'Người kết nối các thành viên, lắng nghe ý kiến và duy trì không khí đoàn kết.',
-      'Người đưa ra các ý tưởng mới mẻ, đề xuất những giải pháp độc đáo cho cả nhóm.',
-      'Người hỗ trợ phía sau, cẩn thận hoàn thành đúng hạn các phần việc được giao.'
+      {
+        tag: 'Trực giác & Ý tưởng tổng quan (N)',
+        text: 'Bức tranh toàn cảnh, những ý tưởng mới lạ, tiềm năng tương lai và các quy luật ẩn giấu sau bề mặt hiện tượng.'
+      },
+      {
+        tag: 'Thực tế & Chi tiết cụ thể (S)',
+        text: 'Số liệu xác thực, sự kiện có thật, thông tin rõ ràng và những ứng dụng có thể kiểm chứng ngay lập tức.'
+      },
+      {
+        tag: 'Tưởng tượng & Sáng tạo tự do (N)',
+        text: 'Cách biểu đạt mang tính ẩn dụ, nghệ thuật, khả năng liên tưởng phong phú và những góc nhìn chưa ai từng nghĩ tới.'
+      },
+      {
+        tag: 'Quy trình & Trải nghiệm thực tiễn (S)',
+        text: 'Hướng dẫn cụ thể từng bước, thứ tự thực hiện rõ ràng và những bài học kinh nghiệm thực tế đã được kiểm chứng.'
+      }
     ]
   },
   {
-    title: 'Bạn cảm thấy bị thu hút và tự tin nhất với kiểu công việc nào trong tương lai?',
+    category: 'Tiêu chuẩn ra quyết định & Đánh giá (T vs F)',
+    title: 'Khi đứng trước một tình huống cần lựa chọn quan trọng hoặc giải quyết tranh luận, bạn dựa vào...',
     options: [
-      'Làm việc với số liệu, hệ thống logic, thuật toán hoặc công nghệ kỹ thuật cao.',
-      'Làm việc với con người: tư vấn, giảng dạy, giao tiếp, chăm sóc hoặc đàm phán.',
-      'Làm việc sáng tạo: thiết kế, truyền thông, nghệ thuật hoặc khởi nghiệp đổi mới.',
-      'Làm việc trong môi trường ổn định, có quy trình rõ ràng, kỷ luật và bài bản.'
+      {
+        tag: 'Lý trí & Logic khách quan (T)',
+        text: 'Phân tích tính đúng - sai, các dữ liệu thực tế và hiệu quả giải pháp, cố gắng không để cảm xúc cá nhân chi phối.'
+      },
+      {
+        tag: 'Cảm xúc & Thấu cảm con người (F)',
+        text: 'Đặt sự hòa hợp, cảm xúc của mọi người và giá trị nhân văn lên hàng đầu; luôn quan tâm đến việc ai có thể bị tổn thương.'
+      },
+      {
+        tag: 'Chiến lược & Tối ưu dài hạn (T)',
+        text: 'Cân nhắc thiệt - hơn, tính toán xác suất thành công và những lợi ích chiến lược bền vững cho tương lai.'
+      },
+      {
+        tag: 'Lương tâm & Giá trị đạo đức (F)',
+        text: 'Lắng nghe niềm tin nội tâm, sự chân thành và những nguyên tắc đạo đức mà bản thân luôn tôn thờ.'
+      }
     ]
   },
   {
-    title: 'Khi tiếp cận một chủ đề hoặc vấn đề mới lạ, phản xạ đầu tiên của bạn là...',
+    category: 'Phong cách tổ chức & Quản lý thời gian (J vs P)',
+    title: 'Cách bạn chuẩn bị cho một kỳ thi quan trọng, dự án lớn hoặc kế hoạch cá nhân là...',
     options: [
-      'Tìm hiểu tài liệu, số liệu để phân tích bản chất và quy luật vận hành của nó.',
-      'Trao đổi với mọi người xung quanh để xem họ suy nghĩ và cảm nhận như thế nào.',
-      'Tự do thử nghiệm, hình dung ra những ứng dụng và khả năng thú vị chưa ai nghĩ tới.',
-      'Quan sát kỹ lưỡng, cân nhắc tính thực tế trước khi bắt tay vào thực hiện.'
+      {
+        tag: 'Nguyên tắc & Kế hoạch chặt chẽ (J)',
+        text: 'Lập danh sách việc cần làm (To-do list), ấn định thời hạn rõ ràng và kiên định hoàn thành sớm từng mục.'
+      },
+      {
+        tag: 'Linh hoạt & Ứng biến tự nhiên (P)',
+        text: 'Không thích bị gò bó bởi thời gian biểu cố định; thích làm việc ngẫu hứng và bùng nổ năng lượng khi cận hạn chót (Deadline).'
+      },
+      {
+        tag: 'Định hướng mục tiêu linh động (J/P)',
+        text: 'Vạch rõ đích đến và khung sườn chính, nhưng sẵn sàng thay đổi phương thức thực hiện khi phát hiện cơ hội tốt hơn.'
+      },
+      {
+        tag: 'Kỷ luật & Gọn gàng ngăn nắp (J)',
+        text: 'Sắp xếp không gian học tập và tài liệu khoa học, khó chịu khi có sự xáo trộn, chậm trễ hoặc thay đổi phút chót.'
+      }
     ]
   },
   {
-    title: 'Sau một tuần học tập bận rộn, cách bạn nạp lại năng lượng hiệu quả nhất là...',
+    category: 'Phong cách tư duy giải quyết vấn đề (Problem-Solving Style)',
+    title: 'Đối diện với một bài tập hóc búa hoặc một sự cố phát sinh bất ngờ, phản xạ tự nhiên của bạn là...',
     options: [
-      'Tự nghiên cứu, đọc sách hoặc tìm hiểu về một chủ đề kiến thức bạn tò mò.',
-      'Tụ tập ăn uống, đi cà phê và trò chuyện sôi nổi cùng nhóm bạn thân.',
-      'Nghe nhạc, vẽ tranh, chụp ảnh hoặc tự do làm những điều ngẫu hứng.',
-      'Dọn dẹp góc học tập ngăn nắp, xem phim yêu thích và nghỉ ngơi yên tĩnh.'
+      {
+        tag: 'Phân tích hệ thống & Bẻ nhỏ vấn đề',
+        text: 'Bình tĩnh tìm hiểu nguyên nhân gốc rễ, chia nhỏ thử thách thành các phần logic và lần lượt xử lý từng bước.'
+      },
+      {
+        tag: 'Thử nghiệm sáng tạo & Góc nhìn phá cách',
+        text: 'Thử một hướng đi hoàn toàn mới lạ, tìm cách làm tắt thông minh hoặc giải pháp khác biệt chưa ai thử.'
+      },
+      {
+        tag: 'Thảo luận & Tìm kiếm sự trợ lực',
+        text: 'Trao đổi cùng bạn bè, xin lời khuyên từ thầy cô hoặc người có kinh nghiệm để tổng hợp nhiều góc nhìn.'
+      },
+      {
+        tag: 'Bắt tay làm thử & Tinh chỉnh thực tế',
+        text: 'Hành động ngay, kiểm tra trên dữ liệu thực tế, sai ở đâu sửa ở đó cho đến khi ra kết quả chính xác.'
+      }
     ]
   },
   {
-    title: 'Điều gì khiến bạn cảm thấy tự hào và có động lực học tập nhất?',
+    category: 'Vai trò tự nhiên trong tập thể & Đội nhóm (Team Role)',
+    title: 'Trong một buổi làm việc nhóm hoặc hoạt động ngoại khóa, vị trí bạn cảm thấy phát huy tốt nhất là...',
     options: [
-      'Tự mình tìm ra lời giải cho một câu hỏi hóc búa mà ít người giải được.',
-      'Được mọi người xung quanh tin tưởng chia sẻ và giúp đỡ bạn bè cùng tiến bộ.',
-      'Tạo ra một sản phẩm, bài viết hay tác phẩm mang đậm phong cách cá nhân.',
-      'Hoàn thành xuất sắc mục tiêu đề ra đúng thời hạn với sự chuẩn xác cao.'
+      {
+        tag: 'Thủ lĩnh điều phối & Định hướng',
+        text: 'Người định hình mục tiêu, phân chia công việc cho từng thành viên và đôn đốc tiến độ để nhóm về đích xuất sắc.'
+      },
+      {
+        tag: 'Chuyên gia nghiên cứu & Đảm bảo chất lượng',
+        text: 'Người âm thầm xử lý những phần khó nhất, rà soát tính chính xác của tài liệu và đảm bảo chiều sâu chuyên môn.'
+      },
+      {
+        tag: 'Sứ giả gắn kết & Tạo động lực',
+        text: 'Người khuấy động không khí, lắng nghe các ý kiến trái chiều, giải tỏa căng thẳng và duy trì tinh thần đoàn kết.'
+      },
+      {
+        tag: 'Người sáng tạo nội dung & Trình bày ý tưởng',
+        text: 'Người thiết kế slide, lên kịch bản, vẽ ý tưởng và đại diện nhóm thuyết trình cuốn hút trước đám đông.'
+      }
     ]
   },
   {
-    title: 'Khi gặp một kết quả kiểm tra hoặc việc làm chưa như mong đợi, bạn thường...',
+    category: 'Phản ứng trước áp lực & Xung đột quan điểm (Stress & Conflict Response)',
+    title: 'Khi gặp bất đồng ý kiến gay gắt hoặc chịu áp lực thi cử căng thẳng, bạn thường có xu hướng...',
     options: [
-      'Tỉnh táo phân tích nguyên nhân xem mình đã sai ở đâu để khắc phục triệt để.',
-      'Chia sẻ với người thân hoặc bạn bè để nhận lời khuyên và giải tỏa tâm lý.',
-      'Xem đó là bài học thú vị, nhanh chóng tìm ra một hướng đi hoặc cách tiếp cận khác.',
-      'Tự chấn chỉnh bản thân, kiên trì luyện tập và quyết tâm làm lại đến khi thành công.'
+      {
+        tag: 'Tranh luận thẳng thắn bằng chứng lý',
+        text: 'Giữ thái độ điềm tĩnh, dùng số liệu và lập luận logic sắc bén để chứng minh quan điểm mà không né tránh.'
+      },
+      {
+        tag: 'Dung hòa & Tìm điểm chung kết nối',
+        text: 'Hạ nhiệt không khí, nhẫn nhịn và khéo léo tìm ra giải pháp vẹn cả đôi đường để giữ gìn mối quan hệ.'
+      },
+      {
+        tag: 'Tạm lùi lại & Suy ngẫm độc lập',
+        text: 'Tránh tranh cãi khi cảm xúc đang cao trào; dành thời gian yên tĩnh tự phân tích xem ai đúng ai sai.'
+      },
+      {
+        tag: 'Tập trung hành động thực tế',
+        text: 'Gác lại mọi tranh luận suông; bắt tay ngay vào việc chứng minh hiệu quả bằng kết quả công việc thực tế.'
+      }
     ]
   },
   {
-    title: 'Môi trường học tập lý tưởng nhất đối với bạn là nơi...',
+    category: 'Động lực cốt lõi & Giá trị sống hướng tới (Core Values & Motivation)',
+    title: 'Điều gì mang lại cho bạn cảm giác tự hào và cảm thấy hành trình học tập có ý nghĩa nhất?',
     options: [
-      'Đề cao tư duy logic, tính chuyên môn sâu và tự do nghiên cứu độc lập.',
-      'Thân thiện, ấm áp, nhiều sự kết nối, tương tác và cùng nhau hỗ trợ.',
-      'Năng động, linh hoạt, tôn trọng sự sáng tạo và không bị gò bó quy chuẩn.',
-      'Có hệ thống rõ ràng, kỷ luật, công bằng và tôn trọng các cam kết chung.'
+      {
+        tag: 'Chinh phục đỉnh cao tri thức & Làm chủ công nghệ',
+        text: 'Giải mã được những câu hỏi hóc búa, thấu suốt nguyên lý hoạt động của vạn vật và trở thành chuyên gia giỏi.'
+      },
+      {
+        tag: 'Cống hiến cho con người & Giúp ích xã hội',
+        text: 'Giúp đỡ bạn bè cùng tiến bộ, đóng góp tích cực cho cộng đồng và nhận được sự tin yêu, trân trọng của mọi người.'
+      },
+      {
+        tag: 'Khẳng định bản lĩnh, Thành công & Vị thế',
+        text: 'Đạt được những thành tích nổi bật, dẫn đầu các kỳ thi và xây dựng lộ trình sự nghiệp vững vàng, thành đạt.'
+      },
+      {
+        tag: 'Tự do trải nghiệm & Tạo ra cái mới',
+        text: 'Được tự do sáng tạo theo phong cách riêng, khám phá thế giới rộng lớn mà không bị rập khuôn trong khuôn mẫu.'
+      }
     ]
   },
   {
-    title: 'Khi đưa ra một quyết định quan trọng, bạn thường dựa vào...',
+    category: 'Môi trường làm việc & Không gian phát triển lý tưởng (Ideal Environment)',
+    title: 'Tưởng tượng về không gian làm việc sau này, nơi bạn cảm thấy muốn gắn bó lâu dài nhất là...',
     options: [
-      'Sự phân tích lý tính, các bằng chứng xác thực và xác suất thành công.',
-      'Cảm xúc, sự thấu hiểu và tác động của quyết định đó đến những người liên quan.',
-      'Cảm hứng, trực giác và những cơ hội tiềm năng có thể mở ra trong tương lai.',
-      'Kinh nghiệm thực tế, lời khuyên của người đi trước và các quy định sẵn có.'
+      {
+        tag: 'Không gian công nghệ & Nghiên cứu chuyên sâu',
+        text: 'Phòng Lab, trung tâm nghiên cứu hiện đại hoặc công ty công nghệ đề cao tư duy logic, dữ liệu và tính độc lập.'
+      },
+      {
+        tag: 'Môi trường giáo dục, Y tế & Xã hội ấm áp',
+        text: 'Giảng đường, bệnh viện hoặc tổ chức xã hội nơi các mối quan hệ đồng nghiệp chân thành, gắn kết và vì con người.'
+      },
+      {
+        tag: 'Môi trường kinh doanh năng động & Đầy cơ hội',
+        text: 'Tập đoàn tài chính, môi trường doanh nghiệp nhộn nhịp, nhịp độ nhanh và có cơ hội thăng tiến rộng mở.'
+      },
+      {
+        tag: 'Không gian sáng tạo tự do & Nghệ thuật',
+        text: 'Studio thiết kế, xưởng sáng tạo, tòa soạn báo hoặc làm việc tự do (Freelance) không gò bó thời gian.'
+      }
     ]
   },
   {
-    title: 'Bạn mong muốn được thầy cô và bạn bè đánh giá cao nhất về...',
+    category: 'Phong cách học tập & Tiếp thu tri thức (Learning Style)',
+    title: 'Bạn tiếp thu các môn học và kỹ năng mới hiệu quả nhất khi được...',
     options: [
-      'Khả năng tư duy logic, sự am hiểu và trí tuệ sắc bén.',
-      'Tấm lòng chân thành, sự thấu hiểu và kỹ năng kết nối mọi người.',
-      'Óc sáng tạo phong phú, sự độc đáo và khả năng tạo ra sự khác biệt.',
-      'Sự đáng tin cậy, tính kiên nhẫn, trung thực và tinh thần trách nhiệm cao.'
+      {
+        tag: 'Tự đào sâu tài liệu & Xây dựng mô hình tư duy',
+        text: 'Tự đọc sách, nghiên cứu bản chất lý thuyết, tìm mối liên hệ giữa các công thức rồi hệ thống hóa lại.'
+      },
+      {
+        tag: 'Thực hành thao tác & Thí nghiệm cụ thể',
+        text: 'Trực tiếp làm bài tập ứng dụng, tham gia thí nghiệm, chế tạo hoặc giải quyết các ca thực tế cụ thể.'
+      },
+      {
+        tag: 'Học thông qua tranh luận & Trao đổi nhóm',
+        text: 'Tham gia các buổi thảo luận, đặt câu hỏi phản biện và giải thích lại bài học cho bạn bè cùng hiểu.'
+      },
+      {
+        tag: 'Học qua cảm hứng & Dự án sáng tạo',
+        text: 'Gắn kiến thức bài học vào việc vẽ sơ đồ tư duy sinh động, làm video ngắn hoặc tạo ra một sản phẩm thực tế.'
+      }
     ]
   }
 ];
@@ -249,11 +399,12 @@ questionsData.forEach((q, i) => {
 
   html += `
     <div class="question" id="qBox${i}">
-      <h3>Câu ${i + 1}: ${q.title}</h3>
+      <div class="q-classification-tag">🏷️ Phân loại: ${q.category}</div>
+      <h3 style="margin-top: 4px;">Câu ${i + 1}: ${q.title}</h3>
   `;
 
   // Các phương án A, B, C, D
-  q.options.forEach((optText, optIdx) => {
+  q.options.forEach((opt, optIdx) => {
     html += `
       <label class="radio">
         <input
@@ -265,7 +416,7 @@ questionsData.forEach((q, i) => {
         >
         <div class="radio-content">
           <span class="radio-letter">${letters[optIdx]}</span>
-          <div>${optText}</div>
+          <div><strong class="opt-tag-prefix">[${opt.tag}]</strong>: ${opt.text}</div>
         </div>
       </label>
     `;
@@ -284,18 +435,18 @@ questionsData.forEach((q, i) => {
           onchange="onRadioChange(${i}, 4)"
         >
         <span class="radio-letter">E</span>
-        <span class="custom-radio-text">Khác (Nhập phương án / suy nghĩ riêng của bạn):</span>
+        <span class="custom-radio-text">Khác (Nhập phương án / xu hướng riêng của bạn):</span>
       </label>
       <div class="custom-input-wrap">
         <input
           type="text"
           id="customAnswer${i}"
           class="custom-answer-input"
-          placeholder="Gõ câu trả lời riêng của bạn cho câu hỏi này..."
+          placeholder="Gõ cách bạn tư duy hoặc phản ứng trong tình huống này..."
           value="${safeAttr(customVal)}"
           onclick="event.stopPropagation(); selectOptionE(${i});"
           onfocus="event.stopPropagation(); selectOptionE(${i});"
-          oninput="event.stopPropagation(); selectOptionE(${i});"
+          oninput="event.stopPropagation(); selectOptionE(${i}); updateProgressBar();"
         >
       </div>
     </div>
@@ -306,10 +457,36 @@ questionsData.forEach((q, i) => {
 
 box.innerHTML = html;
 
+function updateProgressBar() {
+  let answered = 0;
+  for (let i = 0; i < questionsData.length; i++) {
+    const checked = document.querySelector(`input[name="q${i}"]:checked`);
+    if (checked) {
+      if (Number(checked.value) === 4) {
+        const inp = document.getElementById(`customAnswer${i}`);
+        if (inp && inp.value.trim()) {
+          answered++;
+        }
+      } else {
+        answered++;
+      }
+    }
+  }
+  const pct = Math.round((answered / questionsData.length) * 100);
+  const fillEl = document.getElementById('progressBarFill');
+  const txtEl = document.getElementById('progressText');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (txtEl) {
+    txtEl.textContent = `Đã trả lời: ${answered}/${questionsData.length} câu hỏi (${pct}%)`;
+    txtEl.style.color = pct === 100 ? '#34d399' : (pct >= 50 ? '#818cf8' : '#fbbf24');
+  }
+}
+
 function selectOptionE(index) {
   const radio = document.getElementById(`radioE${index}`);
   if (radio && !radio.checked) {
     radio.checked = true;
+    updateProgressBar();
   }
 }
 
@@ -320,7 +497,11 @@ function onRadioChange(qIndex, optIndex) {
       setTimeout(() => input.focus(), 50);
     }
   }
+  updateProgressBar();
 }
+
+// Cập nhật tiến độ lần đầu khi tải trang
+updateProgressBar();
 
 // Nạp lại các câu hỏi tự trả lời đã lưu trước đó nếu có
 const savedReflect = read('personalitySelfReflect') || {};
@@ -335,7 +516,7 @@ function finish() {
   for (let i = 0; i < questionsData.length; i++) {
     const checked = document.querySelector(`input[name=q${i}]:checked`);
     if (!checked) {
-      alert(`Bạn hãy trả lời câu hỏi trắc nghiệm số ${i + 1} nhé!`);
+      alert(`Bạn hãy trả lời câu hỏi trắc nghiệm phân loại số ${i + 1} nhé!`);
       const target = document.getElementById(`qBox${i}`);
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -372,7 +553,7 @@ function finish() {
   };
   save('personalitySelfReflect', selfReflect);
 
-  // 3. Tính toán kết quả tính cách & MBTI
+  // 3. Tính toán kết quả tính cách & MBTI đa chiều
   const mbti = computeMBTI(ans);
   if (mbti) {
     save('mbtiType', mbti.type);
@@ -383,6 +564,43 @@ function finish() {
     document.getElementById('modalTitle').innerText = mbti.title;
     document.getElementById('modalTrait').innerText = mbti.vietnameseTrait.toUpperCase();
     document.getElementById('modalDesc').innerText = mbti.desc;
+
+    // Render 4 chiều kích phân loại
+    const dimBox = document.getElementById('modalDimensions');
+    if (dimBox && mbti.dimensions) {
+      const d = mbti.dimensions;
+      dimBox.innerHTML = `
+        <div class="mbti-dim-item">
+          <div class="mbti-dim-label">
+            <span>⚡ ${d.EI.aspect}</span>
+            <span style="color: #818cf8;">${d.EI.label} (${d.EI.score}%)</span>
+          </div>
+          <div class="mbti-dim-bar"><div class="mbti-dim-fill" style="width: ${d.EI.score}%"></div></div>
+        </div>
+        <div class="mbti-dim-item">
+          <div class="mbti-dim-label">
+            <span>🔭 ${d.SN.aspect}</span>
+            <span style="color: #818cf8;">${d.SN.label} (${d.SN.score}%)</span>
+          </div>
+          <div class="mbti-dim-bar"><div class="mbti-dim-fill" style="width: ${d.SN.score}%"></div></div>
+        </div>
+        <div class="mbti-dim-item">
+          <div class="mbti-dim-label">
+            <span>⚖️ ${d.TF.aspect}</span>
+            <span style="color: #818cf8;">${d.TF.label} (${d.TF.score}%)</span>
+          </div>
+          <div class="mbti-dim-bar"><div class="mbti-dim-fill" style="width: ${d.TF.score}%"></div></div>
+        </div>
+        <div class="mbti-dim-item">
+          <div class="mbti-dim-label">
+            <span>🧭 ${d.JP.aspect}</span>
+            <span style="color: #818cf8;">${d.JP.label} (${d.JP.score}%)</span>
+          </div>
+          <div class="mbti-dim-bar"><div class="mbti-dim-fill" style="width: ${d.JP.score}%"></div></div>
+        </div>
+      `;
+    }
+
     document.getElementById('personalityModal').style.display = 'flex';
   } else {
     location.href = 'muc-tieu.html';

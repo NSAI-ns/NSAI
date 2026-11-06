@@ -56,6 +56,13 @@ cá nhân hóa kết quả và chatbot.
 
 </div>
 
+<label for="studentName">Họ và tên hoặc Biệt danh của bạn (tùy chọn)</label>
+<input
+id="studentName"
+type="text"
+placeholder="Ví dụ: Minh Khang, An Nhiên (để NS AI xưng hô thân mật hơn)..."
+autocomplete="name"
+style="margin-bottom: 16px;">
 
 <label>Tỉnh / Thành phố</label>
 
@@ -130,7 +137,7 @@ autocomplete="off">
 class="btn primary"
 onclick="saveInfo()">
 
-Lưu & tiếp tục →
+Lưu &amp; tiếp tục sang Bước 2 (Điểm số) →
 
 </button>
 
@@ -204,6 +211,9 @@ provinceSearch.addEventListener("input", function(){
 function saveInfo(){
 
     const data = {
+
+        name:
+        (document.getElementById('studentName')?.value || '').trim(),
 
         province:
         document.getElementById('province').value,

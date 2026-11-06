@@ -1,4 +1,4 @@
-﻿
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -46,14 +46,12 @@
 
 <section class="glass form-card wide">
 
-    <p class="eyebrow">CAREER GOAL</p>
+    <p class="eyebrow">BƯỚC 5 · CAREER GOALS &amp; ADMISSION</p>
 
-    <h1>Xác định mục tiêu</h1>
+    <h1>Xác định mục tiêu &amp; Phương thức xét tuyển</h1>
 
     <p class="muted">
-        Hãy chia sẻ định hướng và ước mơ của bạn.
-        NS AI sẽ kết hợp thông tin này với điểm số,
-        sở thích và tính cách để hỗ trợ định hướng.
+        Hãy chia sẻ định hướng ngành học mơ ước và phương thức xét tuyển ưu tiên (THPT, học bạ, đánh giá năng lực...). NS AI sẽ kết hợp toàn diện với điểm số, sở thích và tính cách để tạo lộ trình trúng tuyển phù hợp nhất cho bạn!
     </p>
 
 
@@ -211,6 +209,38 @@
     </div>
 
 
+    <!-- ================= PHƯƠNG THỨC XÉT TUYỂN ƯU TIÊN ================= -->
+
+    <h2>
+        📋 Phương thức xét tuyển ưu tiên
+    </h2>
+
+    <p class="muted">
+        Chọn các phương thức tuyển sinh đại học bạn dự kiến sử dụng để NS AI tư vấn chiến lược xét tuyển phù hợp nhất:
+    </p>
+
+    <div id="admissionMethods" class="chips" style="margin-bottom: 24px;">
+        <button type="button" class="chip" data-method="thpt">
+            📝 Điểm thi tốt nghiệp THPT 2025+
+        </button>
+        <button type="button" class="chip" data-method="hocba">
+            📚 Xét học bạ THPT (5-6 học kỳ)
+        </button>
+        <button type="button" class="chip" data-method="dgnl">
+            🎯 Đánh giá năng lực (ĐHQG Hà Nội / ĐHQG TP.HCM)
+        </button>
+        <button type="button" class="chip" data-method="dgtd">
+            🧠 Đánh giá tư duy (ĐH Bách Khoa Hà Nội)
+        </button>
+        <button type="button" class="chip" data-method="ielts">
+            🌐 Chứng chỉ quốc tế (IELTS / SAT / ACT)
+        </button>
+        <button type="button" class="chip" data-method="tuyenthang">
+            🏅 Tuyển thẳng &amp; Ưu tiên xét tuyển theo quy chế
+        </button>
+    </div>
+
+
     <!-- ================= NGÀNH QUAN TÂM ================= -->
 
     <h2>
@@ -334,7 +364,7 @@
             class="btn secondary"
             href="tinhcach.html"
         >
-            ← Quay lại
+            ← Quay lại Bước 4 (Tính cách)
         </a>
 
         <button
@@ -342,7 +372,7 @@
             type="button"
             onclick="saveGoals()"
         >
-            Lưu & tiếp tục →
+            🚀 Hoàn thành &amp; Xem kết quả phân tích →
         </button>
 
     </div>
@@ -455,34 +485,32 @@ if (oldGoals.studyLocation) {
 
 
 /* =========================================
-   NGÀNH QUAN TÂM
+   NGÀNH QUAN TÂM & PHƯƠNG THỨC XÉT TUYỂN
 ========================================= */
 
-const savedMajors =
-    oldGoals.selected || [];
+const savedMajors = oldGoals.selected || [];
+const savedMethods = oldGoals.admissionMethods || [];
 
-document
-    .querySelectorAll(".chip")
-    .forEach(chip => {
-
-        if (
-            savedMajors.includes(
-                chip.textContent.trim()
-            )
-        ) {
-
-            chip.classList.add("selected");
-
-        }
-
-
-        chip.addEventListener("click", function () {
-
-            this.classList.toggle("selected");
-
-        });
-
+document.querySelectorAll("#majors .chip").forEach(chip => {
+    if (savedMajors.includes(chip.textContent.trim())) {
+        chip.classList.add("selected");
+    }
+    chip.addEventListener("click", function () {
+        this.classList.toggle("selected");
+        updateEvaluation();
     });
+});
+
+document.querySelectorAll("#admissionMethods .chip").forEach(chip => {
+    const val = chip.dataset.method || chip.textContent.trim();
+    if (savedMethods.includes(val) || savedMethods.includes(chip.textContent.trim())) {
+        chip.classList.add("selected");
+    }
+    chip.addEventListener("click", function () {
+        this.classList.toggle("selected");
+        updateEvaluation();
+    });
+});
 
 
 /* =========================================
@@ -588,6 +616,13 @@ function updateEvaluation() {
 
         }
 
+        const selectedMethods = [
+            ...document.querySelectorAll("#admissionMethods .chip.selected")
+        ].map(c => c.textContent.trim().replace(/^[\uD800-\uDBFF][\uDC00-\uDFFF]\s*/, ''));
+        if (selectedMethods.length) {
+            content += `<br><br>📋 Phương thức xét tuyển: <b>${selectedMethods.join(' · ')}</b>`;
+        }
+
     }
 
 
@@ -655,15 +690,12 @@ document
 function saveGoals() {
 
     const selectedMajors = [
+        ...document.querySelectorAll("#majors .chip.selected")
+    ].map(chip => chip.textContent.trim());
 
-        ...document.querySelectorAll(
-            ".chip.selected"
-        )
-
-    ].map(chip =>
-        chip.textContent.trim()
-    );
-
+    const selectedMethods = [
+        ...document.querySelectorAll("#admissionMethods .chip.selected")
+    ].map(chip => chip.dataset.method || chip.textContent.trim());
 
     const data = {
 
@@ -700,6 +732,9 @@ function saveGoals() {
                 .getElementById("dreamGoal")
                 .value
                 .trim(),
+
+        admissionMethods:
+            selectedMethods,
 
         selected:
             selectedMajors,

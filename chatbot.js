@@ -978,15 +978,20 @@ function answer(q) {
   }
 
   // 19. ĐIỂM SỐ & MÔN HỌC
-  const subjectQuery = s.match(/(môn|điểm)?\s*(toán|vật lý|vật lí|lý|lí|hóa học|hóa|sinh học|sinh|tin học|tin|ngữ văn|văn|tiếng anh|anh|lịch sử|sử|địa lý|địa|gdkt&pl)/);
-  if (subjectQuery && (/điểm|sao|thế nào|ổn không|học gì/.test(s) || s.length < 25)) {
+  const subjectQuery = s.match(/(môn|điểm)?\s*(toán|vật lý|vật lí|lý|lí|hóa học|hóa|sinh học|sinh|tin học|tin|ngữ văn|văn|tiếng anh|anh|lịch sử|sử|địa lý|địa|gdkt&pl|công nghệ công nghiệp|công nghệ nông nghiệp|công nghiệp|nông nghiệp|công nghệ)/);
+  if (subjectQuery && (/điểm|sao|thế nào|ổn không|học gì/.test(s) || s.length < 35)) {
     recordTopic('subject');
     const subNameMap = {
+      'công nghệ công nghiệp': 'Công nghệ công nghiệp',
+      'công nghệ nông nghiệp': 'Công nghệ nông nghiệp',
+      'công nghiệp': 'Công nghệ công nghiệp',
+      'nông nghiệp': 'Công nghệ nông nghiệp',
+      'công nghệ': 'Công nghệ công nghiệp',
       'toán': 'Toán', 'vật lý': 'Vật lý', 'vật lí': 'Vật lý', 'lý': 'Vật lý', 'lí': 'Vật lý',
       'hóa học': 'Hóa học', 'hóa': 'Hóa học', 'sinh học': 'Sinh học', 'sinh': 'Sinh học',
       'tin học': 'Tin học', 'tin': 'Tin học', 'ngữ văn': 'Ngữ văn', 'văn': 'Ngữ văn',
       'tiếng anh': 'Tiếng Anh', 'anh': 'Tiếng Anh', 'lịch sử': 'Lịch sử', 'sử': 'Lịch sử',
-      'địa lý': 'Địa lý', 'địa': 'Địa lý', 'gdkt&pl': 'GDKT&PL'
+      'địa lý': 'Địa lý', 'địa': 'Địa lý', 'gdkt&pl': 'GDKT&PL', 'giáo dục công dân': 'GDKT&PL', 'gdcd': 'GDKT&PL'
     };
     const foundKey = Object.keys(subNameMap).find(k => s.includes(k));
     if (foundKey) {
@@ -1085,12 +1090,28 @@ const STORAGE_KEY_CURRENT = 'ns_current_chat_id';
 
 const DEFAULT_CHAT_SESSIONS = [];
 
+function sanitizeChatSessions(sessions) {
+  if (!Array.isArray(sessions)) return [];
+  // Lọc sạch toàn bộ các tiêu đề mẫu ví dụ không phải của người dùng thực tế
+  const mockKeywords = ['minh mạng', 'lời chào thân thiện', 'thống kê số lượng từ', 'nhớ đồng', 'sinh học 11', 'rút gọn văn bản'];
+  return sessions.filter(s => {
+    if (!s || !s.title) return false;
+    const lower = s.title.toLowerCase();
+    return !mockKeywords.some(kw => lower.includes(kw));
+  });
+}
+
 function getChatSessions() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_SESSIONS);
     if (!raw) return [];
     const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
+    const valid = Array.isArray(arr) ? arr : [];
+    const cleaned = sanitizeChatSessions(valid);
+    if (cleaned.length !== valid.length) {
+      saveChatSessions(cleaned);
+    }
+    return cleaned;
   } catch (e) {
     console.error('Error reading chat sessions:', e);
     return [];
@@ -1099,7 +1120,8 @@ function getChatSessions() {
 
 function saveChatSessions(sessions) {
   try {
-    localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
+    const cleaned = sanitizeChatSessions(sessions);
+    localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(cleaned));
   } catch (e) {
     console.error('Error saving chat sessions:', e);
   }
@@ -1117,12 +1139,45 @@ function setCurrentChatId(id) {
   }
 }
 
+function getStudentGreetingName() {
+  let name = '';
+  try {
+    const info = typeof read === 'function' ? read('info') : null;
+    if (info && info.name && info.name.trim()) {
+      name = info.name.trim();
+    }
+    if (!name) {
+      const rawInfo = localStorage.getItem('ns_info') || localStorage.getItem('info');
+      if (rawInfo) {
+        const parsed = JSON.parse(rawInfo);
+        if (parsed && parsed.name && parsed.name.trim()) name = parsed.name.trim();
+      }
+    }
+    if (!name) {
+      const curUser = typeof getCurrentUser === 'function' ? getCurrentUser() : localStorage.getItem('ns_current_user');
+      if (curUser && typeof curUser === 'string' && curUser.trim()) name = curUser.trim();
+    }
+  } catch (e) {}
+  return name || 'bạn';
+}
+
+function getInitialGreetingMessage() {
+  const name = getStudentGreetingName();
+  const salutation = name !== 'bạn' ? `Chào ${name}!` : 'Chào bạn!';
+  return `${salutation} Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Mình luôn ở đây để lắng nghe bạn tâm sự về áp lực thi cử, chuyện gia đình, những ngày mệt mỏi hay băn khoăn về chọn ngành, chọn trường. Bạn có thể gõ phím hoặc bấm nút 🎙️ Micro để tâm sự trực tiếp bằng giọng nói nhé! 💚🌌`;
+}
+
 function initChatHistory() {
   // Dọn sạch hoàn toàn các dữ liệu mẫu ví dụ cũ trong trình duyệt
-  if (!localStorage.getItem('ns_chat_empty_init_v4')) {
-    localStorage.removeItem(STORAGE_KEY_SESSIONS);
-    localStorage.removeItem(STORAGE_KEY_CURRENT);
-    localStorage.setItem('ns_chat_empty_init_v4', 'true');
+  if (!localStorage.getItem('ns_chat_empty_init_v6')) {
+    let oldSessions = [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SESSIONS);
+      if (raw) oldSessions = JSON.parse(raw);
+    } catch (e) {}
+    const cleaned = sanitizeChatSessions(oldSessions);
+    saveChatSessions(cleaned);
+    localStorage.setItem('ns_chat_empty_init_v6', 'true');
   }
 
   let sessions = getChatSessions();
@@ -1144,7 +1199,7 @@ function initChatHistory() {
     if (box) {
       box.innerHTML = `
         <div class="msg bot">
-          Chào bạn! Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Mình luôn ở đây để lắng nghe bạn tâm sự về áp lực thi cử, chuyện gia đình, những ngày mệt mỏi hay băn khoăn về chọn ngành, chọn trường. Bạn có thể gõ phím hoặc bấm nút 🎙️ Micro để tâm sự trực tiếp bằng giọng nói nhé! 💚🌌
+          ${getInitialGreetingMessage()}
           <div class="msg-tools">
             <button type="button" class="btn-read-msg" title="Đọc bằng giọng nói" onclick="speakMessage(this)">🔊 Nghe đọc</button>
           </div>
@@ -1163,10 +1218,15 @@ function loadSessionMessages(session) {
   const msgs = session.messages || [];
 
   if (msgs.length === 0) {
-    addMsg('Chào bạn! Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Mình luôn ở đây để lắng nghe bạn tâm sự về áp lực thi cử, chuyện gia đình, những ngày mệt mỏi hay băn khoăn về chọn ngành, chọn trường. Bạn có thể gõ phím hoặc bấm nút 🎙️ Micro để tâm sự trực tiếp bằng giọng nói nhé! 💚🌌', 'bot');
+    addMsg(getInitialGreetingMessage(), 'bot');
   } else {
-    msgs.forEach(m => {
-      addMsg(m.text, m.who);
+    const sName = getStudentGreetingName();
+    msgs.forEach((m, idx) => {
+      let text = m.text;
+      if (idx === 0 && m.who === 'bot' && sName !== 'bạn' && text.includes('Chào bạn!')) {
+        text = text.replace(/Chào bạn!/g, `Chào ${sName}!`);
+      }
+      addMsg(text, m.who);
     });
   }
 
@@ -1243,6 +1303,8 @@ function switchChatSession(id) {
 function createNewChatSession() {
   const sessions = getChatSessions();
   const newId = 'conv_' + Date.now();
+  const greetingName = getStudentGreetingName();
+  const salutation = greetingName !== 'bạn' ? `Chào ${greetingName}!` : 'Chào bạn!';
   const newSession = {
     id: newId,
     title: 'Đoạn chat mới',
@@ -1251,7 +1313,7 @@ function createNewChatSession() {
     messages: [
       {
         who: 'bot',
-        text: 'Chào bạn! Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Hôm nay bạn đang có điều gì muốn chia sẻ hoặc câu hỏi nào cần mình hỗ trợ không? 💚🌌'
+        text: `${salutation} Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Hôm nay bạn đang có điều gì muốn chia sẻ hoặc câu hỏi nào cần mình hỗ trợ không? 💚🌌`
       }
     ]
   };
@@ -1299,7 +1361,7 @@ function deleteChatSession(id) {
       if (box) {
         box.innerHTML = `
           <div class="msg bot">
-            Chào bạn! Mình là NS AI – trợ lý định hướng và tư vấn tâm lý học đường. Mình luôn ở đây để lắng nghe bạn tâm sự về áp lực thi cử, chuyện gia đình, những ngày mệt mỏi hay băn khoăn về chọn ngành, chọn trường. Bạn có thể gõ phím hoặc bấm nút 🎙️ Micro để tâm sự trực tiếp bằng giọng nói nhé! 💚🌌
+            ${getInitialGreetingMessage()}
             <div class="msg-tools">
               <button type="button" class="btn-read-msg" title="Đọc bằng giọng nói" onclick="speakMessage(this)">🔊 Nghe đọc</button>
             </div>

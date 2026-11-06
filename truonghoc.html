@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -199,39 +199,34 @@ const profileHint =
    Đọc file database trường học từ thư mục JS/data/
 */
 
-// Khởi tạo hiển thị dữ liệu trường học an toàn (ưu tiên dữ liệu từ truonghoc.js)
-if (Array.isArray(window.DEFAULT_SCHOOLS_DATA) && window.DEFAULT_SCHOOLS_DATA.length > 0) {
-    data = window.DEFAULT_SCHOOLS_DATA;
+// Khởi tạo ban đầu từ fallback data nếu có
+if (data.length > 0) {
     render();
     updateProfileHint();
-} else {
-    fetch("truonghoc.json")
-        .then(r => r.json())
-        .then(res => {
-            data = res;
-            render();
-            updateProfileHint();
-        })
-        .catch(() => {
-            fetch("../JS/data/truonghoc.json")
-                .then(r => r.json())
-                .then(res => {
-                    data = res;
-                    render();
-                    updateProfileHint();
-                })
-                .catch(err => {
-                    console.warn("fetch truonghoc.json:", err);
-                    if (data.length === 0) {
-                        schools.innerHTML = `
-                            <div class="notice">
-                                ⚠️ Không đọc được dữ liệu trường học.
-                            </div>
-                        `;
-                    }
-                });
-        });
 }
+
+fetch("../JS/data/truonghoc.json")
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Không đọc được file JSON");
+        }
+        return response.json();
+    })
+    .then(result => {
+        data = result;
+        render();
+        updateProfileHint();
+    })
+    .catch(error => {
+        console.warn("fetch truonghoc.json:", error);
+        if (data.length === 0) {
+            schools.innerHTML = `
+                <div class="notice">
+                    ⚠️ Không đọc được dữ liệu trường học.
+                </div>
+            `;
+        }
+    });
 
 
 /* =========================================

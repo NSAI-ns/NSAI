@@ -79,14 +79,14 @@ Hãy chọn tất cả những lĩnh vực bạn yêu thích hoặc thấy hào 
 
 <!-- CÁC TAB DANH MỤC LỌC NHANH -->
 <div class="hobby-category-tabs">
-    <button type="button" class="tab-btn active" data-cat="all" onclick="setCategory('all')">Tất cả (105)</button>
-    <button type="button" class="tab-btn" data-cat="tech" onclick="setCategory('tech')">💻 Công nghệ & Kỹ thuật</button>
-    <button type="button" class="tab-btn" data-cat="science" onclick="setCategory('science')">🔬 Khoa học & Y dược</button>
-    <button type="button" class="tab-btn" data-cat="art" onclick="setCategory('art')">🎨 Nghệ thuật & Sáng tạo</button>
-    <button type="button" class="tab-btn" data-cat="business" onclick="setCategory('business')">💼 Kinh doanh & Khởi nghiệp</button>
-    <button type="button" class="tab-btn" data-cat="social" onclick="setCategory('social')">🗣️ Xã hội & Ngôn ngữ</button>
-    <button type="button" class="tab-btn" data-cat="sport" onclick="setCategory('sport')">⚽ Thể thao & Rèn luyện</button>
-    <button type="button" class="tab-btn" data-cat="life" onclick="setCategory('life')">🌿 Đời sống & Trải nghiệm</button>
+    <button type="button" class="tab-btn active" data-cat="all" onclick="setCategory('all')">Tất cả (50)</button>
+    <button type="button" class="tab-btn" data-cat="tech" onclick="setCategory('tech')">💻 Công nghệ & Kỹ thuật (8)</button>
+    <button type="button" class="tab-btn" data-cat="science" onclick="setCategory('science')">🔬 Khoa học & Y tế (7)</button>
+    <button type="button" class="tab-btn" data-cat="art" onclick="setCategory('art')">🎨 Nghệ thuật & Sáng tạo (8)</button>
+    <button type="button" class="tab-btn" data-cat="business" onclick="setCategory('business')">💼 Kinh doanh & Quản lý (7)</button>
+    <button type="button" class="tab-btn" data-cat="social" onclick="setCategory('social')">🗣️ Xã hội & Ngôn ngữ (8)</button>
+    <button type="button" class="tab-btn" data-cat="sport" onclick="setCategory('sport')">⚽ Thể thao & Vận động (6)</button>
+    <button type="button" class="tab-btn" data-cat="life" onclick="setCategory('life')">🌿 Đời sống & Trải nghiệm (6)</button>
 </div>
 
 <!-- KHUNG HIỂN THỊ CÁC THẺ SỞ THÍCH -->
@@ -127,126 +127,71 @@ Lưu & tiếp tục →
 
 <script>
 
-// DANH SÁCH 103 SỞ THÍCH ĐA DẠNG DÀNH CHO HỌC SINH THPT
+// DANH SÁCH 50 SỞ THÍCH LỚN & ĐA DẠNG DÀNH CHO HỌC SINH THPT
 const hobbiesList = [
-  // Nhóm 1: Công nghệ & Kỹ thuật
-  { name: '💻 Lập trình phần mềm', cat: 'tech' },
-  { name: '🤖 Trí tuệ nhân tạo (AI)', cat: 'tech' },
-  { name: '🎮 Chơi game & Esports', cat: 'tech' },
-  { name: '🕹️ Thiết kế & Lập trình game', cat: 'tech' },
-  { name: '🌐 Thiết kế website', cat: 'tech' },
-  { name: '📱 Ứng dụng di động (Mobile App)', cat: 'tech' },
+  // Nhóm 1: Công nghệ & Kỹ thuật (8 mục)
+  { name: '💻 Lập trình & Phát triển phần mềm', cat: 'tech' },
+  { name: '🤖 Trí tuệ nhân tạo (AI) & Dữ liệu', cat: 'tech' },
+  { name: '🌐 Thiết kế Website & Ứng dụng di động', cat: 'tech' },
+  { name: '🎮 Trò chơi điện tử (Gaming & Esports)', cat: 'tech' },
   { name: '🔒 An toàn thông tin & An ninh mạng', cat: 'tech' },
-  { name: '🤖 Chế tạo robot & Tự động hóa', cat: 'tech' },
-  { name: '🔧 Lắp ráp máy tính (PC Build)', cat: 'tech' },
-  { name: '📡 Mạch điện tử & Vi điều khiển', cat: 'tech' },
-  { name: '🚗 Ô tô & Động cơ cơ khí', cat: 'tech' },
-  { name: '✈️ Máy bay & Kỹ thuật hàng không', cat: 'tech' },
-  { name: '🏗️ Mô hình kiến trúc & Công trình', cat: 'tech' },
-  { name: '🖨️ In 3D & Tạo mẫu nhanh', cat: 'tech' },
-  { name: '⛓️ Công nghệ chuỗi khối (Blockchain)', cat: 'tech' },
-  { name: '🚀 Khám phá vũ trụ & Tên lửa', cat: 'tech' },
-  { name: '🎥 Làm video & Sáng tạo nội dung số', cat: 'tech' },
+  { name: '⚙️ Cơ khí, Ô tô & Chế tạo máy móc', cat: 'tech' },
+  { name: '📡 Điện tử, Vi mạch & Phần cứng máy tính', cat: 'tech' },
+  { name: '🏗️ Kiến trúc & Kỹ thuật xây dựng', cat: 'tech' },
 
-  // Nhóm 2: Khoa học & Y dược
-  { name: '🔬 Thí nghiệm hóa học', cat: 'science' },
-  { name: '🧬 Sinh học phân tử & Di truyền', cat: 'science' },
-  { name: '🧮 Giải toán nâng cao & Đố vui logic', cat: 'science' },
-  { name: '🔭 Vật lý thiên văn & Vũ trụ học', cat: 'science' },
-  { name: '🩺 Y học & Sơ cấp cứu', cat: 'science' },
-  { name: '💊 Dược học & Thảo dược tự nhiên', cat: 'science' },
-  { name: '🌿 Bảo vệ môi trường & Khí hậu', cat: 'science' },
+  // Nhóm 2: Khoa học & Y tế (7 mục)
+  { name: '🩺 Y học, Y tế & Khám chữa bệnh', cat: 'science' },
+  { name: '💊 Dược học, Thảo dược & Hóa dược', cat: 'science' },
+  { name: '🔬 Nghiên cứu khoa học (Lý, Hóa, Sinh)', cat: 'science' },
+  { name: '🧮 Toán học & Tư duy logic', cat: 'science' },
+  { name: '🌿 Môi trường, Sinh thái & Khí hậu', cat: 'science' },
   { name: '🐾 Chăm sóc động vật & Thú cưng', cat: 'science' },
-  { name: '🪴 Trồng cây & Làm vườn sinh thái', cat: 'science' },
-  { name: '🌊 Khám phá sinh vật biển', cat: 'science' },
-  { name: '📊 Phân tích dữ liệu & Thống kê số liệu', cat: 'science' },
-  { name: '🌦️ Dự báo thời tiết & Khí tượng', cat: 'science' },
-  { name: '🗺️ Địa chất học & Khảo cổ học', cat: 'science' },
-  { name: '🍏 Dinh dưỡng & Lối sống lành mạnh', cat: 'science' },
-  { name: '🧪 Công nghệ sinh học & Vi sinh', cat: 'science' },
+  { name: '🔭 Thiên văn học & Khám phá vũ trụ', cat: 'science' },
 
-  // Nhóm 3: Sáng tạo & Nghệ thuật
-  { name: '🎨 Vẽ tranh màu nước & Sơn dầu', cat: 'art' },
-  { name: '🖌️ Vẽ Digital (Digital Art & Manga)', cat: 'art' },
-  { name: '🖥️ Thiết kế đồ họa (Graphic Design)', cat: 'art' },
-  { name: '📸 Chụp ảnh & Nhiếp ảnh đường phố', cat: 'art' },
-  { name: '🎬 Đạo diễn & Kịch bản phim', cat: 'art' },
-  { name: '👗 Thời trang & Thiết kế trang phục', cat: 'art' },
-  { name: '🛋️ Thiết kế nội thất & Nhà cửa', cat: 'art' },
-  { name: '✒️ Viết truyện & Tản văn', cat: 'art' },
-  { name: '🎹 Chơi đàn Piano & Organ', cat: 'art' },
-  { name: '🎸 Chơi đàn Guitar & Ukulele', cat: 'art' },
-  { name: '🎤 Ca hát & Thanh nhạc', cat: 'art' },
-  { name: '🎧 Phối nhạc điện tử (EDM / Beatmaking)', cat: 'art' },
-  { name: '💃 Nhảy hiện đại & Vũ đạo (Kpop / HipHop)', cat: 'art' },
-  { name: '🎭 Diễn xuất & Kịch nghệ', cat: 'art' },
-  { name: '🖋️ Luyện chữ đẹp & Calligraphy', cat: 'art' },
-  { name: '✂️ Làm đồ thủ công (Handmade & DIY)', cat: 'art' },
-  { name: '🏺 Nặn đất sét & Làm gốm', cat: 'art' },
+  // Nhóm 3: Nghệ thuật & Sáng tạo (8 mục)
+  { name: '🎨 Hội họa, Vẽ tranh & Mỹ thuật số', cat: 'art' },
+  { name: '🖥️ Thiết kế đồ họa & Đa phương tiện', cat: 'art' },
+  { name: '📸 Nhiếp ảnh, Quay phim & Dựng video', cat: 'art' },
+  { name: '👗 Thiết kế thời trang & Làm đẹp', cat: 'art' },
+  { name: '🛋️ Thiết kế nội thất & Không gian sống', cat: 'art' },
+  { name: '🎤 Ca hát, Thanh nhạc & Biểu diễn', cat: 'art' },
+  { name: '🎸 Chơi nhạc cụ & Sáng tác âm nhạc', cat: 'art' },
+  { name: '💃 Nhảy hiện đại & Vũ đạo nghệ thuật', cat: 'art' },
 
-  // Nhóm 4: Kinh doanh & Khởi nghiệp
-  { name: '💼 Khởi nghiệp & Mô hình kinh doanh', cat: 'business' },
-  { name: '📈 Đầu tư tài chính & Chứng khoán', cat: 'business' },
-  { name: '🛍️ Bán hàng online & Thương mại điện tử', cat: 'business' },
-  { name: '📣 Marketing số & Quảng cáo truyền thông', cat: 'business' },
-  { name: '📊 Nghiên cứu hành vi người tiêu dùng', cat: 'business' },
-  { name: '💡 Phát triển ý tưởng sản phẩm mới', cat: 'business' },
-  { name: '🤝 Đàm phán & Kỹ năng thương lượng', cat: 'business' },
-  { name: '📱 Quản lý Fanpage & Mạng xã hội', cat: 'business' },
-  { name: '🏢 Quản lý đội nhóm & Nhân sự', cat: 'business' },
-  { name: '☕ Mở quán cà phê & Dịch vụ F&B', cat: 'business' },
+  // Nhóm 4: Kinh doanh & Quản lý (7 mục)
+  { name: '💼 Khởi nghiệp & Quản trị kinh doanh', cat: 'business' },
+  { name: '📈 Đầu tư, Chứng khoán & Tài chính', cat: 'business' },
+  { name: '🛍️ Bán hàng, E-Commerce & Thương mại', cat: 'business' },
+  { name: '📣 Marketing, Quảng cáo & Tiếp thị số', cat: 'business' },
+  { name: '🏢 Quản lý đội nhóm & Kỹ năng lãnh đạo', cat: 'business' },
   { name: '📦 Logistics & Quản trị chuỗi cung ứng', cat: 'business' },
-  { name: '🪙 Quản lý tài chính cá nhân & Tiết kiệm', cat: 'business' },
-  { name: '👔 Tố chất lãnh đạo & Quản trị', cat: 'business' },
-  { name: '🌍 Kinh doanh quốc tế & Xuất nhập khẩu', cat: 'business' },
+  { name: '📊 Kế toán, Kiểm toán & Thuế tài chính', cat: 'business' },
 
-  // Nhóm 5: Xã hội & Ngôn ngữ
-  { name: '🗣️ Thuyết trình & Diễn thuyết trước đám đông', cat: 'social' },
-  { name: '🌍 Học ngoại ngữ (Anh, Trung, Hàn, Nhật...)', cat: 'social' },
-  { name: '⚖️ Tranh biện học thuật (Debate)', cat: 'social' },
-  { name: '🤝 Giao tiếp & Mở rộng quan hệ xã hội', cat: 'social' },
-  { name: '📰 Làm báo chí & Phóng sự truyền hình', cat: 'social' },
-  { name: '📚 Đọc sách văn học & Triết học', cat: 'social' },
-  { name: '📜 Khám phá lịch sử thế giới & Việt Nam', cat: 'social' },
-  { name: '🌐 Giao lưu văn hóa quốc tế', cat: 'social' },
-  { name: '🧑‍🏫 Giảng dạy & Truyền cảm hứng học tập', cat: 'social' },
-  { name: '💖 Hoạt động tình nguyện & Thiện nguyện', cat: 'social' },
-  { name: '🧠 Tâm lý học & Thấu hiểu cảm xúc', cat: 'social' },
-  { name: '🏛️ Tìm hiểu pháp luật & Công lý xã hội', cat: 'social' },
-  { name: '🎙️ Thu âm Podcast & Radio tâm sự', cat: 'social' },
-  { name: '🕊️ Ngoại giao & Hợp tác quốc tế', cat: 'social' },
+  // Nhóm 5: Xã hội & Ngôn ngữ (8 mục)
+  { name: '🌍 Học ngoại ngữ & Giao lưu văn hóa quốc tế', cat: 'social' },
+  { name: '🗣️ Thuyết trình, Diễn thuyết & MC dẫn chương trình', cat: 'social' },
+  { name: '⚖️ Pháp luật, Tranh biện & Công lý xã hội', cat: 'social' },
+  { name: '🧑‍🏫 Giảng dạy, Đào tạo & Truyền cảm hứng', cat: 'social' },
+  { name: '🧠 Tâm lý học & Thấu hiểu cảm xúc con người', cat: 'social' },
+  { name: '✍️ Viết lách, Báo chí & Sáng tạo nội dung số', cat: 'social' },
+  { name: '💖 Hoạt động tình nguyện & Phát triển cộng đồng', cat: 'social' },
+  { name: '📜 Lịch sử, Triết học & Nghiên cứu xã hội', cat: 'social' },
 
-  // Nhóm 6: Thể thao & Rèn luyện
-  { name: '⚽ Bóng đá', cat: 'sport' },
-  { name: '🏀 Bóng rổ', cat: 'sport' },
-  { name: '🏸 Cầu lông', cat: 'sport' },
-  { name: '🏊 Bơi lội', cat: 'sport' },
-  { name: '🏃 Chạy bộ & Điền kinh', cat: 'sport' },
-  { name: '🚴 Đạp xe đường trường', cat: 'sport' },
-  { name: '🧗 Leo núi thể thao & Trekking rừng', cat: 'sport' },
+  // Nhóm 6: Thể thao & Vận động (6 mục)
+  { name: '⚽ Thể thao đồng đội (Bóng đá, Bóng rổ, Bóng chuyền)', cat: 'sport' },
+  { name: '🏸 Thể thao cá nhân (Cầu lông, Bơi lội, Điền kinh)', cat: 'sport' },
+  { name: '🏋️ Tập Gym, Thể hình & Fitness', cat: 'sport' },
   { name: '🥋 Võ thuật & Kỹ năng tự vệ', cat: 'sport' },
-  { name: '🧘 Tập Yoga & Thiền định', cat: 'sport' },
-  { name: '🏋️ Tập Gym & Thể hình (Fitness)', cat: 'sport' },
-  { name: '🛹 Trượt ván (Skateboarding)', cat: 'sport' },
-  { name: '♟️ Đấu cờ vua & Cờ tướng', cat: 'sport' },
-  { name: '🎯 Bắn cung & Bắn súng thể thao', cat: 'sport' },
-  { name: '🏐 Bóng chuyền', cat: 'sport' },
+  { name: '🧘 Yoga, Thiền định & Sức khỏe tinh thần', cat: 'sport' },
+  { name: '♟️ Cờ vua, Cờ tướng & Thể thao trí tuệ', cat: 'sport' },
 
-  // Nhóm 7: Đời sống & Trải nghiệm
+  // Nhóm 7: Đời sống & Trải nghiệm (6 mục)
+  { name: '✈️ Du lịch, Đi phượt & Trải nghiệm khám phá', cat: 'life' },
   { name: '🍳 Nấu ăn & Nghệ thuật ẩm thực', cat: 'life' },
-  { name: '🧁 Làm bánh ngọt & Đồ tráng miệng', cat: 'life' },
-  { name: '☕ Thưởng thức cà phê & Pha chế Barista', cat: 'life' },
-  { name: '✈️ Đi phượt & Khám phá địa danh mới', cat: 'life' },
-  { name: '🏕️ Cắm trại (Camping & Glamping)', cat: 'life' },
-  { name: '🧩 Giải Rubik & Trò chơi trí tuệ IQ', cat: 'life' },
-  { name: '🎲 Chơi Board Game & Chiến thuật nhóm', cat: 'life' },
-  { name: '💄 Chăm sóc da & Nghệ thuật trang điểm', cat: 'life' },
-  { name: '📝 Viết Bullet Journal & Lập kế hoạch', cat: 'life' },
-  { name: '🎧 Sưu tầm đĩa than & Nghe Podcast', cat: 'life' },
-  { name: '📺 Xem phim điện ảnh & Trinh thám hình sự', cat: 'life' },
-  { name: '🧹 Tổ chức & Tối giản không gian sống', cat: 'life' },
-  { name: '🕯️ Làm nến thơm & Tinh dầu thiên nhiên', cat: 'life' },
-  { name: '🔮 Chiêm tinh học & Thẻ bài Tarot', cat: 'life' }
+  { name: '☕ Pha chế đồ uống & Thưởng thức cà phê', cat: 'life' },
+  { name: '🏨 Quản trị dịch vụ khách sạn & Nhà hàng', cat: 'life' },
+  { name: '🏕️ Cắm trại & Dã ngoại ngoài trời', cat: 'life' },
+  { name: '🎲 Trò chơi bàn cờ (Board Game) & Chiến thuật nhóm', cat: 'life' }
 ];
 
 // Khôi phục dữ liệu đã lưu
