@@ -185,6 +185,15 @@ function switchAuthTab(tab) {
     }
 }
 
+function getDestinationUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectParam = urlParams.get('redirect');
+    if (redirectParam) {
+        return decodeURIComponent(redirectParam);
+    }
+    return 'index.html';
+}
+
 function handleLoginSubmit(e) {
     e.preventDefault();
     clearAlert();
@@ -198,10 +207,11 @@ function handleLoginSubmit(e) {
         return;
     }
 
-    showAlert(res.message, 'success');
+    const dest = getDestinationUrl();
+    showAlert(`${res.message} Đang chuyển hướng vào hệ thống...`, 'success');
     renderAuthTopbar();
     setTimeout(() => {
-        checkUserSession();
+        window.location.href = dest;
     }, 600);
 }
 
@@ -218,10 +228,11 @@ function handleRegisterSubmit(e) {
         return;
     }
 
-    showAlert(res.message, 'success');
+    const dest = getDestinationUrl();
+    showAlert(`${res.message} Đang chuyển hướng vào hệ thống...`, 'success');
     renderAuthTopbar();
     setTimeout(() => {
-        checkUserSession();
+        window.location.href = dest;
     }, 700);
 }
 
@@ -229,6 +240,11 @@ function checkUserSession() {
     const current = getCurrentUser();
     const loggedInSec = document.getElementById('loggedInSection');
     const authFormSec = document.getElementById('authFormSection');
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.get('requireAuth') === '1' && !current) {
+        showAlert('🔒 Bạn cần đăng nhập hoặc đăng ký tài khoản trước khi vào hệ thống NS AI.', 'info');
+    }
 
     if (current) {
         if (authFormSec) authFormSec.style.display = 'none';

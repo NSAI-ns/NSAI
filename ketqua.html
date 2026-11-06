@@ -43,71 +43,79 @@
 
     <section class="glass form-card wide">
 
-        <p class="eyebrow">NS CAREER FIT ANALYSIS</p>
+        <!-- 🔒 KHUNG BÁO TIẾN ĐỘ & BẢNG CHECKLIST 5 BƯỚC (HIỂN THỊ KHI CHƯA ĐỦ 5 BƯỚC) -->
+        <div id="stepGateLockedSection" style="display: none;"></div>
 
-        <h1>Bạn phù hợp với ngành gì?</h1>
+        <!-- 🔓 TOÀN BỘ PHÂN TÍCH KẾT QUẢ AI (CHỈ HIỂN THỊ KHI ĐÃ ĐỦ 5 BƯỚC) -->
+        <div id="resultsUnlockedSection">
 
-        <p class="muted">
-            Dựa trên sự kết hợp toàn diện giữa điểm số, sở thích, xu hướng tính cách và mục tiêu cá nhân, NS AI tổng hợp bức tranh định hướng nghề nghiệp dành riêng cho bạn:
-        </p>
+            <p class="eyebrow">NS CAREER FIT ANALYSIS</p>
 
-        <!-- Thanh công cụ & Nút Xuất PDF / In hồ sơ -->
-        <div class="result-toolbar" style="display: flex; gap: 10px; margin: 16px 0 20px; flex-wrap: wrap; align-items: center;">
-            <button type="button" class="btn primary print-btn" onclick="window.print()" style="cursor: pointer; background: linear-gradient(135deg, #2563eb, #7c3aed); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35); font-weight: 600;">
-                📄 In phiếu định hướng (PDF)
-            </button>
-            <a class="btn secondary" href="thongtin.html">
-                🔄 Cập nhật lại thông tin
-            </a>
-            <a class="btn secondary" href="truong-hoc.html">
-                🏫 Xem các trường đào tạo phù hợp
-            </a>
-            <a class="btn secondary" href="chatbot.html">
-                🤖 Hỏi NS AI về phương thức tuyển sinh
-            </a>
-        </div>
+            <h1>Bạn phù hợp với ngành gì?</h1>
 
+            <p class="muted">
+                Dựa trên sự kết hợp toàn diện giữa điểm số, sở thích, xu hướng tính cách và mục tiêu cá nhân, NS AI tổng hợp bức tranh định hướng nghề nghiệp dành riêng cho bạn:
+            </p>
 
-        <!-- Trạng thái lưu hồ sơ tài khoản -->
-        <div id="accountBanner" class="account-status-banner"></div>
-
-
-        <!-- Thông tin tổng quan -->
-        <div id="summary"></div>
-
-        <!-- 2. PHÂN TÍCH ĐỘ LỆCH KỲ VỌNG & CẢNH BÁO ÁP LỰC (EXPECTATION GAP INDEX) -->
-        <div id="expectationGapContainer"></div>
-
-        <!-- Kết quả ngành nghề -->
-        <div id="results" class="result-list"></div>
-
-        <!-- 3. LỘ TRÌNH HÀNH ĐỘNG CÁ NHÂN HÓA 3 GIAI ĐOẠN (3-STEP ACTION PLAN) -->
-        <div id="actionPlanContainer"></div>
-
-        <!-- 1. BỘ GIẢ LẬP CẢI THIỆN ĐIỂM SỐ (WHAT-IF SIMULATOR) -->
-        <div id="whatIfSimulatorContainer"></div>
-
-        <!-- GỢI Ý TRƯỜNG ĐẠI HỌC PHÙ HỢP THEO MỤC TIÊU & VÙNG MIỀN -->
-        <div id="schoolRecommendations" class="school-rec-section"></div>
+            <!-- Thanh công cụ & Nút Xuất PDF / In hồ sơ -->
+            <div class="result-toolbar" style="display: flex; gap: 10px; margin: 16px 0 20px; flex-wrap: wrap; align-items: center;">
+                <button type="button" class="btn primary print-btn" onclick="window.print()" style="cursor: pointer; background: linear-gradient(135deg, #2563eb, #7c3aed); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35); font-weight: 600;">
+                    📄 In phiếu định hướng (PDF)
+                </button>
+                <a class="btn secondary" href="thongtin.html">
+                    🔄 Cập nhật lại thông tin
+                </a>
+                <a class="btn secondary" href="truong-hoc.html">
+                    🏫 Xem các trường đào tạo phù hợp
+                </a>
+                <a class="btn secondary" href="chatbot.html">
+                    🤖 Hỏi NS AI về phương thức tuyển sinh
+                </a>
+            </div>
 
 
-        <div class="actions">
+            <!-- Trạng thái lưu hồ sơ tài khoản -->
+            <div id="accountBanner" class="account-status-banner"></div>
 
-            <button type="button" class="btn primary print-btn" onclick="window.print()" style="cursor: pointer; background: linear-gradient(135deg, #2563eb, #7c3aed); font-weight: 600;">
-                📄 In phiếu định hướng (PDF)
-            </button>
 
-            <a class="btn secondary" href="truong-hoc.html">
-                🏫 Xem các trường đào tạo phù hợp
-            </a>
+            <!-- Thông tin tổng quan -->
+            <div id="summary"></div>
 
-            <a class="btn primary" href="chatbot.html">
-                🤖 Hỏi NS AI về phương thức tuyển sinh
-            </a>
+            <!-- 2. PHÂN TÍCH ĐỘ LỆCH KỲ VỌNG & CẢNH BÁO ÁP LỰC (EXPECTATION GAP INDEX) -->
+            <div id="expectationGapContainer"></div>
 
-            <a class="btn secondary" href="thongtin.html">
-                🔄 Cập nhật lại thông tin
-            </a>
+            <!-- Kết quả ngành nghề -->
+            <div id="results" class="result-list"></div>
+
+            <!-- 3. LỘ TRÌNH HÀNH ĐỘNG CÁ NHÂN HÓA 3 GIAI ĐOẠN (3-STEP ACTION PLAN) -->
+            <div id="actionPlanContainer"></div>
+
+            <!-- 1. BỘ GIẢ LẬP CẢI THIỆN ĐIỂM SỐ (WHAT-IF SIMULATOR) -->
+            <div id="whatIfSimulatorContainer"></div>
+
+            <!-- GỢI Ý TRƯỜNG ĐẠI HỌC PHÙ HỢP THEO MỤC TIÊU & VÙNG MIỀN -->
+            <div id="schoolRecommendations" class="school-rec-section"></div>
+
+
+            <div class="actions">
+
+                <button type="button" class="btn primary print-btn" onclick="window.print()" style="cursor: pointer; background: linear-gradient(135deg, #2563eb, #7c3aed); font-weight: 600;">
+                    📄 In phiếu định hướng (PDF)
+                </button>
+
+                <a class="btn secondary" href="truong-hoc.html">
+                    🏫 Xem các trường đào tạo phù hợp
+                </a>
+
+                <a class="btn primary" href="chatbot.html">
+                    🤖 Hỏi NS AI về phương thức tuyển sinh
+                </a>
+
+                <a class="btn secondary" href="thongtin.html">
+                    🔄 Cập nhật lại thông tin
+                </a>
+
+            </div>
 
         </div>
 
@@ -122,6 +130,31 @@
 <script src="phantich.js"></script>
 
 <script>
+
+// ==========================================
+// KIỂM TRA ĐIỀU KIỆN 5 BƯỚC (STEP-GATE VALIDATION)
+// ==========================================
+const gateStatus = typeof getStepGateStatus === 'function' ? getStepGateStatus() : { isAllCompleted: true };
+
+if (!gateStatus.isAllCompleted) {
+    const lockedBox = document.getElementById('stepGateLockedSection');
+    const unlockedBox = document.getElementById('resultsUnlockedSection');
+    if (lockedBox) lockedBox.style.display = 'block';
+    if (unlockedBox) unlockedBox.style.display = 'none';
+
+    if (typeof renderStepGateLockedView === 'function') {
+        renderStepGateLockedView('stepGateLockedSection', gateStatus);
+    }
+} else {
+    const lockedBox = document.getElementById('stepGateLockedSection');
+    const unlockedBox = document.getElementById('resultsUnlockedSection');
+    if (lockedBox) lockedBox.style.display = 'none';
+    if (unlockedBox) unlockedBox.style.display = 'block';
+
+    renderUnlockedCareerAnalysis();
+}
+
+function renderUnlockedCareerAnalysis() {
 
 const r = analyzeCareer();
 const topCareer = r.results && r.results.length ? r.results[0] : null;
@@ -233,6 +266,10 @@ const methodMap = {
 const rawMethods = (p.goals && p.goals.admissionMethods) ? p.goals.admissionMethods : [];
 const displayMethods = rawMethods.map(m => methodMap[m] || m);
 
+const customImprintList = (p.customPersonalityAnswers && Array.isArray(p.customPersonalityAnswers) && p.customPersonalityAnswers.length)
+    ? p.customPersonalityAnswers
+    : (typeof read === 'function' ? (read('customPersonalityAnswers') || []) : []);
+
 document.getElementById("summary").innerHTML = `
     <div class="notice">
         📍 <b>Khu vực:</b> ${r.province || "Chưa chọn tỉnh"}
@@ -341,6 +378,36 @@ document.getElementById("summary").innerHTML = `
                         </a>
                     `).join('')}
                 </div>
+            </div>
+        </div>
+    ` : '')}
+
+    ${(customImprintList.length > 0 ? `
+        <div class="personal-imprint-card" style="margin: 20px 0 24px; padding: 20px 22px; background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(168, 85, 247, 0.12)); border: 1.5px solid rgba(236, 72, 153, 0.35); border-radius: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div style="font-size: 16px; font-weight: 700; color: #f472b6; display: flex; align-items: center; gap: 8px;">
+                    <span>✨</span> Dấu ấn cá nhân của riêng bạn (Phản xạ tình huống tự luận)
+                </div>
+                <span style="font-size: 12px; padding: 3px 10px; background: rgba(236, 72, 153, 0.2); border: 1px solid rgba(236, 72, 153, 0.4); border-radius: 999px; color: #fbcfe8; font-weight: 600;">
+                    ${customImprintList.length} phản xạ độc lập
+                </span>
+            </div>
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-top: 0; margin-bottom: 14px; line-height: 1.6;">
+                Hệ thống NS AI đã áp dụng thuật toán NLP phân tích các câu trả lời tự nhập của bạn ở bài trắc nghiệm lai (Hybrid Assessment). Những chia sẻ chân thực này chứng minh tính cá nhân hóa độc bản của hồ sơ định hướng:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                ${customImprintList.map(ca => `
+                    <div style="padding: 12px 16px; background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255, 255, 255, 0.1); border-left: 4px solid #f472b6; border-radius: 10px;">
+                        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span style="font-weight: 600; color: #e2e8f0;">${ca.contextLabel || `Câu ${ca.questionNumber || (ca.questionIndex + 1)}`}</span>
+                            <span>•</span>
+                            <span style="color: #67e8f9; font-weight: 600;">🎯 Quy đổi NLP: ${ca.matchedGroup || 'Kỹ thuật - Logic (Nhóm A)'}</span>
+                        </div>
+                        <div style="font-size: 13.5px; color: #ffffff; font-style: italic; line-height: 1.55;">
+                            "${(ca.userAnswer || '').replace(/"/g, '&quot;')}"
+                        </div>
+                    </div>
+                `).join('')}
             </div>
         </div>
     ` : '')}
@@ -1167,6 +1234,8 @@ if (typeof render3StepActionPlan === 'function') {
 if (typeof initWhatIfSimulator === 'function') {
     initWhatIfSimulator(p, topCareer, r);
 }
+
+} // Kết thúc hàm renderUnlockedCareerAnalysis()
 
 </script>
 

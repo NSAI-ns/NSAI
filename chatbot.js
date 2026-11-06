@@ -343,6 +343,10 @@ function getChatContext() {
     ? window.DEFAULT_SCHOOLS_DATA
     : [];
 
+  const customAnswers = (p.customPersonalityAnswers && Array.isArray(p.customPersonalityAnswers))
+    ? p.customPersonalityAnswers
+    : (typeof read === 'function' ? (read('customPersonalityAnswers') || []) : []);
+
   return {
     p,
     top,
@@ -358,7 +362,8 @@ function getChatContext() {
     scores,
     bestSubjects,
     lowestSubjects,
-    schools
+    schools,
+    customAnswers
   };
 }
 
@@ -1046,13 +1051,41 @@ function answer(q) {
   if (/tôi là ai|thông tin của em|hồ sơ|profile|bạn biết gì về em|xem lại thông tin/.test(s)) {
     recordTopic('profile');
     let scoreText = c.avg ? `${c.p.scoreCount} môn (Điểm TB: ${c.avg}/10)` : 'chưa nhập điểm';
+    let imprintInfo = '';
+    if (c.customAnswers && c.customAnswers.length) {
+      imprintInfo = `• ✨ **Dấu ấn cá nhân (Phản xạ riêng của bạn):** Đã ghi nhận ${c.customAnswers.length} chia sẻ độc lập:\n` +
+        c.customAnswers.map(ca => `  - *${ca.contextLabel || `Câu ${ca.questionNumber}`}:* "${ca.userAnswer}" (Quy đổi: ${ca.matchedGroup})`).join('\n') + '\n';
+    }
     return `📋 **Tóm tắt hồ sơ của bạn đang được mình ghi nhớ:**\n\n` +
       `• **Học vấn:** ${c.grade}, tại ${c.province}\n` +
       `• **Mục tiêu tương lai:** ${c.goal}\n` +
       `• **Điểm học tập:** Đã nhập ${scoreText}\n` +
       `• **Sở thích:** ${c.hobbies}${c.custom}\n` +
-      `• **Xu hướng tính cách:** ${c.p.personality}.\n\n` +
+      `• **Xu hướng tính cách:** ${c.p.personality}.\n` +
+      imprintInfo + `\n` +
       `Bạn có muốn mình phân tích sâu hơn về mục nào trong hồ sơ không?`;
+  }
+
+  // 13.1 DẤU ẤN CÁ NHÂN & PHẢN XẠ TỰ LUẬN ĐÁP ÁN E
+  if (/dấu ấn cá nhân|câu trả lời tự nhập|phản xạ riêng|tự luận|câu e|đáp án e|chia sẻ riêng|hybrid assessment/.test(s)) {
+    recordTopic('custom_imprint');
+    if (!c.customAnswers || !c.customAnswers.length) {
+      return `✨ **Về dấu ấn cá nhân của bạn:**\n\n` +
+        `Hiện tại trong bài trắc nghiệm tính cách (tinhcach.html), bạn chưa chọn đáp án **"E. ✍️ Khác"** để tự nhập suy nghĩ riêng. ` +
+        `Bạn có thể quay lại bước 4 để chia sẻ cách tư duy độc lập của mình, NS AI sẽ phân tích NLP và giải thích cặn kẽ cho bạn nhé!`;
+    }
+
+    let res = `✨ **Phân tích Dấu ấn Cá nhân độc bản của bạn:**\n\n` +
+      `NS AI đã ghi nhận **${c.customAnswers.length} phản xạ tự luận độc lập** do chính bạn tự nhập trong bài trắc nghiệm lai:\n\n`;
+
+    c.customAnswers.forEach((ca, idx) => {
+      res += `${idx + 1}. **${ca.contextLabel || `Tình huống ${ca.questionNumber}`}:**\n` +
+        `   • *Bạn chia sẻ:* "${ca.userAnswer}"\n` +
+        `   • *Phân tích NLP:* Khớp với **${ca.matchedGroup}**.\n\n`;
+    });
+
+    res += `💡 **Ý nghĩa hướng nghiệp:** Những câu trả lời này cho thấy bạn không bị bó buộc vào các phương án có sẵn mà luôn có tư duy độc lập, sáng tạo và thấu hiểu chính mình. Điều này giúp dự đoán nghề nghiệp chính xác và sát thực tế hơn rất nhiều! 🌟`;
+    return res;
   }
 
   // 14. ÁP LỰC THI CỬ & CĂNG THẲNG HỌC TẬP CHUNG

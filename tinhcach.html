@@ -596,9 +596,9 @@ questionsData.forEach((q, i) => {
     `;
   });
 
-  // ĐÁP ÁN E: KHÁC (KÈM Ô NHẬP TỰ TRẢ LỜI ĐẶT NGOÀI LABEL)
+  // ĐÁP ÁN E: ✍️ KHÁC (TỰ CHIA SẺ SUY NGHĨ / CÁCH LÀM RIÊNG CỦA BẠN)
   html += `
-    <div class="radio radio-custom-option" id="radioBoxE${i}">
+    <div class="radio radio-custom-option ${isOldVal === 4 ? 'selected' : ''}" id="radioBoxE${i}">
       <label class="custom-radio-top" for="radioE${i}">
         <input
           type="radio"
@@ -609,19 +609,18 @@ questionsData.forEach((q, i) => {
           onchange="onRadioChange(${i}, 4)"
         >
         <span class="radio-letter">E</span>
-        <span class="custom-radio-text">Khác (Nhập phương án / phản ứng riêng của bạn):</span>
+        <span class="custom-radio-text">✍️ Khác (Tự chia sẻ suy nghĩ / cách làm riêng của bạn):</span>
       </label>
-      <div class="custom-input-wrap">
-        <input
-          type="text"
+      <div class="custom-input-wrap ${isOldVal === 4 ? 'active' : ''}" id="customWrap${i}" style="${isOldVal === 4 ? 'display: block; opacity: 1;' : 'display: none;'}">
+        <textarea
           id="customAnswer${i}"
           class="custom-answer-input"
-          placeholder="Gõ cách bạn tư duy hoặc phản ứng trong tình huống này..."
-          value="${safeAttr(customVal)}"
+          rows="2"
+          placeholder="Nhập suy nghĩ, thói quen hoặc cách xử lý riêng của bạn tại đây..."
           onclick="event.stopPropagation(); selectOptionE(${i});"
           onfocus="event.stopPropagation(); selectOptionE(${i});"
           oninput="event.stopPropagation(); selectOptionE(${i}); updateProgressBar();"
-        >
+        >${safeAttr(customVal)}</textarea>
       </div>
     </div>
   `;
@@ -660,15 +659,32 @@ function selectOptionE(index) {
   const radio = document.getElementById(`radioE${index}`);
   if (radio && !radio.checked) {
     radio.checked = true;
-    updateProgressBar();
   }
+  onRadioChange(index, 4);
 }
 
 function onRadioChange(qIndex, optIndex) {
+  const wrap = document.getElementById(`customWrap${qIndex}`);
+  const boxE = document.getElementById(`radioBoxE${qIndex}`);
   if (optIndex === 4) {
-    const input = document.getElementById(`customAnswer${qIndex}`);
-    if (input) {
-      setTimeout(() => input.focus(), 50);
+    if (boxE) boxE.classList.add('selected');
+    if (wrap) {
+      wrap.style.display = 'block';
+      setTimeout(() => {
+        wrap.classList.add('active');
+        const input = document.getElementById(`customAnswer${qIndex}`);
+        if (input) input.focus();
+      }, 15);
+    }
+  } else {
+    if (boxE) boxE.classList.remove('selected');
+    if (wrap) {
+      wrap.classList.remove('active');
+      setTimeout(() => {
+        if (!wrap.classList.contains('active')) {
+          wrap.style.display = 'none';
+        }
+      }, 220);
     }
   }
   updateProgressBar();
@@ -682,6 +698,7 @@ function resetPersonalityAnswers() {
   if (!confirm('Bạn có muốn xóa các câu trả lời trắc nghiệm tính cách để làm lại từ đầu không?')) return;
   save('personalityAnswers', []);
   save('personalityCustomAnswers', {});
+  save('customPersonalityAnswers', []);
   save('mbtiType', null);
   save('mbtiData', null);
   save('riasecScores', null);
@@ -692,7 +709,13 @@ function resetPersonalityAnswers() {
 
   // Bỏ chọn tất cả radio
   document.querySelectorAll('#questions input[type="radio"]').forEach(r => { r.checked = false; });
-  // Xóa tất cả input text custom
+  // Bỏ class selected ở các box E
+  document.querySelectorAll('.radio-custom-option').forEach(el => el.classList.remove('selected'));
+  // Xóa và ẩn tất cả textarea custom
+  document.querySelectorAll('.custom-input-wrap').forEach(w => {
+    w.classList.remove('active');
+    w.style.display = 'none';
+  });
   document.querySelectorAll('.custom-answer-input').forEach(inp => { inp.value = ''; });
   // Xóa các textarea tự luận
   const s = document.getElementById('openStrength'); if (s) s.value = '';
@@ -737,7 +760,7 @@ function finish() {
       const inputEl = document.getElementById(`customAnswer${i}`);
       const txt = (inputEl ? inputEl.value : '').trim();
       if (!txt) {
-        alert(`Bạn đã chọn đáp án E (Khác) ở Câu ${i + 1}. Vui lòng nhập câu trả lời của bạn vào ô bên cạnh nhé!`);
+        alert(`Bạn đã chọn đáp án "E. ✍️ Khác" ở Câu ${i + 1}. Vui lòng chia sẻ vài từ mô tả suy nghĩ hoặc cách làm riêng của bạn trước khi hoàn thành nhé!`);
         if (inputEl) {
           inputEl.focus();
           inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -751,6 +774,26 @@ function finish() {
   // 1. Lưu câu trả lời trắc nghiệm & câu trả lời E riêng
   save('personalityAnswers', ans);
   save('personalityCustomAnswers', customAnswers);
+
+  // Lưu chi tiết các câu trả lời tự luận E phục vụ trang Kết quả và Chatbot AI
+  const customPersonalityAnswers = [];
+  for (let i = 0; i < questionsData.length; i++) {
+    if (ans[i] === 4 && customAnswers[i]) {
+      const q = questionsData[i];
+      const nlp = typeof analyzeOptionEText === 'function' ? analyzeOptionEText(customAnswers[i]) : null;
+      customPersonalityAnswers.push({
+        questionIndex: i,
+        questionNumber: i + 1,
+        questionText: q ? q.title : `Câu ${i + 1}`,
+        contextLabel: q ? (q.contextLabel || q.category) : `Câu ${i + 1}`,
+        category: q ? q.category : '',
+        userAnswer: customAnswers[i],
+        matchedGroup: nlp ? nlp.groupName : 'Kỹ thuật - Logic - Nghiên cứu (Nhóm A)',
+        groupKey: nlp ? nlp.group : 'logic'
+      });
+    }
+  }
+  save('customPersonalityAnswers', customPersonalityAnswers);
 
   // 2. Lưu câu hỏi tự trả lời phần II
   const selfReflect = {

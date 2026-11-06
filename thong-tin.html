@@ -223,12 +223,16 @@ function saveInfo(){
 
     };
 
-    if(!data.province){
-
-        alert('Hãy chọn tỉnh/thành phố.');
-
+    if(!data.name){
+        alert('Vui lòng nhập họ và tên của bạn để NS AI phân tích chính xác!');
+        const el = document.getElementById('studentName');
+        if (el) el.focus();
         return;
+    }
 
+    if(!data.province){
+        alert('Hãy chọn tỉnh/thành phố.');
+        return;
     }
 
     save('info',data);

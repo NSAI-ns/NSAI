@@ -84,6 +84,9 @@ function save(key, value, syncToAccount = true) {
     if (syncToAccount && PROFILE_KEYS.includes(key)) {
       syncCurrentProfileToAccount();
     }
+    if (typeof updateStepGateNavUI === 'function') {
+      updateStepGateNavUI();
+    }
   } catch (e) {
     console.error('Error saving data:', e);
   }
@@ -119,31 +122,6 @@ function read(key) {
   }
 }
 
-/**
- * Điền nhanh dữ liệu mẫu cho Bước 1 (Thông tin) phục vụ test nhanh cho Giám Khảo
- */
-function fillDemoInfo() {
-  const nameInput = document.getElementById('studentName');
-  const provinceSelect = document.getElementById('province');
-  const gradeSelect = document.getElementById('grade');
-
-  if (nameInput) nameInput.value = 'Minh Khang';
-  if (provinceSelect) provinceSelect.value = 'Hà Nội';
-  if (gradeSelect) gradeSelect.value = '12';
-
-  save('info', {
-    name: 'Minh Khang',
-    province: 'Hà Nội',
-    grade: '12'
-  });
-
-  const banner = document.getElementById('demoAlertBanner');
-  if (banner) {
-    banner.style.display = 'block';
-    banner.innerHTML = '✅ <strong>Đã điền nhanh thông tin mẫu (Minh Khang - Hà Nội - Lớp 12)!</strong> Bạn có thể bấm <strong>"Lưu & tiếp tục →"</strong> để chuyển sang Bước 2, hoặc bấm <strong>"⚡ Xem thử toàn bộ hồ sơ mẫu"</strong> để sang thẳng trang Kết quả.';
-  }
-}
-
 function resetAllData(showMessage = true) {
   const preservedKeys = ['ns_accounts', 'ns_current_user', 'ns_chat_sessions', 'ns_current_chat_id', 'ns_topbar_collapsed'];
   Object.keys(localStorage)
@@ -167,78 +145,6 @@ function resetAllData(showMessage = true) {
     alert('Đã tạo phiên mới. Dữ liệu phân tích đã được làm mới.');
     location.href = 'index.html';
   }
-}
-
-/**
- * Nạp bộ dữ liệu mẫu chuẩn (Dành cho Ban Giám Khảo & Trải nghiệm nhanh)
- * Bao gồm đầy đủ 5 trụ cột: Thông tin, Điểm số, Sở thích, Tính cách MBTI, Mục tiêu
- */
-function loadDemoDataAndRedirect() {
-  // 1. Thông tin cơ bản
-  save('info', {
-    name: 'Minh Khang',
-    province: 'Hà Nội',
-    grade: '12'
-  });
-
-  // 2. Điểm số các môn học thế mạnh (Toán, Lý, Hóa, Tin, Anh, Công nghệ)
-  save('scores', {
-    'Toán': 9.2,
-    'Vật lý': 8.8,
-    'Hóa học': 8.0,
-    'Tin học': 9.6,
-    'Tiếng Anh': 8.5,
-    'Ngữ văn': 7.8,
-    'Công nghệ công nghiệp': 9.0
-  });
-
-  // 3. Sở thích & Đam mê tự nhiên
-  save('hobbies', {
-    selected: [
-      'Lập trình & Phát triển phần mềm',
-      'Trí tuệ nhân tạo & Dữ liệu',
-      'Phần cứng & Vi mạch máy tính',
-      'Robot & Tự động hóa',
-      'Thiết kế đồ họa & Mỹ thuật số'
-    ],
-    custom: 'Đam mê lập trình phát triển ứng dụng, thuật toán AI và chế tạo robot thông minh'
-  });
-
-  // 4. Trắc nghiệm tính cách MBTI & Phản hồi tự bộc lộ (Nhóm INTJ - Nhà Kiến Tạo)
-  const demoAnswers = [0, 1, 0, 0, 0, 1, 0, 0, 0, 0];
-  save('personalityAnswers', demoAnswers);
-  save('personalityCustomAnswers', {});
-  save('personalitySelfReflect', {
-    strengths: 'Tư duy logic, giải quyết vấn đề kỹ thuật và phân tích thuật toán',
-    idealEnv: 'Môi trường công nghệ hiện đại, tự do sáng tạo và làm việc nhóm hiệu quả',
-    vision: 'Trở thành Kỹ sư Công nghệ thông tin / Chuyên gia Trí tuệ nhân tạo (AI)'
-  });
-  save('mbtiType', 'INTJ');
-  save('mbtiData', {
-    type: 'INTJ',
-    title: 'Nhà Kiến Tạo Chiến Lược',
-    vietnameseTrait: 'Tư duy logic, chiến lược & độc lập',
-    desc: 'Bạn có tầm nhìn sắc bén, tư duy hệ thống và khả năng giải quyết các vấn đề kỹ thuật phức tạp.'
-  });
-
-  // 5. Mục tiêu cá nhân & Nguyện vọng
-  save('goals', {
-    dreamMajor: 'Công nghệ thông tin',
-    dreamCareer: 'Kỹ sư phần mềm & Trí tuệ nhân tạo (AI)',
-    dreamSchool: 'Đại học Bách Khoa Hà Nội',
-    studyLocation: 'Miền Bắc',
-    studyAbroad: 'Chưa có ý định',
-    dreamGoal: 'Xây dựng các giải pháp phần mềm thông minh phục vụ cộng đồng',
-    admissionMethods: ['thpt', 'dgnl', 'ielts'],
-    selected: [
-      'Công nghệ thông tin & Lập trình phần mềm',
-      'Khoa học máy tính & Trí tuệ nhân tạo (AI)'
-    ],
-    other: ''
-  });
-
-  // Chuyển hướng thẳng sang trang kết quả phân tích
-  window.location.href = 'ketqua.html';
 }
 
 // =================== HỆ THỐNG TÀI KHOẢN & LƯU HỒ SƠ ===================
@@ -390,9 +296,35 @@ function logoutUser() {
     localStorage.removeItem('ns_current_user');
     // Xóa session phân tích đang mở để đảm bảo tính riêng tư
     PROFILE_KEYS.forEach(k => localStorage.removeItem(NS_PREFIX + k));
-    location.reload();
+    location.href = 'dangnhap.html';
   }
 }
+
+/**
+ * BẢO VỆ PHIÊN TRUY CẬP (AUTHENTICATION GUARD)
+ * Yêu cầu học sinh phải đăng nhập hoặc đăng ký tài khoản trước khi truy cập vào hệ thống NS AI.
+ * Nếu chưa đăng nhập, tự động chuyển hướng sang dangnhap.html kèm tham số ghi nhớ trang đích (redirect).
+ */
+function enforceAuthGuard() {
+  try {
+    if (typeof window === 'undefined' || !window.location) return;
+    const path = window.location.pathname.toLowerCase();
+    const isAuthPage = path.endsWith('dangnhap.html') || path.endsWith('dang-nhap.html');
+    if (isAuthPage) return;
+
+    const user = getCurrentUser();
+    if (!user) {
+      const fileName = path.split('/').pop() || 'index.html';
+      const redirectTarget = encodeURIComponent(fileName + window.location.search);
+      window.location.replace('dangnhap.html?requireAuth=1&redirect=' + redirectTarget);
+    }
+  } catch (err) {
+    console.error('Lỗi Auth Guard:', err);
+  }
+}
+
+// Kiểm tra phiên đăng nhập ngay khi tải script
+enforceAuthGuard();
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -446,9 +378,296 @@ function renderAuthTopbar() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', renderAuthTopbar);
+  document.addEventListener('DOMContentLoaded', () => {
+    renderAuthTopbar();
+    updateStepGateNavUI();
+  });
 } else {
   renderAuthTopbar();
+  updateStepGateNavUI();
+}
+
+// ==========================================================================
+// HỆ THỐNG XÁC THỰC 5 BƯỚC MỞ KHÓA KẾT QUẢ (STEP-GATE VALIDATION)
+// ==========================================================================
+
+/**
+ * Kiểm tra trạng thái hoàn thành thực tế của 5 bước từ LocalStorage
+ */
+function getStepGateStatus() {
+  // 1. Bước 1 - Thông tin cơ bản (thongtin.html)
+  const info = (typeof read === 'function' ? read('info') : null) || {};
+  const hasInfoName = typeof info.name === 'string' && info.name.trim().length > 0;
+  const hasInfoProvince = typeof info.province === 'string' && info.province.trim().length > 0;
+  const step1Done = hasInfoName || hasInfoProvince;
+  let step1Detail = 'Chưa nhập họ tên / thông tin';
+  if (step1Done) {
+    const parts = [];
+    if (info.name && info.name.trim()) parts.push(info.name.trim());
+    if (info.province && info.province.trim()) parts.push(info.province.trim());
+    if (info.grade && info.grade.trim()) parts.push('Lớp ' + info.grade.trim());
+    step1Detail = parts.length ? parts.join(' • ') : 'Đã nhập thông tin cơ bản';
+  }
+
+  // 2. Bước 2 - Điểm số môn học (diemso.html)
+  const scores = (typeof read === 'function' ? read('scores') : null) || {};
+  const validScores = Object.entries(scores).filter(([, v]) => v !== '' && v != null && !isNaN(Number(v)));
+  const step2Done = validScores.length > 0;
+  let step2Detail = 'Chưa nhập điểm môn học';
+  if (step2Done) {
+    const avg = (validScores.reduce((sum, [, v]) => sum + Number(v), 0) / validScores.length).toFixed(1);
+    step2Detail = `${validScores.length} môn học (Điểm TB: ${avg})`;
+  }
+
+  // 3. Bước 3 - Sở thích & Đam mê (sothich.html)
+  const hobbies = (typeof read === 'function' ? read('hobbies') : null) || {};
+  const selectedHobbies = Array.isArray(hobbies.selected) ? hobbies.selected : [];
+  const customHobby = typeof hobbies.custom === 'string' ? hobbies.custom.trim() : '';
+  const step3Done = selectedHobbies.length > 0 || customHobby.length > 0;
+  let step3Detail = 'Chưa chọn sở thích';
+  if (step3Done) {
+    if (selectedHobbies.length > 0) {
+      step3Detail = `${selectedHobbies.length} sở thích đã chọn (${selectedHobbies.slice(0, 2).join(', ')}${selectedHobbies.length > 2 ? '...' : ''})`;
+    } else {
+      step3Detail = `Sở thích riêng: "${customHobby.slice(0, 30)}..."`;
+    }
+  }
+
+  // 4. Bước 4 - Tính cách (tinhcach.html)
+  const personalityAnswers = typeof read === 'function' ? read('personalityAnswers') : null;
+  const mbtiType = typeof read === 'function' ? read('mbtiType') : null;
+  const mbtiData = typeof read === 'function' ? read('mbtiData') : null;
+  const step4Done = (Array.isArray(personalityAnswers) && personalityAnswers.length >= 10 && personalityAnswers.every(a => typeof a === 'number' && a >= 0)) || Boolean(mbtiType) || Boolean(mbtiData);
+  let step4Detail = 'Chưa làm trắc nghiệm tình huống';
+  if (step4Done) {
+    const code = mbtiType || (mbtiData && mbtiData.type) || 'MBTI';
+    const trait = (mbtiData && mbtiData.title) ? ` - ${mbtiData.title}` : '';
+    step4Detail = `[${code}]${trait} (Đã làm 12 câu tình huống SJT)`;
+  }
+
+  // 5. Bước 5 - Mục tiêu & Nguyện vọng (muc-tieu.html)
+  const goals = (typeof read === 'function' ? read('goals') : null) || {};
+  const dreamMajor = typeof goals.dreamMajor === 'string' ? goals.dreamMajor.trim() : '';
+  const dreamSchool = typeof goals.dreamSchool === 'string' ? goals.dreamSchool.trim() : '';
+  const dreamCareer = typeof goals.dreamCareer === 'string' ? goals.dreamCareer.trim() : '';
+  const dreamGoal = typeof goals.dreamGoal === 'string' ? goals.dreamGoal.trim() : '';
+  const admissionMethods = Array.isArray(goals.admissionMethods) ? goals.admissionMethods : [];
+  const selectedMajors = Array.isArray(goals.selected) ? goals.selected : [];
+  const goalsOther = typeof goals.other === 'string' ? goals.other.trim() : '';
+  const step5Done = Boolean(dreamMajor || dreamSchool || dreamCareer || dreamGoal || admissionMethods.length > 0 || selectedMajors.length > 0 || goalsOther);
+  let step5Detail = 'Chưa đặt mục tiêu ngành nghề';
+  if (step5Done) {
+    const primary = dreamMajor || dreamCareer || (selectedMajors.length ? selectedMajors[0] : '') || dreamSchool || 'Đã chọn mục tiêu';
+    step5Detail = `Mục tiêu: ${primary}${dreamSchool && primary !== dreamSchool ? ' • ' + dreamSchool : ''}`;
+  }
+
+  const steps = [
+    {
+      step: 1,
+      id: 'step_info',
+      title: 'Bước 1: Thông tin cơ bản',
+      subtitle: 'Họ tên, tỉnh thành và khối lớp đang học',
+      url: 'thongtin.html',
+      completed: step1Done,
+      detail: step1Detail
+    },
+    {
+      step: 2,
+      id: 'step_scores',
+      title: 'Bước 2: Điểm số môn học',
+      subtitle: 'Điểm các môn học thế mạnh theo GDPT 2018',
+      url: 'diemso.html',
+      completed: step2Done,
+      detail: step2Detail
+    },
+    {
+      step: 3,
+      id: 'step_hobbies',
+      title: 'Bước 3: Sở thích & Đam mê',
+      subtitle: 'Lĩnh vực nghề nghiệp bạn hứng thú khám phá',
+      url: 'sothich.html',
+      completed: step3Done,
+      detail: step3Detail
+    },
+    {
+      step: 4,
+      id: 'step_personality',
+      title: 'Bước 4: Trắc nghiệm tính cách',
+      subtitle: '12 tình huống học đường đo lường MBTI & Holland (RIASEC)',
+      url: 'tinhcach.html',
+      completed: step4Done,
+      detail: step4Detail
+    },
+    {
+      step: 5,
+      id: 'step_goals',
+      title: 'Bước 5: Mục tiêu & Nguyện vọng',
+      subtitle: 'Ngành học mơ ước, trường đại học & phương thức xét tuyển',
+      url: 'muc-tieu.html',
+      completed: step5Done,
+      detail: step5Detail
+    }
+  ];
+
+  const completedCount = steps.filter(s => s.completed).length;
+  const isAllCompleted = completedCount === 5;
+  const firstIncompleteStep = steps.find(s => !s.completed) || null;
+
+  return {
+    isAllCompleted,
+    completedCount,
+    totalSteps: 5,
+    percentage: Math.round((completedCount / 5) * 100),
+    firstIncompleteStep,
+    steps
+  };
+}
+
+/**
+ * Hàm kiểm tra boolean nhanh
+ */
+function checkAllStepsCompleted() {
+  return getStepGateStatus().isAllCompleted;
+}
+
+/**
+ * Render khung thông báo khóa & bảng Checklist 5 bước trên trang Kết quả (ketqua.html)
+ */
+function renderStepGateLockedView(containerId = 'stepGateLockedSection', status = null) {
+  const container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+  if (!container) return;
+
+  if (!status) status = getStepGateStatus();
+  const { completedCount, totalSteps, percentage, firstIncompleteStep, steps } = status;
+
+  container.innerHTML = `
+    <div class="step-gate-card glass">
+      <div class="step-gate-header">
+        <div class="step-gate-lock-icon">🔒</div>
+        <div class="step-gate-header-content">
+          <span class="step-gate-pill">HỆ THỐNG XÁC THỰC 5 BƯỚC • STEP-GATE VALIDATION</span>
+          <h2 class="step-gate-title">🔒 Vui lòng hoàn thành đủ 5 bước để mở khóa Kết quả phân tích từ NS AI</h2>
+          <p class="step-gate-lead">
+            Để bảo đảm tính khoa học chuẩn GDPT 2018 và mô hình Holland (RIASEC), thuật toán NS AI yêu cầu tích hợp trọn vẹn <strong>5 trụ cột dữ liệu</strong> (Học lực, Sở thích, Tính cách MBTI, Mục tiêu xét tuyển). Vui lòng hoàn thiện các bước còn thiếu để hệ thống đối sánh đa chiều chính xác nhất cho bạn.
+          </p>
+        </div>
+      </div>
+
+      <!-- THANH TIẾN ĐỘ -->
+      <div class="step-gate-progress-card">
+        <div class="step-gate-progress-meta">
+          <span class="step-gate-progress-label">Tiến độ hoàn thiện hồ sơ: <strong>${completedCount}/${totalSteps} bước</strong></span>
+          <span class="step-gate-progress-percent">${percentage}%</span>
+        </div>
+        <div class="step-gate-progress-track">
+          <div class="step-gate-progress-fill" style="width: ${percentage}%;"></div>
+        </div>
+      </div>
+
+      <!-- CHECKLIST 5 BƯỚC -->
+      <div class="step-gate-checklist">
+        ${steps.map(s => `
+          <div class="step-gate-row ${s.completed ? 'is-completed' : 'is-pending'}">
+            <div class="step-gate-row-icon">
+              ${s.completed ? '✅' : '⏳'}
+            </div>
+            <div class="step-gate-row-main">
+              <div class="step-gate-row-top">
+                <span class="step-gate-row-title">${s.title}</span>
+                <span class="step-gate-row-status ${s.completed ? 'status-done' : 'status-pending'}">
+                  ${s.completed ? '✅ Đã hoàn thành' : '⏳ Chưa hoàn thành'}
+                </span>
+              </div>
+              <div class="step-gate-row-desc">${s.subtitle}</div>
+              <div class="step-gate-row-detail">
+                ${s.completed ? `<span class="detail-done">📋 ${escapeHtml(s.detail)}</span>` : `<span class="detail-missing">⚠️ ${escapeHtml(s.detail)}</span>`}
+              </div>
+            </div>
+            <div class="step-gate-row-btn">
+              ${s.completed
+                ? `<a href="${s.url}" class="btn-step-action btn-step-edit" title="Chỉnh sửa lại dữ liệu ${s.title}">✏️ Sửa lại</a>`
+                : `<a href="${s.url}" class="btn-step-action btn-step-start pulse-gate" title="Bấm để hoàn thành ngay ${s.title}">👉 Hoàn thành ngay</a>`
+              }
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- KHU VỰC ĐIỀU HƯỚNG CUỐI KHUNG -->
+      <div class="step-gate-action-footer">
+        ${firstIncompleteStep ? `
+          <a href="${firstIncompleteStep.url}" class="btn primary btn-step-gate-primary">
+            🚀 Đi tới bước tiếp theo cần làm: ${firstIncompleteStep.title} &rarr;
+          </a>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Cập nhật trạng thái khóa/mở khóa trên thanh điều hướng (<nav>) và trang chủ (index.html)
+ */
+function updateStepGateNavUI() {
+  try {
+    const status = getStepGateStatus();
+
+    // 1. Cập nhật trên tất cả các thẻ menu (<nav>)
+    const navLinks = document.querySelectorAll('header.topbar nav a, nav a');
+    navLinks.forEach(link => {
+      const href = (link.getAttribute('href') || '').toLowerCase();
+      if (href.endsWith('ketqua.html') || href.endsWith('ket-qua.html')) {
+        if (!status.isAllCompleted) {
+          link.innerHTML = '🔒 Kết quả';
+          link.classList.add('nav-gate-locked');
+          link.classList.remove('nav-gate-unlocked');
+          link.title = `Chưa mở khóa kết quả: Cần hoàn thành đủ 5 bước (Hiện tại: ${status.completedCount}/5 bước)`;
+        } else {
+          link.innerHTML = '✅ Kết quả';
+          link.classList.add('nav-gate-unlocked');
+          link.classList.remove('nav-gate-locked');
+          link.title = 'Đã hoàn thành đủ 5 bước - Sẵn sàng xem kết quả phân tích AI';
+        }
+      }
+    });
+
+    // 2. Cập nhật trên mục "06 Kết quả từ AI" trên Trang chủ (index.html)
+    const homeProcessLink = document.querySelector('.process-grid a[href*="ketqua.html"], .process-grid a[href*="ket-qua.html"]');
+    if (homeProcessLink) {
+      if (!status.isAllCompleted) {
+        homeProcessLink.innerHTML = `<strong>🔒 06</strong><span>Kết quả (Cần 5 bước)</span>`;
+        homeProcessLink.classList.add('home-gate-locked');
+        homeProcessLink.classList.remove('home-gate-unlocked');
+        homeProcessLink.title = `Chưa mở khóa: Hoàn thành 5 bước trước để xem kết quả (${status.completedCount}/5 bước)`;
+      } else {
+        homeProcessLink.innerHTML = `<strong>✅ 06</strong><span>Kết quả từ AI</span>`;
+        homeProcessLink.classList.add('home-gate-unlocked');
+        homeProcessLink.classList.remove('home-gate-locked');
+        homeProcessLink.title = 'Đã mở khóa toàn bộ kết quả phân tích!';
+      }
+    }
+
+    // 3. Hiển thị tiến độ hoàn thành trên các bước 01 - 05 trong .process-grid của index.html
+    const stepHrefs = ['thongtin', 'diemso', 'sothich', 'tinhcach', 'muc-tieu'];
+    status.steps.forEach((st, idx) => {
+      const gridItem = document.querySelector(`.process-grid a[href*="${stepHrefs[idx]}"]`);
+      if (gridItem) {
+        const strong = gridItem.querySelector('strong');
+        if (strong) {
+          const numStr = `0${idx + 1}`;
+          if (st.completed) {
+            strong.innerHTML = `${numStr} <span style="color: #10b981; font-size: 13px;" title="Đã hoàn thành">✓</span>`;
+            gridItem.classList.add('step-completed');
+          } else {
+            strong.innerHTML = numStr;
+            gridItem.classList.remove('step-completed');
+          }
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Lỗi khi cập nhật Step-Gate UI:', err);
+  }
 }
 
 // Tự động dọn dẹp dữ liệu trắc nghiệm tính cách không hợp lệ (ví dụ: mảng chữ cái demo cũ)
@@ -852,6 +1071,101 @@ const HOLLAND_DESCRIPTIONS = {
   C: { name: 'Nghiệp vụ - Chi tiết (Conventional)', short: 'Nghiệp vụ', desc: 'Ngăn nắp, cẩn trọng, tôn trọng quy trình chuẩn, có trách nhiệm cao và làm việc có kế hoạch.' }
 };
 
+/**
+ * Thuật toán NLP phân tích từ khóa khi học sinh chọn đáp án E (Hybrid Assessment)
+ * Tự động cộng điểm vào nhóm tính cách phù hợp nhất:
+ * A: Kỹ thuật - Logic - Nghiên cứu
+ * B: Sáng tạo - Nghệ thuật - Truyền thông
+ * C: Xã hội - Giao tiếp - Hỗ trợ
+ * D: Quản lý - Kinh doanh - Tổ chức
+ */
+function analyzeOptionEText(text, currentCounts) {
+  const counts = currentCounts || { logic: 0, creative: 0, people: 0, patient: 0 };
+  const raw = (text || '').toLowerCase().trim();
+  if (!raw) {
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const fallbackGroup = (sorted[0] && sorted[0][1] > 0) ? sorted[0][0] : 'logic';
+    return {
+      group: fallbackGroup,
+      groupName: getGroupNameByKey(fallbackGroup),
+      matchedKeywords: [],
+      scores: { logic: 0, creative: 0, people: 0, patient: 0 },
+      isFallback: true
+    };
+  }
+
+  // Danh mục từ khóa chuẩn xác theo yêu cầu đề bài KHKT
+  const dict = {
+    logic: [ // Nhóm A: Kỹ thuật - Logic - Nghiên cứu
+      'code', 'lập trình', 'máy tính', 'toán', 'lý', 'hóa', 'khoa học', 
+      'logic', 'sửa chữa', 'nghiên cứu', 'ai', 'dữ liệu', 'kỹ thuật', 'tự tìm hiểu',
+      'phần mềm', 'thuật toán', 'phần cứng', 'công nghệ', 'tự mày mò', 'phân tích', 'tự học'
+    ],
+    creative: [ // Nhóm B: Sáng tạo - Nghệ thuật - Truyền thông
+      'vẽ', 'thiết kế', 'nhạc', 'hát', 'video', 'quay', 'chụp ảnh', 
+      'sáng tạo', 'viết', 'nghệ thuật', 'màu sắc', 'ý tưởng', 'tự do', 
+      'canva', 'tiktok', 'nội dung', 'đồ họa', 'thẩm mỹ', 'media', 'poster', 'content'
+    ],
+    people: [ // Nhóm C: Xã hội - Giao tiếp - Hỗ trợ
+      'giúp đỡ', 'bạn bè', 'lắng nghe', 'tâm sự', 'giao tiếp', 'thuyết trình', 
+      'dạy', 'chăm sóc', 'tâm lý', 'y tế', 'cộng đồng', 'mọi người', 'hòa đồng',
+      'chia sẻ', 'thấu cảm', 'kết nối', 'yêu thương', 'giáo dục', 'thầy cô', 'bác sĩ'
+    ],
+    patient: [ // Nhóm D: Quản lý - Kinh doanh - Tổ chức
+      'quản lý', 'lãnh đạo', 'nhóm trưởng', 'kinh doanh', 'bán hàng', 'tiền', 
+      'tài chính', 'kế hoạch', 'tổ chức', 'điều phối', 'thị trường', 'luật',
+      'kinh tế', 'tiến độ', 'phân công', 'chiến lược', 'doanh nghiệp', 'khởi nghiệp', 'ngân sách'
+    ]
+  };
+
+  const scores = { logic: 0, creative: 0, people: 0, patient: 0 };
+  const matchedKeywords = [];
+
+  Object.entries(dict).forEach(([groupKey, kws]) => {
+    kws.forEach(kw => {
+      if (raw.includes(kw)) {
+        scores[groupKey] += 1;
+        matchedKeywords.push({ keyword: kw, group: groupKey });
+      }
+    });
+  });
+
+  const maxScore = Math.max(scores.logic, scores.creative, scores.people, scores.patient);
+
+  let winningGroup = 'logic';
+  let isFallback = false;
+
+  if (maxScore > 0) {
+    if (scores.creative === maxScore) winningGroup = 'creative';
+    else if (scores.people === maxScore) winningGroup = 'people';
+    else if (scores.patient === maxScore) winningGroup = 'patient';
+    else winningGroup = 'logic';
+  } else {
+    // Không khớp từ khóa nào -> phân bổ vào nhóm có điểm cao nhất hiện tại để đảm bảo biểu đồ kết quả
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    winningGroup = (sorted[0] && sorted[0][1] > 0) ? sorted[0][0] : 'logic';
+    isFallback = true;
+  }
+
+  return {
+    group: winningGroup,
+    groupName: getGroupNameByKey(winningGroup),
+    matchedKeywords,
+    scores,
+    isFallback
+  };
+}
+
+function getGroupNameByKey(key) {
+  switch (key) {
+    case 'logic': return 'Kỹ thuật - Logic - Nghiên cứu (Nhóm A)';
+    case 'creative': return 'Sáng tạo - Nghệ thuật - Truyền thông (Nhóm B)';
+    case 'people': return 'Xã hội - Giao tiếp - Hỗ trợ (Nhóm C)';
+    case 'patient': return 'Quản lý - Kinh doanh - Tổ chức (Nhóm D)';
+    default: return 'Kỹ thuật - Logic - Nghiên cứu (Nhóm A)';
+  }
+}
+
 function computeMBTI(answers) {
   const savedType = typeof read === 'function' ? read('mbtiType') : null;
   if (!Array.isArray(answers) || answers.length === 0) {
@@ -969,26 +1283,32 @@ function computeMBTI(answers) {
         else if (optIdx === 3) { mbtiScores.S += 1; mbtiScores.J += 1; counts.patient += 1; riasecScores.C += 2; }
       }
     } else if (optIdx === 4) {
-      // Đáp án E (Khác / tự luận)
-      const txt = (customMap[qIdx] || '').toLowerCase();
-      if (/hướng ngoại|giao tiếp|bạn bè|đông người|thuyết trình/.test(txt)) { mbtiScores.E += 2; counts.people += 2; riasecScores.S += 2; }
-      else if (/hướng nội|một mình|yên tĩnh|độc lập|riêng tư/.test(txt)) { mbtiScores.I += 2; counts.logic += 1; riasecScores.I += 1; }
+      // Đáp án E: Thuật toán NLP phân tích từ khóa thông minh (Hybrid Assessment)
+      const txt = (customMap[qIdx] || '').trim();
+      const nlp = analyzeOptionEText(txt, counts);
 
-      if (/thực tế|số liệu|chi tiết|quy trình|kinh nghiệm/.test(txt)) { mbtiScores.S += 2; counts.patient += 2; riasecScores.C += 2; }
-      else if (/ý tưởng|sáng tạo|tương lai|tổng quan|trực giác/.test(txt)) { mbtiScores.N += 2; counts.creative += 2; riasecScores.A += 2; }
+      if (nlp.group === 'logic') { // Nhóm A: Kỹ thuật - Logic - Nghiên cứu
+        counts.logic += 2;
+        mbtiScores.T += 2; mbtiScores.I += 1;
+        riasecScores.I += 2; riasecScores.R += 1;
+      } else if (nlp.group === 'creative') { // Nhóm B: Sáng tạo - Nghệ thuật - Truyền thông
+        counts.creative += 2;
+        mbtiScores.N += 2; mbtiScores.P += 2;
+        riasecScores.A += 3;
+      } else if (nlp.group === 'people') { // Nhóm C: Xã hội - Giao tiếp - Hỗ trợ
+        counts.people += 2;
+        mbtiScores.F += 2; mbtiScores.E += 2;
+        riasecScores.S += 3;
+      } else if (nlp.group === 'patient') { // Nhóm D: Quản lý - Kinh doanh - Tổ chức
+        counts.patient += 2;
+        mbtiScores.J += 2; mbtiScores.E += 1;
+        riasecScores.E += 2; riasecScores.C += 1;
+      }
 
-      if (/logic|lý trí|phân tích|nguyên lý|đúng sai|khoa học/.test(txt)) { mbtiScores.T += 2; counts.logic += 2; riasecScores.I += 2; }
-      else if (/cảm xúc|thấu cảm|con người|tình cảm|chia sẻ|hòa hợp/.test(txt)) { mbtiScores.F += 2; counts.people += 2; riasecScores.S += 2; }
-
-      if (/kế hoạch|kỷ luật|nguyên tắc|đúng hạn|ngăn nắp/.test(txt)) { mbtiScores.J += 2; counts.patient += 2; riasecScores.C += 2; }
-      else if (/tự do|linh hoạt|ngẫu hứng|tùy hứng|thích nghi/.test(txt)) { mbtiScores.P += 2; counts.creative += 2; riasecScores.A += 2; }
-
-      if (/kỹ thuật|máy móc|cơ khí|thực tế|chế tạo|lắp ráp|phần cứng/.test(txt)) { riasecScores.R += 2; }
-      if (/kinh doanh|quản lý|lãnh đạo|tiền|thương mại|khởi nghiệp|đàm phán/.test(txt)) { riasecScores.E += 2; }
-
-      if (counts.logic === 0 && counts.people === 0 && counts.creative === 0 && counts.patient === 0) {
-        mbtiScores.I += 1; mbtiScores.N += 1; mbtiScores.T += 1; mbtiScores.P += 1;
-        counts.logic += 1; counts.creative += 1; riasecScores.I += 2; riasecScores.A += 1;
+      if (nlp.isFallback) {
+        // Nếu không khớp từ khóa đặc thù nào, phân bổ thêm điểm cân bằng nhẹ
+        mbtiScores.I += 1; mbtiScores.N += 1; mbtiScores.P += 1;
+        riasecScores.I += 1; riasecScores.A += 1;
       }
     }
   });
@@ -1102,6 +1422,7 @@ function getProfile() {
   const scores = read('scores') || {};
   const hobbies = read('hobbies') || {selected: [], custom: ''};
   const answers = read('personalityAnswers') || [];
+  const customPersonalityAnswers = read('customPersonalityAnswers') || [];
   const selfReflect = read('personalitySelfReflect') || { strengths: '', idealEnv: '', vision: '' };
   const goals = read('goals') || {selected: [], other: ''};
 
@@ -1140,6 +1461,7 @@ function getProfile() {
     scores,
     hobbies,
     answers,
+    customPersonalityAnswers,
     selfReflect,
     goals,
     avg,

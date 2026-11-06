@@ -169,7 +169,6 @@
                 <span style="display: flex; align-items: center; gap: 6px;">
                     <span>🎭</span> Chế độ: Trải nghiệm thử 1 ngày làm nghề
                 </span>
-                <span style="background: linear-gradient(135deg, #a855f7, #06b6d4); color: #fff; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; box-shadow: 0 2px 6px rgba(168, 85, 247, 0.4);">Tính mới KHKT ✨</span>
             </div>
             <div class="quick" style="margin: 0;">
                 <button type="button" class="quick-chip-roleplay" onclick="quick('Cho mình trải nghiệm thử 1 tình huống thực tế của ngành học phù hợp nhất')">
@@ -195,6 +194,9 @@
                 </button>
                 <button type="button" onclick="quick('Phân tích nhóm tính cách MBTI của em')">
                     🧠 Tính cách [MBTI]
+                </button>
+                <button type="button" onclick="quick('Phân tích dấu ấn cá nhân từ câu trả lời tự nhập của em')">
+                    ✨ Dấu ấn cá nhân (Câu E)
                 </button>
                 <button type="button" onclick="quick('Bạn có tài liệu học tập và đề thi có giải chi tiết không?')">
                     📚 Tài liệu &amp; Đề thi
@@ -355,6 +357,12 @@ document.getElementById("personalProfile").innerHTML = `
     ·
 
     xu hướng ${p.personality || "chưa xác định"}.
+
+    ${
+        (p.customPersonalityAnswers && p.customPersonalityAnswers.length)
+        ? ` · ✨ <strong>${p.customPersonalityAnswers.length} phản xạ tự nhập</strong>`
+        : ""
+    }
 
     ${
         top

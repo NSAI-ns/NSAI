@@ -203,6 +203,11 @@ function saveScores(redirect = true) {
     }
   });
 
+  if (Object.keys(d).length === 0) {
+    alert('Vui lòng nhập điểm của ít nhất 1 môn học thế mạnh (Toán, Văn, Anh...) để NS AI phân tích!');
+    return;
+  }
+
   save('scores', d);
 
   if (redirect) {

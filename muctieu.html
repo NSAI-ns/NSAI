@@ -241,102 +241,6 @@
     </div>
 
 
-    <!-- ================= NGÀNH QUAN TÂM ================= -->
-
-    <h2>
-        Ngành bạn đang quan tâm
-    </h2>
-
-    <p class="muted">
-        Bạn có thể chọn một hoặc nhiều ngành.
-        Nếu chưa biết ngành nào, có thể bỏ qua.
-    </p>
-
-
-    <div id="majors" class="chips">
-
-        <button type="button" class="chip">
-            Công nghệ thông tin
-        </button>
-
-        <button type="button" class="chip">
-            Khoa học máy tính
-        </button>
-
-        <button type="button" class="chip">
-            Kỹ thuật
-        </button>
-
-        <button type="button" class="chip">
-            Kinh tế
-        </button>
-
-        <button type="button" class="chip">
-            Quản trị kinh doanh
-        </button>
-
-        <button type="button" class="chip">
-            Tài chính - Ngân hàng
-        </button>
-
-        <button type="button" class="chip">
-            Marketing
-        </button>
-
-        <button type="button" class="chip">
-            Luật
-        </button>
-
-        <button type="button" class="chip">
-            Y - Dược
-        </button>
-
-        <button type="button" class="chip">
-            Giáo dục
-        </button>
-
-        <button type="button" class="chip">
-            Ngoại ngữ
-        </button>
-
-        <button type="button" class="chip">
-            Truyền thông
-        </button>
-
-        <button type="button" class="chip">
-            Thiết kế
-        </button>
-
-        <button type="button" class="chip">
-            Kiến trúc
-        </button>
-
-        <button type="button" class="chip">
-            Khoa học tự nhiên
-        </button>
-
-        <button type="button" class="chip">
-            Khoa học xã hội
-        </button>
-
-    </div>
-
-
-    <!-- ================= NGÀNH KHÁC ================= -->
-
-    <label>
-
-        Ngành khác
-
-        <textarea
-            id="other"
-            rows="4"
-            placeholder="Ví dụ: Trí tuệ nhân tạo, An ninh mạng, Công nghệ ô tô..."
-        ></textarea>
-
-    </label>
-
-
     <!-- ================= ĐÁNH GIÁ ================= -->
 
     <section id="goalEvaluation" class="glass">
@@ -737,16 +641,22 @@ function saveGoals() {
             selectedMethods,
 
         selected:
-            selectedMajors,
+            selectedMajors.length ? selectedMajors : (oldGoals.selected || []),
 
         other:
-            document
-                .getElementById("other")
-                .value
-                .trim()
+            document.getElementById("other")
+                ? document.getElementById("other").value.trim()
+                : (oldGoals.other || "")
 
     };
 
+    const hasAnyGoal = data.dreamMajor || data.dreamSchool || data.dreamCareer || data.dreamGoal || (data.admissionMethods && data.admissionMethods.length) || (data.selected && data.selected.length) || data.other;
+    if (!hasAnyGoal) {
+        alert('Vui lòng nhập ngành học, trường đại học mong muốn hoặc chọn phương thức xét tuyển ưu tiên để tiếp tục!');
+        const majorEl = document.getElementById("dreamMajor");
+        if (majorEl) majorEl.focus();
+        return;
+    }
 
     save("goals", data);
 

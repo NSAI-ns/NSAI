@@ -282,6 +282,11 @@ function saveHobbies() {
     custom: customInput.value.trim()
   };
 
+  if (data.selected.length === 0 && !data.custom) {
+    alert('Vui lòng chọn ít nhất 1 lĩnh vực sở thích hoặc nhập mô tả sở thích riêng của bạn!');
+    return;
+  }
+
   save('hobbies', data);
   location.href = 'tinhcach.html';
 }
