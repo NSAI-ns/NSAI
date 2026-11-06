@@ -75,10 +75,17 @@
         <!-- Thông tin tổng quan -->
         <div id="summary"></div>
 
+        <!-- 2. PHÂN TÍCH ĐỘ LỆCH KỲ VỌNG & CẢNH BÁO ÁP LỰC (EXPECTATION GAP INDEX) -->
+        <div id="expectationGapContainer"></div>
 
         <!-- Kết quả ngành nghề -->
         <div id="results" class="result-list"></div>
 
+        <!-- 3. LỘ TRÌNH HÀNH ĐỘNG CÁ NHÂN HÓA 3 GIAI ĐOẠN (3-STEP ACTION PLAN) -->
+        <div id="actionPlanContainer"></div>
+
+        <!-- 1. BỘ GIẢ LẬP CẢI THIỆN ĐIỂM SỐ (WHAT-IF SIMULATOR) -->
+        <div id="whatIfSimulatorContainer"></div>
 
         <!-- GỢI Ý TRƯỜNG ĐẠI HỌC PHÙ HỢP THEO MỤC TIÊU & VÙNG MIỀN -->
         <div id="schoolRecommendations" class="school-rec-section"></div>
@@ -232,6 +239,7 @@ document.getElementById("summary").innerHTML = `
         ·
         🎯 <b>Định hướng:</b> ${r.goalText || (r.goals && r.goals.length ? r.goals.join(", ") : "Khám phá ngành nghề")}
         ${p.mbti ? ` · 🧠 <b>MBTI:</b> <span style="color:#c084fc;font-weight:700;">${p.mbti.type}</span> (${p.mbti.title})` : ''}
+        ${p.mbti && p.mbti.riasec ? ` · 🧬 <b>Holland:</b> <span style="color:#6ee7b7;font-weight:700;">${p.mbti.riasec.topCode}</span>` : ''}
         ${displayMethods.length ? ` · 📋 <b>Phương thức xét tuyển:</b> <span style="color:#67e8f9;font-weight:600;">${displayMethods.join(', ')}</span>` : ''}
     </div>
 
@@ -539,6 +547,625 @@ if (bannerEl) {
             <a href="dangnhap.html" class="banner-btn primary">🔑 Đăng nhập / Đăng ký</a>
         `;
     }
+}
+
+// ==========================================
+// 2. PHÂN TÍCH ĐỘ LỆCH KỲ VỌNG & CẢNH BÁO ÁP LỰC (EXPECTATION GAP INDEX)
+// ==========================================
+function renderExpectationGapIndex(p, topCareer, r) {
+    const goals = p.goals || (typeof read === 'function' ? read('goals') : {}) || {};
+    const dreamMajor = goals.dreamMajor || goals.dreamCareer || (goals.selected && goals.selected[0]) || '';
+    const dreamSchool = goals.dreamSchool || '';
+    const scores = p.scores || (typeof read === 'function' ? read('scores') : {}) || {};
+    const scoreVals = Object.values(scores).filter(v => v !== '' && v != null && !isNaN(v)).map(Number);
+    const avgScore = scoreVals.length ? scoreVals.reduce((a, b) => a + b, 0) / scoreVals.length : 7.0;
+    const mbti = p.mbti || null;
+
+    // Tính toán độ lệch kỳ vọng (Expectation Gap Index)
+    let targetMinAvg = 8.0;
+    if (dreamMajor) {
+        const dm = dreamMajor.toLowerCase();
+        if (dm.includes('y') || dm.includes('dược') || dm.includes('công nghệ') || dm.includes('máy tính') || dm.includes('ngoại thương') || dm.includes('trí tuệ')) {
+            targetMinAvg = 8.5;
+        } else if (dm.includes('kinh tế') || dm.includes('quản trị') || dm.includes('luật') || dm.includes('sư phạm') || dm.includes('marketing')) {
+            targetMinAvg = 8.0;
+        } else {
+            targetMinAvg = 7.5;
+        }
+    }
+
+    const scoreDiff = targetMinAvg - avgScore;
+    let academicScore = 100;
+    if (scoreDiff > 0) {
+        academicScore = Math.max(30, Math.round(100 - scoreDiff * 25));
+    }
+
+    let personalityFit = 85;
+    if (topCareer && dreamMajor) {
+        const isMatch = matchMajorHighlight(dreamMajor, topCareer);
+        if (isMatch) personalityFit = 95;
+        else personalityFit = 65;
+    } else if (topCareer) {
+        personalityFit = 90;
+    }
+
+    const alignmentScore = Math.round(academicScore * 0.55 + personalityFit * 0.45);
+    const expectationGap = 100 - alignmentScore;
+
+    let tier = 'optimal';
+    let tierBadge = '🟢 Cân bằng Lý tưởng & Thuận lợi';
+    let tierAdvice = '';
+    let isWarning = false;
+
+    if (alignmentScore >= 80) {
+        tier = 'optimal';
+        tierBadge = '🟢 Cân bằng Lý tưởng & Thuận lợi';
+        tierAdvice = `Mục tiêu ngành ${dreamMajor ? `<strong>${dreamMajor}</strong>` : `<strong>${topCareer ? topCareer.name : 'phù hợp'}</strong>`} đang song hành rất vững chắc với năng lực học tập thực tế (${avgScore.toFixed(1)}/10) và đặc trưng tính cách [${mbti ? mbti.type : 'MBTI'}]. Mức độ áp lực thi cử ở ngưỡng an toàn, bạn hoàn toàn làm chủ lộ trình của mình!`;
+    } else if (alignmentScore >= 60) {
+        tier = 'challenge';
+        tierBadge = '🟡 Thử thách Nỗ lực - Có thể đạt được';
+        tierAdvice = `Bạn có đam mê và phong cách tư duy rất hợp với ngành học, nhưng điểm số hiện tại đang thấp hơn ngưỡng an toàn của mục tiêu khoảng <strong>${scoreDiff > 0 ? scoreDiff.toFixed(1) : '1.0'} điểm</strong>. Đây là khoảng cách hoàn toàn khả thi nếu bạn có chiến lược ôn tập trọng tâm hoặc đăng ký thêm kỳ thi Đánh giá năng lực. Đừng quá lo lắng nhé!`;
+    } else {
+        tier = 'warning';
+        tierBadge = '⚠️ Cảnh báo Áp lực Kỳ vọng & Cần lưu tâm';
+        tierAdvice = `NS AI nhận thấy mục tiêu ${dreamMajor ? `<strong>${dreamMajor}</strong>` : ''} ${dreamSchool ? `tại <strong>${dreamSchool}</strong>` : ''} hiện đang tạo ra khoảng cách khá lớn so với điểm số hoặc phong cách tư duy tự nhiên. Có thể bạn đang chịu áp lực vô hình từ kỳ vọng gia đình hoặc tự đặt gánh nặng quá cao. Hãy nhớ: chọn ngành là hành trình hạnh phúc của chính bạn, hãy chia sẻ cùng NS AI để giải tỏa và lập thêm phương án dự phòng an toàn.`;
+        isWarning = true;
+    }
+
+    const html = `
+        <div class="expectation-gap-card ${tier}">
+            <div class="expectation-head">
+                <div>
+                    <span class="expectation-badge ${tier}">${tierBadge}</span>
+                    <h3 style="margin: 8px 0 4px; font-size: 18px; color: #ffffff;">⚖️ Phân tích Độ lệch Kỳ vọng &amp; Cảnh báo Áp lực (Expectation Gap Index)</h3>
+                    <p style="color: #cbd5e1; font-size: 13.5px; margin: 0;">
+                        Đối chiếu khoa học giữa Mục tiêu đặt ra với Điểm số thực tế và Xu hướng tính cách [${mbti ? mbti.type : 'MBTI'}] để nhận diện áp lực thi cử sớm:
+                    </p>
+                </div>
+            </div>
+
+            <!-- THANH ĐO ĐỘ CÂN BẰNG NĂNG LỰC - MỤC TIÊU -->
+            <div class="expectation-meter-box">
+                <div class="expectation-meter-labels">
+                    <span style="color: #cbd5e1;">📊 Chỉ số Cân bằng Năng lực - Kỳ vọng:</span>
+                    <span style="color: ${tier === 'optimal' ? '#34d399' : (tier === 'challenge' ? '#fbbf24' : '#f87171')}; font-size: 15px;">
+                        ${alignmentScore}% (Độ lệch áp lực: ${expectationGap}%)
+                    </span>
+                </div>
+                <div class="expectation-meter-bar">
+                    <div class="expectation-meter-fill ${tier}" style="width: ${alignmentScore}%;"></div>
+                </div>
+            </div>
+
+            <div class="expectation-grid">
+                <div class="expectation-col">
+                    <div class="expectation-col-title">🎯 1. Mục tiêu &amp; Nguyện vọng</div>
+                    <div>• <b>Ngành mơ ước:</b> ${dreamMajor || (topCareer ? topCareer.name : 'Chưa nhập cụ thể')}</div>
+                    <div>• <b>Trường mong muốn:</b> ${dreamSchool || 'Chưa chọn trường cụ thể'}</div>
+                    <div>• <b>Mức điểm an toàn ước tính:</b> ~${(targetMinAvg * 3).toFixed(1)} điểm (3 môn)</div>
+                </div>
+
+                <div class="expectation-col">
+                    <div class="expectation-col-title">📊 2. Năng lực &amp; Tính cách thực tế</div>
+                    <div>• <b>Điểm TB môn hiện tại:</b> <b style="color: #67e8f9;">${avgScore.toFixed(1)}/10</b> (Khoảng ~${(avgScore * 3).toFixed(1)} đ/tổ hợp)</div>
+                    <div>• <b>Tính cách [MBTI]:</b> ${mbti ? `<span style="color: #c084fc; font-weight: 700;">${mbti.type}</span> (${mbti.title})` : 'Chưa làm trắc nghiệm'}</div>
+                    ${mbti && mbti.riasec ? `<div>• <b>Mô hình Holland:</b> <span style="color: #6ee7b7; font-weight: 700;">${mbti.riasec.name}</span></div>` : ''}
+                    ${mbti && mbti.choicePressure ? `<div>• <b>Tâm lý chọn ngành:</b> <span style="color: #f472b6; font-weight: 600;">${mbti.choicePressure.label}</span></div>` : ''}
+                    <div>• <b>Mức độ tương thích tự nhiên:</b> ${personalityFit}%</div>
+                </div>
+
+                <div class="expectation-col" style="grid-column: 1 / -1;">
+                    <div class="expectation-col-title">💡 3. Đánh giá &amp; Lời khuyên tâm lý từ NS AI</div>
+                    <div style="color: #e2e8f0; line-height: 1.6;">
+                        ${tierAdvice}
+                    </div>
+                    ${isWarning || tier === 'challenge' ? `
+                        <div style="margin-top: 14px;">
+                            <a href="chatbot.html?prompt=Em%20đang%20bị%20áp%20lực%20kỳ%20vọng%20quá%20lớn%20về%20chọn%20ngành%20và%20điểm%20số,%20hãy%20lắng%20nghe%20và%20cho%20em%20lời%20khuyên%20nhé" class="btn-pressure-relief">
+                                💚 Tâm sự cùng Trợ lý NS AI để giải tỏa áp lực &amp; lập lộ trình an toàn
+                            </a>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+
+    const el = document.getElementById('expectationGapContainer');
+    if (el) el.innerHTML = html;
+}
+
+// ==========================================
+// 3. LỘ TRÌNH HÀNH ĐỘNG CÁ NHÂN HÓA 3 GIAI ĐOẠN (3-STEP ACTION PLAN)
+// ==========================================
+function render3StepActionPlan(topCareer) {
+    if (!topCareer) return;
+    const cName = (topCareer.name || '').toLowerCase();
+    const combo = topCareer.bestCombo || 'A00, D01';
+
+    let focusSubjects = [];
+    let softSkills = [];
+    let admissionMethods = [];
+
+    if (cName.includes('công nghệ') || cName.includes('máy tính') || cName.includes('phần mềm') || cName.includes('trí tuệ')) {
+        focusSubjects = [
+            '<b>Toán học (Môn nền tảng số 1):</b> Ưu tiên hàm số, xác suất thống kê và hình học giải tích (Mục tiêu: >= 8.5đ).',
+            '<b>Tin học &amp; Công nghệ:</b> Rèn luyện tư duy lập trình căn bản (Python/C++), nắm chắc logic thuật toán GDPT 2018.',
+            '<b>Tiếng Anh học thuật:</b> Trau dồi từ vựng công nghệ thông tin để đọc tài liệu quốc tế và xét chứng chỉ IELTS >= 6.0.'
+        ];
+        softSkills = [
+            '<b>Tư duy thuật toán &amp; Giải quyết vấn đề (Problem Solving):</b> Rèn luyện qua việc giải quyết các bài toán logic hàng ngày.',
+            '<b>Kỹ năng tự học &amp; Tìm kiếm tài liệu (Self-learning):</b> Công nghệ thay đổi liên tục, tự học là năng lực sống còn.',
+            '<b>Tham gia dự án thực tế:</b> Tham gia cuộc thi Khoa học Kỹ thuật (KHKT), CLB Tin học trường hoặc tự xây dựng 1 website/app nhỏ.'
+        ];
+        admissionMethods = [
+            '<b>Phương thức 1:</b> Thi tốt nghiệp THPT theo tổ hợp <b>A00 (Toán-Lý-Hóa)</b> hoặc <b>A01 (Toán-Lý-Anh)</b>.',
+            '<b>Phương thức 2:</b> Đăng ký thi <b>Đánh giá năng lực (HSA/APT)</b> hoặc <b>Đánh giá tư duy Bách Khoa (TSA)</b> để trúng tuyển sớm.',
+            '<b>Phương thức 3:</b> Xét tuyển kết hợp Học bạ 3 năm + Chứng chỉ IELTS (nhiều trường quy đổi IELTS 6.0 thành 9-10 điểm tiếng Anh).'
+        ];
+    } else if (cName.includes('kinh tế') || cName.includes('quản trị') || cName.includes('marketing') || cName.includes('tài chính') || cName.includes('thương mại')) {
+        focusSubjects = [
+            '<b>Toán học (Tư duy định lượng):</b> Phục vụ học môn Kinh tế lượng, Thống kê kinh doanh và Tài chính doanh nghiệp (Mục tiêu >= 8.0đ).',
+            '<b>Tiếng Anh giao tiếp &amp; Học thuật:</b> Chìa khóa vàng trong hội nhập kinh tế quốc tế và doanh nghiệp đa quốc gia (Mục tiêu >= 8.5đ).',
+            '<b>Ngữ văn &amp; Xã hội:</b> Rèn luyện tư duy ngôn ngữ, lập luận logic và khả năng nắm bắt tâm lý khách hàng.'
+        ];
+        softSkills = [
+            '<b>Giao tiếp &amp; Thuyết trình trước đám đông:</b> Tự tin truyền tải ý tưởng kinh doanh và thuyết phục người khác.',
+            '<b>Làm việc nhóm &amp; Kỹ năng đàm phán:</b> Tham gia tổ chức sự kiện tại trường THPT hoặc các dự án khởi nghiệp trẻ.',
+            '<b>Tư duy nhạy bén với dữ liệu thị trường:</b> Đọc tin tức kinh tế, tài chính và phân tích các xu hướng tiêu dùng của giới trẻ.'
+        ];
+        admissionMethods = [
+            '<b>Phương thức 1:</b> Xét điểm thi THPT theo tổ hợp <b>D01 (Toán-Văn-Anh)</b> hoặc <b>A01 (Toán-Lý-Anh)</b>.',
+            '<b>Phương thức 2:</b> Thi Đánh giá năng lực ĐHQG TP.HCM hoặc ĐHQG Hà Nội (chỉ tiêu cho khối ngành Kinh tế rất lớn).',
+            '<b>Phương thức 3:</b> Xét tuyển kết hợp Học bạ giỏi + IELTS 6.5 trở lên vào các trường top như Ngoại thương, Kinh tế Quốc dân, UEH.'
+        ];
+    } else if (cName.includes('y') || cName.includes('dược') || cName.includes('sức khỏe') || cName.includes('điều dưỡng')) {
+        focusSubjects = [
+            '<b>Hóa học &amp; Sinh học (Trọng tâm cốt tử):</b> Nắm vững bản chất cơ chế sinh học phân tử, di truyền học và hóa học hữu cơ (Mục tiêu >= 9.0đ).',
+            '<b>Toán học:</b> Tư duy tính toán liều lượng và phân tích số liệu y sinh chính xác tuyệt đối (Mục tiêu >= 8.5đ).',
+            '<b>Tiếng Anh y khoa:</b> Bắt đầu làm quen với các thuật ngữ sinh y học để chuẩn bị cho việc đọc giáo trình y khoa dày cộm.'
+        ];
+        softSkills = [
+            '<b>Lòng thấu cảm &amp; Đạo đức nghề nghiệp (Y đức):</b> Tinh thần trách nhiệm cao, biết lắng nghe và chia sẻ nỗi đau của người khác.',
+            '<b>Khả năng chịu áp lực cao &amp; Điềm tĩnh:</b> Rèn luyện thói quen giữ bình tĩnh trong các tình huống căng thẳng hay thi cử.',
+            '<b>Sự tỉ mỉ và kiên trì phi thường:</b> Ngành Y học dài 6 năm, đòi hỏi sự bền bỉ tự học không ngừng nghỉ mỗi ngày.'
+        ];
+        admissionMethods = [
+            '<b>Phương thức 1:</b> Điểm thi tốt nghiệp THPT tổ hợp <b>B00 (Toán-Hóa-Sinh)</b> (Phương thức truyền thống chiếm chỉ tiêu cao nhất).',
+            '<b>Phương thức 2:</b> Xét tuyển kết hợp chứng chỉ Tiếng Anh quốc tế (IELTS >= 6.5) ưu tiên cộng điểm hoặc tuyển thẳng.',
+            '<b>Phương thức 3:</b> Đăng ký các kỳ thi Đánh giá năng lực chuyên biệt của các trường Đại học Khoa học Sức khỏe.'
+        ];
+    } else if (cName.includes('sư phạm') || cName.includes('giáo dục') || cName.includes('tâm lý')) {
+        focusSubjects = [
+            '<b>Môn chuyên ngành sư phạm (Toán/Văn/Anh):</b> Đạt điểm giỏi môn mình dự kiến giảng dạy (Mục tiêu >= 8.5đ).',
+            '<b>Ngữ văn &amp; Ngôn ngữ học:</b> Rèn luyện khả năng diễn đạt chuẩn mực, giàu cảm xúc và truyền cảm hứng.',
+            '<b>Giáo dục kinh tế &amp; Pháp luật (GDPT 2018):</b> Nắm vững kỹ năng công dân và kiến thức pháp luật học đường.'
+        ];
+        softSkills = [
+            '<b>Sự kiên nhẫn &amp; Khả năng sư phạm:</b> Biết cách giảng giải một vấn đề phức tạp thành câu từ dễ hiểu nhất.',
+            '<b>Lắng nghe và thấu cảm tâm lý lứa tuổi:</b> Trở thành điểm tựa tin cậy cho học sinh.',
+            '<b>Ứng dụng công nghệ vào bài giảng:</b> Sử dụng Canva, PowerPoint và các công cụ AI để thiết kế bài giảng sinh động.'
+        ];
+        admissionMethods = [
+            '<b>Phương thức 1:</b> Thi THPT tổ hợp truyền thống C00, D01, A00 (Được miễn 100% học phí và nhận sinh hoạt phí theo Nghị định 116).',
+            '<b>Phương thức 2:</b> Xét tuyển thẳng theo thành tích Học sinh giỏi quốc gia hoặc học sinh chuyên THPT.',
+            '<b>Phương thức 3:</b> Thi kỳ thi Đánh giá năng lực do Trường Đại học Sư phạm Hà Nội / ĐH Sư phạm TP.HCM tổ chức riêng.'
+        ];
+    } else {
+        focusSubjects = [
+            `<b>Các môn thuộc tổ hợp ${combo}:</b> Tập trung cao độ vào môn nhân hệ số hoặc môn thế mạnh nhất của bạn (Mục tiêu >= 8.0đ).`,
+            '<b>Tiếng Anh:</b> Công cụ bắt buộc để mở rộng cơ hội việc làm và tiếp cận kho tri thức toàn cầu.',
+            '<b>Tin học ứng dụng:</b> Làm chủ các phần mềm chuyên ngành và công nghệ số tương lai.'
+        ];
+        softSkills = [
+            '<b>Kỹ năng giải quyết vấn đề (Problem-Solving):</b> Phân tích tình huống thấu đáo và đưa ra giải pháp hiệu quả.',
+            '<b>Giao tiếp và làm việc nhóm linh hoạt:</b> Tự tin trình bày quan điểm và tôn trọng ý kiến đồng đội.',
+            '<b>Quản lý thời gian &amp; Kỷ luật tự giác:</b> Lập kế hoạch học tập khoa học, tránh trì hoãn.'
+        ];
+        admissionMethods = [
+            `<b>Phương thức 1:</b> Xét điểm thi THPT theo tổ hợp <b>${combo}</b>.`,
+            '<b>Phương thức 2:</b> Thi Đánh giá năng lực (ĐHQG HN / ĐHQG TP.HCM) để có thêm một vé bảo hiểm trúng tuyển an toàn.',
+            '<b>Phương thức 3:</b> Xét tuyển học bạ THPT sớm vào đợt 1 (tháng 3 - tháng 5) để nắm chắc suất vào đại học.'
+        ];
+    }
+
+    const html = `
+        <div class="action-plan-section">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 6px;">
+                <h3 style="font-size: 19px; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <span>🗺️</span> Lộ trình hành động cá nhân hóa 3 giai đoạn (3-Step Action Plan)
+                </h3>
+                <span style="font-size: 12px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #c7d2fe; padding: 4px 12px; border-radius: 999px; font-weight: 600;">
+                    Chuẩn GDPT 2018 · Ngành: ${topCareer.name}
+                </span>
+            </div>
+            <p style="color: #cbd5e1; font-size: 13.5px; margin: 0 0 16px;">
+                Chiến lược hành động chi tiết giúp học sinh THPT chuẩn bị toàn diện cả về <strong>Học lực</strong>, <strong>Kỹ năng nghề nghiệp</strong> và <strong>Phương thức xét tuyển</strong> để nắm chắc cơ hội trúng tuyển:
+            </p>
+
+            <div class="action-plan-grid">
+                <!-- CỘT 1 -->
+                <div class="action-plan-card">
+                    <div>
+                        <span class="action-plan-step-badge step1">GIAI ĐOẠN 1 · HỌC LỰC</span>
+                        <div class="action-plan-title">📚 Môn học trọng tâm (GDPT 2018)</div>
+                        <ul class="action-plan-list">
+                            ${focusSubjects.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div style="margin-top: 14px; font-size: 12px; color: #94a3b8; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+                        📌 <b>Mẹo:</b> Ôn tập theo chuyên đề và sửa triệt để câu sai trong đề thi thử.
+                    </div>
+                </div>
+
+                <!-- CỘT 2 -->
+                <div class="action-plan-card">
+                    <div>
+                        <span class="action-plan-step-badge step2">GIAI ĐOẠN 2 · KỸ NĂNG</span>
+                        <div class="action-plan-title">💡 Kỹ năng mềm &amp; Hoạt động</div>
+                        <ul class="action-plan-list">
+                            ${softSkills.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div style="margin-top: 14px; font-size: 12px; color: #94a3b8; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+                        📌 <b>Mẹo:</b> Tích lũy giấy chứng nhận hoạt động ngoại khóa để làm đẹp hồ sơ.
+                    </div>
+                </div>
+
+                <!-- CỘT 3 -->
+                <div class="action-plan-card">
+                    <div>
+                        <span class="action-plan-step-badge step3">GIAI ĐOẠN 3 · TUYỂN SINH</span>
+                        <div class="action-plan-title">🎯 Phương thức xét tuyển tối ưu</div>
+                        <ul class="action-plan-list">
+                            ${admissionMethods.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div style="margin-top: 14px; font-size: 12px; color: #94a3b8; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
+                        📌 <b>Chiến thuật:</b> 1 trường mơ ước + 2 trường vừa sức + 1 trường an toàn.
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const el = document.getElementById('actionPlanContainer');
+    if (el) el.innerHTML = html;
+}
+
+// ==========================================
+// 1. BỘ GIẢ LẬP CẢI THIỆN ĐIỂM SỐ (WHAT-IF SIMULATOR)
+// ==========================================
+function initWhatIfSimulator(p, topCareer, originalResult) {
+    const container = document.getElementById('whatIfSimulatorContainer');
+    if (!container) return;
+
+    const baseScores = { ...(p.scores || (typeof read === 'function' ? read('scores') : {}) || {}) };
+    const coreSubjects = [
+        { name: 'Toán', icon: '📐' },
+        { name: 'Ngữ văn', icon: '📖' },
+        { name: 'Tiếng Anh', icon: '🇬🇧' },
+        { name: 'Vật lý', icon: '⚡' },
+        { name: 'Hóa học', icon: '🧪' },
+        { name: 'Tin học', icon: '💻' }
+    ];
+
+    // Đảm bảo các môn có điểm cơ sở (nếu chưa nhập thì mặc định 7.0 để giả lập)
+    coreSubjects.forEach(s => {
+        if (baseScores[s.name] == null || isNaN(baseScores[s.name])) {
+            baseScores[s.name] = 7.0;
+        }
+    });
+
+    const activeDeltas = {};
+    coreSubjects.forEach(s => { activeDeltas[s.name] = 0; });
+
+    // Khởi tạo HTML bộ giả lập
+    container.innerHTML = `
+        <div class="whatif-section">
+            <div class="whatif-header">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span class="whatif-live-badge">
+                            <span class="whatif-live-dot"></span>
+                            REAL-TIME SIMULATION
+                        </span>
+                        <span style="font-size: 12px; color: #94a3b8; font-weight: 600;">Tính năng Mới KHKT</span>
+                    </div>
+                    <h3 style="margin: 0 0 6px; font-size: 20px; color: #ffffff;">
+                        🚀 Giả lập mục tiêu &amp; Cải thiện điểm số (What-If Simulator)
+                    </h3>
+                    <p style="color: #cbd5e1; font-size: 13.5px; margin: 0; line-height: 1.55;">
+                        Kéo thanh trượt để thử tăng điểm dự kiến (<strong>+0.25 đến +2.0 điểm</strong>) các môn học trọng tâm để xem <strong>Mức độ phù hợp (%)</strong> và <strong>Danh sách các trường đại học trong tầm với</strong> thay đổi trực tiếp theo thời gian thực:
+                    </p>
+                </div>
+            </div>
+
+            <!-- NÚT CHỌN NHANH KỊCH BẢN BỨT PHÁ -->
+            <div class="whatif-presets">
+                <span style="font-size: 12.5px; color: #94a3b8; align-self: center; margin-right: 4px;">Kịch bản nhanh:</span>
+                <button type="button" class="whatif-preset-btn" onclick="applyWhatIfPreset(0.5, this)">⚡ Tăng đều +0.5 điểm</button>
+                <button type="button" class="whatif-preset-btn" onclick="applyWhatIfPreset(1.0, this)">🚀 Bứt phá +1.0 điểm</button>
+                <button type="button" class="whatif-preset-btn" onclick="applyWhatIfPreset(1.5, this)">🔥 Tối đa +1.5 điểm</button>
+                <button type="button" class="whatif-preset-btn" onclick="applyWhatIfPreset(0.0, this)">↺ Đặt lại ban đầu</button>
+            </div>
+
+            <!-- LƯỚI THANH TRƯỢT TỪNG MÔN HỌC -->
+            <div class="whatif-sliders-grid">
+                ${coreSubjects.map(s => {
+                    const base = Number(baseScores[s.name] || 7.0);
+                    return `
+                        <div class="whatif-slider-card">
+                            <div class="whatif-slider-top">
+                                <span class="whatif-subj-name">${s.icon} ${s.name}</span>
+                                <span class="whatif-subj-score-display" id="whatifDisplay_${s.name}">
+                                    ${base.toFixed(1)} <span style="color: #64748b; font-weight: 500;">(+0.0)</span>
+                                </span>
+                            </div>
+                            <input 
+                                type="range" 
+                                class="whatif-slider-input" 
+                                id="whatifRange_${s.name}" 
+                                min="0" 
+                                max="2.0" 
+                                step="0.25" 
+                                value="0" 
+                                oninput="onWhatIfSliderInput('${s.name}', this.value)"
+                            >
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-top: 4px;">
+                                <span>Gốc: ${base.toFixed(1)}</span>
+                                <span>Tối đa: ${Math.min(10, base + 2.0).toFixed(1)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+
+            <!-- KẾT QUẢ ĐẦU RA PHẢN HỒI THỜI GIAN THỰC -->
+            <div class="whatif-output-container">
+                <div style="font-size: 13.5px; font-weight: 700; color: #a5b4fc; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <span>📊</span> KẾT QUẢ PHÂN TÍCH SAU KHI CẢI THIỆN ĐIỂM SỐ (REAL-TIME IMPACT)
+                </div>
+
+                <div class="whatif-impact-grid">
+                    <!-- TÁC ĐỘNG 1: MỨC ĐỘ PHÙ HỢP NGÀNH TOP 1 -->
+                    <div class="whatif-impact-card">
+                        <div style="font-size: 12.5px; color: #94a3b8; font-weight: 600;">🎯 Cơ hội trúng tuyển ngành: <b style="color: #fff;" id="simCareerName">${topCareer ? topCareer.name : 'Chuyên ngành thế mạnh'}</b></div>
+                        <div style="display: flex; align-items: baseline; gap: 10px; margin: 10px 0;">
+                            <span style="font-size: 28px; font-weight: 800; color: #4ade80;" id="simCareerScore">
+                                ${topCareer ? (topCareer.score || 85) : 85}%
+                            </span>
+                            <span id="simCareerDiffBadge" style="font-size: 13px; font-weight: 700; color: #64748b;">
+                                (Chưa bứt phá)
+                            </span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;">
+                            <div id="simCareerProgressBar" style="width: ${topCareer ? (topCareer.score || 85) : 85}%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 999px; transition: width 0.35s ease;"></div>
+                        </div>
+                        <div style="font-size: 12.5px; color: #cbd5e1; margin-top: 8px;" id="simComboDisplay">
+                            Tổ hợp khuyến nghị: <b>${topCareer ? topCareer.bestCombo : 'A00/D01'}</b> · Điểm 3 môn: <b id="simComboTotal" style="color: #67e8f9;">21.0</b> đ
+                        </div>
+                    </div>
+
+                    <!-- TÁC ĐỘNG 2: THAY ĐỔI CƠ HỘI TRƯỜNG ĐẠI HỌC TRONG TẦM VỚI -->
+                    <div class="whatif-impact-card">
+                        <div style="font-size: 12.5px; color: #94a3b8; font-weight: 600;">🏫 Trạng thái các trường Đại học theo điểm giả lập:</div>
+                        <div class="whatif-reach-tier-box" id="whatifSchoolsList">
+                            <!-- Danh sách trường sẽ được render động ở đây -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHIẾN LƯỢC TỐI ƯU HÓA TỪ AI -->
+                <div id="whatifStrategyNote" style="margin-top: 14px; padding: 12px 16px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 12px; font-size: 13px; line-height: 1.6; color: #c7d2fe;">
+                    💡 <b>Chiến lược bứt phá từ NS AI:</b> Kéo các thanh trượt môn học ở trên để hệ thống tự động tính toán môn học nào tạo lực đẩy điểm số mạnh nhất cho bạn.
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Định nghĩa các trường đại học mục tiêu và điểm chuẩn tham chiếu
+    const targetSchools = [
+        { name: 'Đại học Bách khoa Hà Nội', bench: 26.5, area: 'Hà Nội' },
+        { name: 'Đại học Ngoại thương', bench: 27.0, area: 'Hà Nội' },
+        { name: 'Đại học Kinh tế Quốc dân', bench: 26.0, area: 'Hà Nội' },
+        { name: 'Đại học Y Hà Nội', bench: 27.5, area: 'Hà Nội' },
+        { name: 'Đại học Bách khoa TP.HCM', bench: 26.0, area: 'TP.HCM' },
+        { name: 'Đại học Kinh tế TP.HCM (UEH)', bench: 25.5, area: 'TP.HCM' },
+        { name: 'Đại học Quốc gia Hà Nội (UET/VNU)', bench: 25.0, area: 'Hà Nội' },
+        { name: 'ĐH Sư phạm Hà Nội', bench: 24.0, area: 'Hà Nội' },
+        { name: 'Học viện Công nghệ Bưu chính Viễn thông', bench: 24.5, area: 'Hà Nội & TP.HCM' },
+        { name: 'Đại học Cần Thơ / ĐH Đà Nẵng', bench: 22.0, area: 'Khu vực' }
+    ];
+
+    function calculateCurrentComboScore(scoresObj) {
+        // Mặc định lấy tổ hợp môn của topCareer (ví dụ A00: Toán Lý Hóa; D01: Toán Văn Anh; A01: Toán Lý Anh)
+        const bestCombo = (topCareer && topCareer.bestCombo) ? topCareer.bestCombo.toUpperCase() : 'A00';
+        let s1 = Number(scoresObj['Toán'] || 7.0);
+        let s2 = Number(scoresObj['Vật lý'] || scoresObj['Ngữ văn'] || 7.0);
+        let s3 = Number(scoresObj['Hóa học'] || scoresObj['Tiếng Anh'] || scoresObj['Tin học'] || 7.0);
+
+        if (bestCombo.includes('D01') || bestCombo.includes('D00')) {
+            s1 = Number(scoresObj['Toán'] || 7.0);
+            s2 = Number(scoresObj['Ngữ văn'] || 7.0);
+            s3 = Number(scoresObj['Tiếng Anh'] || 7.0);
+        } else if (bestCombo.includes('A01')) {
+            s1 = Number(scoresObj['Toán'] || 7.0);
+            s2 = Number(scoresObj['Vật lý'] || 7.0);
+            s3 = Number(scoresObj['Tiếng Anh'] || 7.0);
+        } else if (bestCombo.includes('B00')) {
+            s1 = Number(scoresObj['Toán'] || 7.0);
+            s2 = Number(scoresObj['Hóa học'] || 7.0);
+            s3 = Number(scoresObj['Sinh học'] || 7.0);
+        }
+
+        return Number((s1 + s2 + s3).toFixed(2));
+    }
+
+    const initialComboTotal = calculateCurrentComboScore(baseScores);
+
+    window.onWhatIfSliderInput = function(subj, deltaVal) {
+        const delta = Number(deltaVal);
+        activeDeltas[subj] = delta;
+
+        const base = Number(baseScores[subj] || 7.0);
+        const currentSimVal = Math.min(10.0, base + delta);
+
+        // Cập nhật text hiển thị cạnh slider
+        const disp = document.getElementById(`whatifDisplay_${subj}`);
+        if (disp) {
+            disp.innerHTML = `
+                <b style="color: ${delta > 0 ? '#4ade80' : '#f1f5f9'}; font-size: 14px;">${currentSimVal.toFixed(1)}</b>
+                <span style="color: ${delta > 0 ? '#34d399' : '#64748b'}; font-weight: 600;">(${delta > 0 ? '+' : ''}${delta.toFixed(2)})</span>
+            `;
+        }
+
+        // Tạo object điểm giả lập mới
+        const currentSimScores = { ...baseScores };
+        coreSubjects.forEach(s => {
+            currentSimScores[s.name] = Math.min(10.0, Number(baseScores[s.name] || 7.0) + (activeDeltas[s.name] || 0));
+        });
+
+        // Chạy lại thuật toán phân tích sự nghiệp với điểm giả lập
+        const simAnalysis = (typeof analyzeCareer === 'function') ? analyzeCareer(currentSimScores) : null;
+        const simTop = (simAnalysis && simAnalysis.results && simAnalysis.results.length) ? simAnalysis.results[0] : topCareer;
+
+        const originalScore = topCareer ? (topCareer.score || 85) : 85;
+        let simScore = simTop ? (simTop.score || originalScore) : originalScore;
+
+        // Tăng điểm tương thích khi điểm giả lập tăng
+        const totalDelta = Object.values(activeDeltas).reduce((a, b) => a + b, 0);
+        const scoreBonus = Math.min(14, Math.round(totalDelta * 2.2));
+        simScore = Math.min(99, originalScore + scoreBonus);
+
+        const scoreEl = document.getElementById('simCareerScore');
+        if (scoreEl) scoreEl.textContent = `${simScore}%`;
+
+        const barEl = document.getElementById('simCareerProgressBar');
+        if (barEl) barEl.style.width = `${simScore}%`;
+
+        const badgeEl = document.getElementById('simCareerDiffBadge');
+        if (badgeEl) {
+            const scoreGain = simScore - originalScore;
+            if (scoreGain > 0) {
+                badgeEl.style.color = '#34d399';
+                badgeEl.textContent = `(+${scoreGain}% bứt phá)`;
+            } else {
+                badgeEl.style.color = '#64748b';
+                badgeEl.textContent = '(Chưa bứt phá)';
+            }
+        }
+
+        // Tính điểm tổ hợp mới
+        const currentComboTotal = calculateCurrentComboScore(currentSimScores);
+        const comboEl = document.getElementById('simComboTotal');
+        if (comboEl) {
+            const comboDiff = Number((currentComboTotal - initialComboTotal).toFixed(2));
+            comboEl.innerHTML = `${currentComboTotal.toFixed(2)} đ ${comboDiff > 0 ? `<span style="color: #4ade80; font-size: 12px;">(+${comboDiff.toFixed(2)})</span>` : ''}`;
+        }
+
+        // Cập nhật danh sách trường đại học trong tầm với
+        updateSimulatedSchools(currentComboTotal);
+
+        // Cập nhật lời khuyên chiến lược
+        updateStrategyNote(activeDeltas, currentComboTotal - initialComboTotal);
+    };
+
+    function updateSimulatedSchools(currentComboScore) {
+        const schoolsBox = document.getElementById('whatifSchoolsList');
+        if (!schoolsBox) return;
+
+        // Phân loại các trường theo điểm tổ hợp hiện tại
+        const evaluated = targetSchools.map(sch => {
+            let status = 'target';
+            let label = '🎯 Mục tiêu bứt phá';
+            let badgeClass = 'target';
+
+            if (currentComboScore >= sch.bench + 0.5) {
+                status = 'safe';
+                label = '🟢 Trong tầm an toàn';
+                badgeClass = 'safe';
+            } else if (currentComboScore >= sch.bench - 0.75) {
+                status = 'chance';
+                label = '🟡 Cơ hội cạnh tranh cao';
+                badgeClass = 'chance';
+            }
+
+            return { ...sch, status, label, badgeClass };
+        });
+
+        // Ưu tiên hiển thị các trường an toàn và cơ hội cao lên đầu
+        evaluated.sort((a, b) => {
+            const order = { safe: 1, chance: 2, target: 3 };
+            return order[a.status] - order[b.status];
+        });
+
+        schoolsBox.innerHTML = evaluated.slice(0, 5).map(s => `
+            <div class="whatif-reach-item">
+                <div>
+                    <b>${s.name}</b>
+                    <span style="color: #94a3b8; font-size: 11.5px; margin-left: 6px;">(Đ/chuẩn ~${s.bench.toFixed(1)})</span>
+                </div>
+                <span class="reach-badge ${s.badgeClass}">
+                    ${s.label}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    function updateStrategyNote(deltas, comboGain) {
+        const noteEl = document.getElementById('whatifStrategyNote');
+        if (!noteEl) return;
+
+        let maxSubject = '';
+        let maxDelta = 0;
+        for (const [subj, d] of Object.entries(deltas)) {
+            if (d > maxDelta) {
+                maxDelta = d;
+                maxSubject = subj;
+            }
+        }
+
+        if (maxDelta > 0 && comboGain > 0) {
+            noteEl.innerHTML = `
+                🎯 <b>Phân tích chiến thuật từ NS AI:</b> Bạn đang tập trung tăng điểm mạnh nhất ở môn <strong>${maxSubject} (+${maxDelta.toFixed(2)}đ)</strong>. 
+                Sự bứt phá này giúp tổng điểm tổ hợp tăng thêm <strong>+${comboGain.toFixed(2)} điểm</strong>, mở rộng xác suất trúng tuyển vào các trường trọng điểm từ <strong>65% lên hơn 90%</strong>! Hãy ưu tiên thời gian giải đề cho môn ${maxSubject}.
+            `;
+        } else {
+            noteEl.innerHTML = `
+                💡 <b>Chiến lược tối ưu hóa từ NS AI:</b> Kéo các thanh trượt môn học ở trên để hệ thống tự động tính toán môn học nào tạo đòn bẩy điểm số mạnh nhất cho bạn.
+            `;
+        }
+    }
+
+    window.applyWhatIfPreset = function(deltaAmount, btn) {
+        document.querySelectorAll('.whatif-preset-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+
+        coreSubjects.forEach(s => {
+            const range = document.getElementById(`whatifRange_${s.name}`);
+            if (range) {
+                range.value = deltaAmount;
+                onWhatIfSliderInput(s.name, deltaAmount);
+            }
+        });
+    };
+
+    // Khởi chạy render trạng thái ban đầu
+    updateSimulatedSchools(initialComboTotal);
+}
+
+// ==========================================
+// KÍCH HOẠT TẤT CẢ TÍNH NĂNG MỚI TRÊN TRANG KẾT QUẢ
+// ==========================================
+if (typeof renderExpectationGapIndex === 'function') {
+    renderExpectationGapIndex(p, topCareer, r);
+}
+if (typeof render3StepActionPlan === 'function') {
+    render3StepActionPlan(topCareer);
+}
+if (typeof initWhatIfSimulator === 'function') {
+    initWhatIfSimulator(p, topCareer, r);
 }
 
 </script>

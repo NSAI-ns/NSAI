@@ -1,7 +1,8 @@
 
 const NS_PREFIX = 'ns_';
 const UNIFIED_PROFILE_KEY = 'ns_ai_user_profile';
-const PROFILE_KEYS = ['info', 'scores', 'hobbies', 'personalityAnswers', 'personalityCustomAnswers', 'personalitySelfReflect', 'mbtiType', 'goals'];
+const ALT_PROFILE_KEY = 'ns_test_user_profile';
+const PROFILE_KEYS = ['info', 'scores', 'hobbies', 'personalityAnswers', 'personalityCustomAnswers', 'customPersonalityAnswers', 'personalitySelfReflect', 'mbtiType', 'mbtiData', 'riasecScores', 'riasecTopCode', 'techOrientation', 'choicePressure', 'goals'];
 
 /**
  * Đồng bộ toàn bộ dữ liệu 5 bước vào 1 object JSON duy nhất trong LocalStorage: 'ns_ai_user_profile'
@@ -9,14 +10,14 @@ const PROFILE_KEYS = ['info', 'scores', 'hobbies', 'personalityAnswers', 'person
 function syncUnifiedProfile(updatedKey, updatedValue) {
   try {
     let profile = {};
-    const raw = localStorage.getItem(UNIFIED_PROFILE_KEY);
+    const raw = localStorage.getItem(UNIFIED_PROFILE_KEY) || localStorage.getItem(ALT_PROFILE_KEY);
     if (raw) {
       try { profile = JSON.parse(raw) || {}; } catch (e) {}
     }
     if (!profile.info) profile.info = {};
     if (!profile.scores) profile.scores = {};
     if (!profile.hobbies) profile.hobbies = { selected: [], custom: '' };
-    if (!profile.personality) profile.personality = { answers: [], customAnswers: {}, selfReflect: {}, mbtiType: null, mbtiData: null };
+    if (!profile.personality) profile.personality = { answers: [], customAnswers: {}, customPersonalityAnswers: [], selfReflect: {}, mbtiType: null, mbtiData: null };
     if (!profile.goals) profile.goals = { selected: [], admissionMethods: [], other: '' };
 
     if (updatedKey === 'info') profile.info = updatedValue;
@@ -24,13 +25,20 @@ function syncUnifiedProfile(updatedKey, updatedValue) {
     else if (updatedKey === 'hobbies') profile.hobbies = updatedValue;
     else if (updatedKey === 'personalityAnswers') profile.personality.answers = updatedValue;
     else if (updatedKey === 'personalityCustomAnswers') profile.personality.customAnswers = updatedValue;
+    else if (updatedKey === 'customPersonalityAnswers') profile.personality.customPersonalityAnswers = updatedValue;
     else if (updatedKey === 'personalitySelfReflect') profile.personality.selfReflect = updatedValue;
     else if (updatedKey === 'mbtiType') profile.personality.mbtiType = updatedValue;
     else if (updatedKey === 'mbtiData') profile.personality.mbtiData = updatedValue;
+    else if (updatedKey === 'riasecScores') profile.personality.riasecScores = updatedValue;
+    else if (updatedKey === 'riasecTopCode') profile.personality.riasecTopCode = updatedValue;
+    else if (updatedKey === 'techOrientation') profile.personality.techOrientation = updatedValue;
+    else if (updatedKey === 'choicePressure') profile.personality.choicePressure = updatedValue;
     else if (updatedKey === 'goals') profile.goals = updatedValue;
 
     profile.lastUpdated = new Date().toISOString();
-    localStorage.setItem(UNIFIED_PROFILE_KEY, JSON.stringify(profile));
+    const jsonStr = JSON.stringify(profile);
+    localStorage.setItem(UNIFIED_PROFILE_KEY, jsonStr);
+    localStorage.setItem(ALT_PROFILE_KEY, jsonStr);
     return profile;
   } catch (err) {
     console.error('Lỗi khi đồng bộ ns_ai_user_profile:', err);
@@ -42,7 +50,7 @@ function syncUnifiedProfile(updatedKey, updatedValue) {
  */
 function getUnifiedProfile() {
   try {
-    const raw = localStorage.getItem(UNIFIED_PROFILE_KEY);
+    const raw = localStorage.getItem(UNIFIED_PROFILE_KEY) || localStorage.getItem(ALT_PROFILE_KEY);
     if (raw) {
       const p = JSON.parse(raw);
       if (p && typeof p === 'object') return p;
@@ -84,7 +92,7 @@ function save(key, value, syncToAccount = true) {
 function read(key) {
   try {
     // 1. Thử lấy từ object hồ sơ thống nhất ns_ai_user_profile
-    const rawUnified = localStorage.getItem(UNIFIED_PROFILE_KEY);
+    const rawUnified = localStorage.getItem(UNIFIED_PROFILE_KEY) || localStorage.getItem(ALT_PROFILE_KEY);
     if (rawUnified) {
       const u = JSON.parse(rawUnified);
       if (u) {
@@ -93,9 +101,14 @@ function read(key) {
         if (key === 'hobbies' && u.hobbies) return u.hobbies;
         if (key === 'personalityAnswers' && u.personality && u.personality.answers) return u.personality.answers;
         if (key === 'personalityCustomAnswers' && u.personality && u.personality.customAnswers) return u.personality.customAnswers;
+        if (key === 'customPersonalityAnswers' && u.personality && u.personality.customPersonalityAnswers) return u.personality.customPersonalityAnswers;
         if (key === 'personalitySelfReflect' && u.personality && u.personality.selfReflect) return u.personality.selfReflect;
         if (key === 'mbtiType' && u.personality && u.personality.mbtiType) return u.personality.mbtiType;
         if (key === 'mbtiData' && u.personality && u.personality.mbtiData) return u.personality.mbtiData;
+        if (key === 'riasecScores' && u.personality && u.personality.riasecScores) return u.personality.riasecScores;
+        if (key === 'riasecTopCode' && u.personality && u.personality.riasecTopCode) return u.personality.riasecTopCode;
+        if (key === 'techOrientation' && u.personality && u.personality.techOrientation) return u.personality.techOrientation;
+        if (key === 'choicePressure' && u.personality && u.personality.choicePressure) return u.personality.choicePressure;
         if (key === 'goals' && u.goals) return u.goals;
       }
     }
@@ -192,7 +205,7 @@ function loadDemoDataAndRedirect() {
   });
 
   // 4. Trắc nghiệm tính cách MBTI & Phản hồi tự bộc lộ (Nhóm INTJ - Nhà Kiến Tạo)
-  const demoAnswers = ['A', 'B', 'A', 'A', 'A', 'B', 'A', 'A', 'A', 'A'];
+  const demoAnswers = [0, 1, 0, 0, 0, 1, 0, 0, 0, 0];
   save('personalityAnswers', demoAnswers);
   save('personalityCustomAnswers', {});
   save('personalitySelfReflect', {
@@ -438,6 +451,39 @@ if (document.readyState === 'loading') {
   renderAuthTopbar();
 }
 
+// Tự động dọn dẹp dữ liệu trắc nghiệm tính cách không hợp lệ (ví dụ: mảng chữ cái demo cũ)
+(function sanitizePersonalityData() {
+  try {
+    const rawAnswers = read('personalityAnswers');
+    if (rawAnswers) {
+      // Nếu dữ liệu không phải mảng, không đủ 10 câu hoặc có chứa phần tử không phải số 0-4 (như 'A', 'B' từ dữ liệu demo cũ)
+      if (!Array.isArray(rawAnswers) || rawAnswers.length < 10 || rawAnswers.some(a => typeof a !== 'number' || a < 0 || a > 4)) {
+        localStorage.removeItem(NS_PREFIX + 'personalityAnswers');
+        localStorage.removeItem(NS_PREFIX + 'mbtiType');
+        localStorage.removeItem(NS_PREFIX + 'mbtiData');
+        localStorage.removeItem(NS_PREFIX + 'personalityCustomAnswers');
+        
+        // Dọn dẹp trong object tổng hợp nếu có
+        const rawUnified = localStorage.getItem(UNIFIED_PROFILE_KEY);
+        if (rawUnified) {
+          try {
+            const u = JSON.parse(rawUnified);
+            if (u && u.personality) {
+              u.personality.answers = [];
+              u.personality.customAnswers = {};
+              u.personality.mbtiType = null;
+              u.personality.mbtiData = null;
+              const updated = JSON.stringify(u);
+              localStorage.setItem(UNIFIED_PROFILE_KEY, updated);
+              localStorage.setItem(ALT_PROFILE_KEY, updated);
+            }
+          } catch (e) {}
+        }
+      }
+    }
+  } catch (e) {}
+})();
+
 // Kiểm tra dữ liệu thực tế đã hoàn thành cho từng bước
 function isStepCompleted(stepNum) {
   try {
@@ -462,19 +508,24 @@ function isStepCompleted(stepNum) {
         return hasSelected || hasCustom;
       }
       case 4: { // Bước 4: Tính cách
-        const mbti = read('mbtiType');
         const answers = read('personalityAnswers');
-        const customAnswers = read('personalityCustomAnswers');
-        const selfReflect = read('personalitySelfReflect');
-        const hasMbti = typeof mbti === 'string' && mbti.trim().length >= 4;
-        const hasAnswers = Array.isArray(answers) && answers.filter(a => a != null && a !== '').length >= 6;
-        const hasCustom = customAnswers && typeof customAnswers === 'object' && Object.keys(customAnswers).length > 0;
-        const hasReflect = !!(selfReflect && (
-          (selfReflect.strengths && selfReflect.strengths.trim()) ||
-          (selfReflect.idealEnv && selfReflect.idealEnv.trim()) ||
-          (selfReflect.vision && selfReflect.vision.trim())
-        ));
-        return hasMbti || hasAnswers || hasCustom || hasReflect;
+        // Phải trả lời đầy đủ 12 câu trắc nghiệm tình huống & kỷ nguyên số (chỉ mục 0 đến 4)
+        if (!Array.isArray(answers) || answers.length < 12) return false;
+        const validAnswers = answers.filter(a => typeof a === 'number' && a >= 0 && a <= 4);
+        if (validAnswers.length < 12) return false;
+
+        // Nếu có câu nào chọn đáp án 4 (E - Khác), bắt buộc phải có nội dung nhập tự luận
+        const customAnswers = read('personalityCustomAnswers') || {};
+        for (let i = 0; i < answers.length; i++) {
+          if (answers[i] === 4) {
+            const txt = customAnswers[i] || '';
+            if (!txt || !String(txt).trim()) return false;
+          }
+        }
+
+        // Bắt buộc phải có kết quả phân loại MBTI hợp lệ (4 ký tự chữ cái)
+        const mbti = read('mbtiType');
+        return typeof mbti === 'string' && mbti.trim().length === 4;
       }
       case 5: { // Bước 5: Mục tiêu
         const goals = read('goals');
@@ -488,7 +539,7 @@ function isStepCompleted(stepNum) {
         return hasSelected || hasMajor || hasCareer || hasSchool || hasLoc || hasDream;
       }
       case 6: { // Bước 6: Kết quả
-        // Trang kết quả chỉ xem là hoàn thành khi các bước nền tảng cốt lõi (1, 2, 3) đã hoàn tất
+        // Trang kết quả chỉ xem là hoàn thành khi các bước nền tảng cốt lõi đã hoàn tất
         return isStepCompleted(1) && isStepCompleted(2) && isStepCompleted(3);
       }
       default:
@@ -792,41 +843,116 @@ const MBTI_INFO = {
   'ESFP': { title: 'Người trình diễn hoạt náo', desc: 'Vui vẻ, hào phóng, yêu đời và luôn là tâm điểm kết nối mọi người.' }
 };
 
+const HOLLAND_DESCRIPTIONS = {
+  R: { name: 'Kỹ thuật - Thực tế (Realistic)', short: 'Kỹ thuật', desc: 'Thích làm việc với công cụ, máy móc, kỹ thuật, công nghệ thực tế và hành động cụ thể.' },
+  I: { name: 'Nghiên cứu - Logic (Investigative)', short: 'Nghiên cứu', desc: 'Thích phân tích, đào sâu bản chất, tư duy logic khoa học và giải quyết các bài toán phức tạp.' },
+  A: { name: 'Nghệ thuật - Sáng tạo (Artistic)', short: 'Nghệ thuật', desc: 'Giàu trí tưởng tượng, yêu thích sự tự do, đổi mới, thẩm mỹ và biểu đạt cảm xúc độc đáo.' },
+  S: { name: 'Xã hội - Giao tiếp (Social)', short: 'Xã hội', desc: 'Hướng đến con người, thấu cảm, thích chia sẻ, truyền cảm hứng, giảng dạy và giúp đỡ cộng đồng.' },
+  E: { name: 'Quản lý - Kinh doanh (Enterprising)', short: 'Quản lý', desc: 'Năng động, có tố chất lãnh đạo, thích thuyết phục, đàm phán, nắm bắt cơ hội và dẫn dắt tập thể.' },
+  C: { name: 'Nghiệp vụ - Chi tiết (Conventional)', short: 'Nghiệp vụ', desc: 'Ngăn nắp, cẩn trọng, tôn trọng quy trình chuẩn, có trách nhiệm cao và làm việc có kế hoạch.' }
+};
+
 function computeMBTI(answers) {
   const savedType = typeof read === 'function' ? read('mbtiType') : null;
   if (!Array.isArray(answers) || answers.length === 0) {
     if (savedType && MBTI_INFO[savedType]) {
-      return { type: savedType, ...MBTI_INFO[savedType], traits: { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 }, counts: {}, dimensions: null };
+      return { type: savedType, ...MBTI_INFO[savedType], traits: { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 }, counts: {}, dimensions: null, riasec: null, techTrend: null, choicePressure: null };
     }
     return null;
   }
 
   const mbtiScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+  const riasecScores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
   const counts = { logic: 0, people: 0, creative: 0, patient: 0 };
   const customMap = typeof read === 'function' ? (read('personalityCustomAnswers') || {}) : {};
 
-  // Bảng phân loại tính cách chuẩn xác theo 10 câu hỏi
+  // Bảng phân loại tính cách chuẩn xác theo 12 câu hỏi SJT - RIASEC
+  // Ánh xạ 4 lựa chọn: A = Kỹ thuật - Logic; B = Sáng tạo - Nghệ thuật; C = Xã hội - Giao tiếp; D = Quản lý - Kinh doanh
   const questionWeights = [
-    // Q1: Năng lượng & Xã hội (E vs I)
-    [ { m: { E: 3 }, t: { people: 2 } }, { m: { I: 3 }, t: { logic: 1, patient: 1 } }, { m: { E: 1, I: 2 }, t: { logic: 1, people: 1 } }, { m: { I: 3 }, t: { patient: 2 } } ],
-    // Q2: Tiếp nhận thông tin (S vs N)
-    [ { m: { N: 3 }, t: { logic: 1, creative: 1 } }, { m: { S: 3 }, t: { logic: 1, patient: 1 } }, { m: { N: 3 }, t: { creative: 2 } }, { m: { S: 3 }, t: { patient: 2 } } ],
-    // Q3: Ra quyết định (T vs F)
-    [ { m: { T: 3 }, t: { logic: 2 } }, { m: { F: 3 }, t: { people: 2 } }, { m: { T: 3 }, t: { logic: 1, patient: 1 } }, { m: { F: 3 }, t: { people: 1, creative: 1 } } ],
-    // Q4: Lối sống & Kế hoạch (J vs P)
-    [ { m: { J: 3 }, t: { patient: 2 } }, { m: { P: 3 }, t: { creative: 2 } }, { m: { J: 1, P: 2 }, t: { logic: 1, creative: 1 } }, { m: { J: 3 }, t: { patient: 2 } } ],
-    // Q5: Giải quyết vấn đề
-    [ { m: { T: 2, N: 1 }, t: { logic: 2 } }, { m: { N: 2, P: 1 }, t: { creative: 2 } }, { m: { F: 2, E: 1 }, t: { people: 2 } }, { m: { S: 2, J: 1 }, t: { patient: 2 } } ],
-    // Q6: Vai trò đội nhóm
-    [ { m: { E: 2, J: 1, T: 1 }, t: { logic: 1, people: 1 } }, { m: { I: 2, T: 1 }, t: { logic: 2 } }, { m: { E: 2, F: 1 }, t: { people: 2 } }, { m: { N: 2, P: 1 }, t: { creative: 2 } } ],
-    // Q7: Áp lực & Xung đột
-    [ { m: { T: 2 }, t: { logic: 2 } }, { m: { F: 2 }, t: { people: 2 } }, { m: { I: 2 }, t: { logic: 1, patient: 1 } }, { m: { S: 2, J: 1 }, t: { patient: 2 } } ],
-    // Q8: Động lực cốt lõi
-    [ { m: { T: 2, N: 1 }, t: { logic: 2 } }, { m: { F: 2 }, t: { people: 2 } }, { m: { E: 2, J: 1 }, t: { logic: 1, patient: 1 } }, { m: { P: 2, N: 1 }, t: { creative: 2 } } ],
-    // Q9: Môi trường lý tưởng
-    [ { m: { I: 2, T: 1 }, t: { logic: 2 } }, { m: { F: 2, E: 1 }, t: { people: 2 } }, { m: { E: 2, T: 1 }, t: { logic: 1, people: 1 } }, { m: { P: 2 }, t: { creative: 2 } } ],
-    // Q10: Phong cách học tập
-    [ { m: { I: 2, N: 1 }, t: { logic: 2 } }, { m: { S: 2 }, t: { patient: 2 } }, { m: { E: 2 }, t: { people: 2 } }, { m: { P: 2, N: 1 }, t: { creative: 2 } } ]
+    // Q1: Hội trại 26/3 & Hoạt động ngoại khóa (A: Kỹ thuật / B: Sáng tạo / C: Xã hội / D: Quản lý)
+    [
+      { m: { S: 2, T: 2 }, t: { logic: 2 }, r: { R: 3, I: 1 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { E: 2, F: 2 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { E: 2, J: 2 }, t: { patient: 2 }, r: { E: 3, C: 1 } }
+    ],
+    // Q2: Dự án học tập & Làm việc nhóm (A: Nghiên cứu - Code / B: Slide - Kịch bản / C: Thuyết trình - Hòa giải / D: Nhóm trưởng)
+    [
+      { m: { I: 2, T: 2 }, t: { logic: 2 }, r: { I: 3, R: 1 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { E: 2, F: 2 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { E: 2, J: 2 }, t: { patient: 2 }, r: { E: 3 } }
+    ],
+    // Q3: Cách giải quyết vấn đề khó (A: Tự mày mò quy luật / B: Mindmap sáng tạo / C: Trao đổi thầy cô bạn bè / D: Đánh giá nhanh hành động)
+    [
+      { m: { I: 3, T: 2 }, t: { logic: 2 }, r: { I: 3 } },
+      { m: { N: 3, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { E: 2, F: 2 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { S: 2, J: 2 }, t: { patient: 2 }, r: { C: 2, E: 1 } }
+    ],
+    // Q4: Môn học & Hoạt động trí tuệ yêu thích (A: Toán lý code / B: Viết lách nghệ thuật / C: Tâm lý văn hóa giảng bài / D: Thị trường tài chính Notion)
+    [
+      { m: { I: 2, T: 2 }, t: { logic: 2 }, r: { I: 2, R: 2 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { F: 2, I: 1 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { J: 2, T: 1, E: 1 }, t: { patient: 2 }, r: { E: 2, C: 2 } }
+    ],
+    // Q5: Ứng dụng Công nghệ & AI (A: Thuật toán debug / B: Ảnh minh họa kịch bản / C: Tâm sự ngoại ngữ thấu cảm / D: Tóm tắt kế hoạch phân tích)
+    [
+      { m: { I: 2, T: 2, N: 1 }, t: { logic: 2 }, r: { I: 2, R: 2 } },
+      { m: { N: 3, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { F: 2, E: 1 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { S: 2, J: 2 }, t: { patient: 2 }, r: { C: 3, E: 1 } }
+    ],
+    // Q6: Môi trường làm việc mơ ước (A: Lab công nghệ / B: Studio sáng tạo / C: Trường học bệnh viện xã hội / D: Văn phòng sàn tài chính doanh nghiệp)
+    [
+      { m: { I: 2, T: 2 }, t: { logic: 2 }, r: { R: 2, I: 2 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { F: 2, E: 2 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { E: 2, J: 2, T: 1 }, t: { patient: 2 }, r: { E: 3, C: 1 } }
+    ],
+    // Q7: Thói quen sử dụng Mạng xã hội (A: Video khoa học công nghệ / B: Trend biến hình đồ họa nhạc / C: Podcast chữa lành thiện nguyện / D: Khởi nghiệp tài chính marketing)
+    [
+      { m: { I: 2, T: 2 }, t: { logic: 2 }, r: { I: 2, R: 1 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { F: 2, E: 1 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { E: 2, J: 1, T: 1 }, t: { patient: 2 }, r: { E: 3 } }
+    ],
+    // Q8: Góc nhìn trước sản phẩm mới / App trường (A: Ngôn ngữ lập trình bảo mật / B: UI thẩm mỹ logo / C: Hỗ trợ học tập kết nối tâm lý / D: Quảng bá 100% duy trì lâu dài)
+    [
+      { m: { T: 2, I: 1 }, t: { logic: 2 }, r: { R: 2, I: 2 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { F: 2, E: 1 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { E: 3, J: 1 }, t: { patient: 2 }, r: { E: 3 } }
+    ],
+    // Q9: Xử lý áp lực ôn thi (A: Cày bài vận dụng cao bản chất / B: Bút nhớ nhiều màu sơ đồ thị giác / C: Study group động viên nhau / D: Thời gian biểu chi tiết mục tiêu)
+    [
+      { m: { I: 3, T: 2 }, t: { logic: 2 }, r: { I: 3 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { E: 2, F: 2 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { S: 2, J: 3 }, t: { patient: 2 }, r: { C: 3 } }
+    ],
+    // Q10: Giá trị cốt lõi hướng tới (A: Chế tạo sản phẩm công nghệ mới / B: Tác phẩm sáng tạo cá nhân / C: Giúp đỡ con người phụng sự / D: Doanh nghiệp vững mạnh tự do tài chính)
+    [
+      { m: { I: 2, T: 2 }, t: { logic: 2 }, r: { I: 2, R: 2 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { F: 3, E: 1 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { E: 3, J: 2 }, t: { patient: 2 }, r: { E: 3 } }
+    ],
+    // Q11: Bối cảnh Kỷ nguyên số (A: Core Tech AI / B: Creative Media AI / C: Human-Centric / D: Digital Biz Fintech)
+    [
+      { m: { T: 2, N: 1 }, t: { logic: 2 }, r: { R: 3, I: 2 } },
+      { m: { N: 2, P: 2 }, t: { creative: 2 }, r: { A: 3 } },
+      { m: { F: 2, S: 1 }, t: { people: 2 }, r: { S: 3 } },
+      { m: { E: 2, T: 1 }, t: { patient: 2 }, r: { E: 3, C: 2 } }
+    ],
+    // Q12: Bối cảnh Tâm lý học đường (A: Logic rõ ràng / B: Khao khát tự do / C: Áp lực bối rối / D: Thực tế việc làm)
+    [
+      { m: { I: 2, T: 1 }, t: { logic: 2 }, r: { I: 2, R: 1 } },
+      { m: { P: 2, N: 1 }, t: { creative: 2 }, r: { A: 2 } },
+      { m: { F: 2, J: 1 }, t: { people: 1, patient: 1 }, r: { S: 2 } },
+      { m: { J: 2, T: 1 }, t: { patient: 2 }, r: { E: 2, C: 2 } }
+    ]
   ];
 
   answers.forEach((optIdx, qIdx) => {
@@ -835,30 +961,34 @@ function computeMBTI(answers) {
       if (qRules) {
         if (qRules.m) Object.keys(qRules.m).forEach(k => { mbtiScores[k] += qRules.m[k]; });
         if (qRules.t) Object.keys(qRules.t).forEach(k => { counts[k] += qRules.t[k]; });
+        if (qRules.r) Object.keys(qRules.r).forEach(k => { riasecScores[k] += qRules.r[k]; });
       } else {
-        if (optIdx === 0) { mbtiScores.E += 1; mbtiScores.T += 1; counts.logic += 1; }
-        else if (optIdx === 1) { mbtiScores.I += 1; mbtiScores.F += 1; counts.people += 1; }
-        else if (optIdx === 2) { mbtiScores.N += 1; mbtiScores.P += 1; counts.creative += 1; }
-        else if (optIdx === 3) { mbtiScores.S += 1; mbtiScores.J += 1; counts.patient += 1; }
+        if (optIdx === 0) { mbtiScores.E += 1; mbtiScores.T += 1; counts.logic += 1; riasecScores.I += 2; }
+        else if (optIdx === 1) { mbtiScores.I += 1; mbtiScores.F += 1; counts.people += 1; riasecScores.S += 2; }
+        else if (optIdx === 2) { mbtiScores.N += 1; mbtiScores.P += 1; counts.creative += 1; riasecScores.A += 2; }
+        else if (optIdx === 3) { mbtiScores.S += 1; mbtiScores.J += 1; counts.patient += 1; riasecScores.C += 2; }
       }
     } else if (optIdx === 4) {
       // Đáp án E (Khác / tự luận)
       const txt = (customMap[qIdx] || '').toLowerCase();
-      if (/hướng ngoại|giao tiếp|bạn bè|đông người|thuyết trình/.test(txt)) { mbtiScores.E += 2; counts.people += 2; }
-      else if (/hướng nội|một mình|yên tĩnh|độc lập|riêng tư/.test(txt)) { mbtiScores.I += 2; counts.logic += 1; }
+      if (/hướng ngoại|giao tiếp|bạn bè|đông người|thuyết trình/.test(txt)) { mbtiScores.E += 2; counts.people += 2; riasecScores.S += 2; }
+      else if (/hướng nội|một mình|yên tĩnh|độc lập|riêng tư/.test(txt)) { mbtiScores.I += 2; counts.logic += 1; riasecScores.I += 1; }
 
-      if (/thực tế|số liệu|chi tiết|quy trình|kinh nghiệm/.test(txt)) { mbtiScores.S += 2; counts.patient += 2; }
-      else if (/ý tưởng|sáng tạo|tương lai|tổng quan|trực giác/.test(txt)) { mbtiScores.N += 2; counts.creative += 2; }
+      if (/thực tế|số liệu|chi tiết|quy trình|kinh nghiệm/.test(txt)) { mbtiScores.S += 2; counts.patient += 2; riasecScores.C += 2; }
+      else if (/ý tưởng|sáng tạo|tương lai|tổng quan|trực giác/.test(txt)) { mbtiScores.N += 2; counts.creative += 2; riasecScores.A += 2; }
 
-      if (/logic|lý trí|phân tích|nguyên lý|đúng sai|khoa học/.test(txt)) { mbtiScores.T += 2; counts.logic += 2; }
-      else if (/cảm xúc|thấu cảm|con người|tình cảm|chia sẻ|hòa hợp/.test(txt)) { mbtiScores.F += 2; counts.people += 2; }
+      if (/logic|lý trí|phân tích|nguyên lý|đúng sai|khoa học/.test(txt)) { mbtiScores.T += 2; counts.logic += 2; riasecScores.I += 2; }
+      else if (/cảm xúc|thấu cảm|con người|tình cảm|chia sẻ|hòa hợp/.test(txt)) { mbtiScores.F += 2; counts.people += 2; riasecScores.S += 2; }
 
-      if (/kế hoạch|kỷ luật|nguyên tắc|đúng hạn|ngăn nắp/.test(txt)) { mbtiScores.J += 2; counts.patient += 2; }
-      else if (/tự do|linh hoạt|ngẫu hứng|tùy hứng|thích nghi/.test(txt)) { mbtiScores.P += 2; counts.creative += 2; }
+      if (/kế hoạch|kỷ luật|nguyên tắc|đúng hạn|ngăn nắp/.test(txt)) { mbtiScores.J += 2; counts.patient += 2; riasecScores.C += 2; }
+      else if (/tự do|linh hoạt|ngẫu hứng|tùy hứng|thích nghi/.test(txt)) { mbtiScores.P += 2; counts.creative += 2; riasecScores.A += 2; }
+
+      if (/kỹ thuật|máy móc|cơ khí|thực tế|chế tạo|lắp ráp|phần cứng/.test(txt)) { riasecScores.R += 2; }
+      if (/kinh doanh|quản lý|lãnh đạo|tiền|thương mại|khởi nghiệp|đàm phán/.test(txt)) { riasecScores.E += 2; }
 
       if (counts.logic === 0 && counts.people === 0 && counts.creative === 0 && counts.patient === 0) {
         mbtiScores.I += 1; mbtiScores.N += 1; mbtiScores.T += 1; mbtiScores.P += 1;
-        counts.logic += 1; counts.creative += 1;
+        counts.logic += 1; counts.creative += 1; riasecScores.I += 2; riasecScores.A += 1;
       }
     }
   });
@@ -916,6 +1046,36 @@ function computeMBTI(answers) {
     }
   };
 
+  // Tính toán Mô hình Holland RIASEC
+  const sortedRiasec = Object.entries(riasecScores).sort((a, b) => b[1] - a[1]);
+  const topRiasecLetters = sortedRiasec.slice(0, 3).map(x => x[0]);
+  const topHollandCode = topRiasecLetters.join('');
+  const riasecNames = topRiasecLetters.map(l => (HOLLAND_DESCRIPTIONS[l] ? HOLLAND_DESCRIPTIONS[l].short : l)).join(' · ');
+  const riasecFullName = `Nhóm ${riasecNames} (${topHollandCode})`;
+  const riasecDesc = `Thế mạnh nổi trội của bạn thuộc nhóm ${riasecNames}: ${topRiasecLetters.map(l => HOLLAND_DESCRIPTIONS[l] ? HOLLAND_DESCRIPTIONS[l].desc : '').filter(Boolean).join(' ')}`;
+
+  // Phân tích câu hỏi 11: Xu hướng Chuyển đổi số trong nghề nghiệp
+  let techTrend = { key: 'moderate', label: 'Ứng dụng công nghệ linh hoạt', score: 75 };
+  if (answers.length > 10 && answers[10] != null) {
+    const q11Val = answers[10];
+    if (q11Val === 0) techTrend = { key: 'core_tech', label: 'Tiên phong Công nghệ & Kỹ thuật số (AI, Big Data, Tự động hóa)', score: 95 };
+    else if (q11Val === 1) techTrend = { key: 'creative_tech', label: 'Sáng tạo Nghệ thuật & Truyền thông số (Thiết kế, Nội dung số, AI Creative)', score: 88 };
+    else if (q11Val === 2) techTrend = { key: 'human_first', label: 'Ưu tiên Giá trị Con người & Nhân văn (Tâm lý, Giáo dục, Y tế, Thấu cảm)', score: 65 };
+    else if (q11Val === 3) techTrend = { key: 'applied_biz', label: 'Quản trị thông minh & Kinh doanh số (Fintech, E-Commerce, Quản lý số)', score: 85 };
+    else if (q11Val === 4) techTrend = { key: 'custom', label: customMap[10] || 'Xu hướng công nghệ riêng biệt', score: 75 };
+  }
+
+  // Phân tích câu hỏi 12: Động lực & Kỳ vọng chọn ngành (Tâm lý học đường)
+  let choicePressure = { key: 'autonomous', label: 'Tự chủ & Rõ ràng Đam mê', level: 'Thấp', text: 'Tự tin cao, ít áp lực kỳ vọng' };
+  if (answers.length > 11 && answers[11] != null) {
+    const q12Val = answers[11];
+    if (q12Val === 0) choicePressure = { key: 'autonomous', label: 'Tự chủ & Rõ ràng Thế mạnh Chuyên môn', level: 'Thấp', text: 'Học sinh hoàn toàn tự chủ, đã xác định rõ thế mạnh logic và chuyên môn kỹ thuật; chủ động tìm hiểu sâu về ngành học.' };
+    else if (q12Val === 1) choicePressure = { key: 'passion_freedom', label: 'Khao khát Đam mê & Tự do Cá tính', level: 'Trung bình', text: 'Rất khao khát theo đuổi đam mê và cá tính riêng; cần môi trường cởi mở, sáng tạo, sợ sự gò bó và khô khan.' };
+    else if (q12Val === 2) choicePressure = { key: 'family_pressure', label: 'Áp lực Kỳ vọng Gia đình & Tâm lý Đám đông', level: 'Cao', text: 'Đang cảm thấy bối rối trước nhiều thông tin hoặc chịu áp lực kỳ vọng từ gia đình; cần được lắng nghe và tư vấn giải tỏa tâm lý.' };
+    else if (q12Val === 3) choicePressure = { key: 'pragmatic_goal', label: 'Mục tiêu Thực tế & Cơ hội Việc làm', level: 'Thấp', text: 'Ưu tiên tính thực tế và cơ hội việc làm rõ ràng sau khi ra trường; chủ động lập kế hoạch hành động cụ thể để chinh phục ngành học.' };
+    else if (q12Val === 4) choicePressure = { key: 'custom', label: 'Cảm xúc cá nhân riêng biệt', level: 'Tùy biến', text: customMap[11] || 'Tâm lý tự chia sẻ' };
+  }
+
   return {
     type,
     title: info.title,
@@ -924,7 +1084,16 @@ function computeMBTI(answers) {
     vietnameseTrait,
     counts,
     mbtiScores,
-    dimensions
+    dimensions,
+    riasec: {
+      scores: riasecScores,
+      sorted: sortedRiasec,
+      topCode: topHollandCode,
+      name: riasecFullName,
+      desc: riasecDesc
+    },
+    techTrend,
+    choicePressure
   };
 }
 
@@ -976,6 +1145,9 @@ function getProfile() {
     avg,
     personality,
     mbti,
+    riasec: mbti ? mbti.riasec : null,
+    techTrend: mbti ? mbti.techTrend : null,
+    choicePressure: mbti ? mbti.choicePressure : null,
     scoreCount: values.length
   };
 }
@@ -1006,9 +1178,9 @@ function profileText() {
  * Đảm bảo: KHÔNG thiên vị bất kỳ ngành nghề nào. Mọi ngành đều có xuất phát điểm công bằng.
  */
 
-function analyzeCareer() {
+function analyzeCareer(overrideScores = null) {
   const info = typeof read === 'function' ? (read('info') || {}) : {};
-  const scores = typeof read === 'function' ? (read('scores') || {}) : {};
+  const scores = (overrideScores && typeof overrideScores === 'object') ? overrideScores : (typeof read === 'function' ? (read('scores') || {}) : {});
   const hobbies = typeof read === 'function' ? (read('hobbies') || { selected: [], custom: '' }) : { selected: [], custom: '' };
   const answers = typeof read === 'function' ? (read('personalityAnswers') || []) : [];
   const customAnswers = typeof read === 'function' ? (read('personalityCustomAnswers') || {}) : {};

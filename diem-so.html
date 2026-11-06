@@ -57,32 +57,30 @@ onclick="resetAllData()">
 
 <main class="page">
 
-<section class="glass form-card">
+<section class="glass form-card wide">
 
 <p class="eyebrow">BƯỚC 2</p>
 
-<h1>Điểm các môn</h1>
+<h1>Điểm các môn học</h1>
 
 <p class="muted">
-Môn không học hoặc chưa có điểm có thể để trống.
-Điểm trống sẽ không được tính.
+Theo Chương trình GDPT 2018, bạn chỉ cần nhập điểm các môn bạn đang theo học hoặc là thế mạnh xét tuyển đại học. Môn không học hoặc chưa có điểm có thể để trống.
 </p>
 
+<div id="scoresContainer" style="display: flex; flex-direction: column; gap: 24px;"></div>
 
-<div id="scores" class="score-grid"></div>
 
-
-<div class="actions">
+<div class="actions" style="margin-top: 32px;">
 
 <a href="thongtin.html" class="btn secondary">
-← Quay lại
+← Quay lại Bước 1 (Thông tin)
 </a>
 
 <button
 class="btn primary"
 onclick="saveScores()">
 
-Lưu & tiếp tục →
+Lưu &amp; tiếp tục sang Bước 3 (Sở thích) →
 
 </button>
 
@@ -98,74 +96,118 @@ Lưu & tiếp tục →
 
 <script>
 
-const subjects = [
-
-'Toán',
-'Vật lý',
-'Hóa học',
-'Sinh học',
-'Tin học',
-'Ngữ văn',
-'Tiếng Anh',
-'Lịch sử',
-'Địa lý',
-'GDKT&PL',
-'Công nghệ công nghiệp',
-'Công nghệ nông nghiệp'
-
+const subjectGroups = [
+  {
+    title: '📌 1. Các môn học bắt buộc cốt lõi',
+    badge: '3 môn cốt lõi',
+    badgeColor: '#6366f1',
+    desc: 'Các môn học nền tảng bắt buộc theo chương trình GDPT 2018 và chiếm tỷ lệ cao trong các tổ hợp xét tuyển truyền thống.',
+    items: [
+      { name: 'Toán', icon: '📐', hint: 'Khối A, B, D, A01...' },
+      { name: 'Ngữ văn', icon: '📖', hint: 'Khối C, D, D01, D14...' },
+      { name: 'Tiếng Anh', icon: '🌐', hint: 'Khối A01, D01, D07...' }
+    ]
+  },
+  {
+    title: '🔬 2. Môn lựa chọn: Khoa học Tự nhiên & Công nghệ',
+    badge: 'Kỹ thuật - Y dược - Công nghệ',
+    badgeColor: '#10b981',
+    desc: 'Học sinh chọn tổ hợp KHTN, Công nghệ thông tin, Kỹ thuật, Y Dược chỉ cần nhập các môn thế mạnh của mình.',
+    items: [
+      { name: 'Vật lý', icon: '⚡', hint: 'Khối A00, A01...' },
+      { name: 'Hóa học', icon: '🧪', hint: 'Khối A00, B00, D07...' },
+      { name: 'Sinh học', icon: '🧬', hint: 'Khối B00, B08...' },
+      { name: 'Tin học', icon: '💻', hint: 'Chuyên Tin, CNTT, A00, A01...' },
+      { name: 'Công nghệ công nghiệp', icon: '⚙️', hint: 'Tổ hợp công nghệ mới GDPT 2018' },
+      { name: 'Công nghệ nông nghiệp', icon: '🌾', hint: 'Công nghệ sinh học & Nông nghiệp' }
+    ]
+  },
+  {
+    title: '📚 3. Môn lựa chọn: Khoa học Xã hội & Pháp luật',
+    badge: 'Xã hội - Kinh tế - Luật',
+    badgeColor: '#f59e0b',
+    desc: 'Học sinh chọn tổ hợp KHXH, Sư phạm, Báo chí, Luật, Kinh tế chỉ cần nhập các môn theo học.',
+    items: [
+      { name: 'Lịch sử', icon: '🏛️', hint: 'Khối C00, C19, C20...' },
+      { name: 'Địa lý', icon: '🌍', hint: 'Khối C00, A06, D10...' },
+      { name: 'GDKT&PL', icon: '⚖️', hint: 'Giáo dục kinh tế & Pháp luật' }
+    ]
+  }
 ];
 
-
-const old = read('scores') || {};
-
-const box = document.getElementById('scores');
-
-
-subjects.forEach((s,i) => {
-
-const key = 's' + i;
-
-box.innerHTML += `
-
-<label>
-
-${s}
-
-<input
-id="${key}"
-type="number"
-min="0"
-max="10"
-step="0.1"
-placeholder="Để trống nếu không học"
-value="${old[s] ?? ''}">
-
-</label>
-
-`;
-
+// Lấy danh sách tất cả các môn
+const allSubjects = [];
+subjectGroups.forEach(g => {
+  g.items.forEach(it => allSubjects.push(it.name));
 });
 
+const oldScores = read('scores') || {};
+const container = document.getElementById('scoresContainer');
 
-function saveScores(){
+// Render giao diện theo 3 nhóm môn học rõ ràng
+subjectGroups.forEach((group, gIdx) => {
+  const groupCard = document.createElement('div');
+  groupCard.style.cssText = 'background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 20px;';
 
-const d = {};
+  groupCard.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+      <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin: 0;">${group.title}</h3>
+      <span style="font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,0.07); color: ${group.badgeColor}; border: 1px solid ${group.badgeColor}40;">
+        ${group.badge}
+      </span>
+    </div>
+    <p style="font-size: 13px; color: #94a3b8; margin: 0 0 16px 0; line-height: 1.5;">${group.desc}</p>
+    <div class="score-grid" id="grid_group_${gIdx}"></div>
+  `;
 
-subjects.forEach((s,i) => {
+  container.appendChild(groupCard);
+  const gridEl = groupCard.querySelector(`#grid_group_${gIdx}`);
 
-let v =
-document.getElementById('s'+i).value;
-
-if(v !== '')
-d[s] = Number(v);
-
+  group.items.forEach(subj => {
+    const safeId = 'score_' + encodeURIComponent(subj.name).replace(/%/g, '_');
+    const label = document.createElement('label');
+    label.style.display = 'flex';
+    label.style.flexDirection = 'column';
+    label.style.gap = '6px';
+    label.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 600; font-size: 14px; color: #f1f5f9;">${subj.icon} ${subj.name}</span>
+        <span style="font-size: 11px; color: #64748b;">${subj.hint}</span>
+      </div>
+      <input
+        id="${safeId}"
+        data-subject="${subj.name}"
+        type="number"
+        min="0"
+        max="10"
+        step="0.1"
+        placeholder="Để trống nếu không học"
+        value="${oldScores[subj.name] != null ? oldScores[subj.name] : ''}"
+        style="width: 100%; box-sizing: border-box;"
+      >
+    `;
+    gridEl.appendChild(label);
+  });
 });
 
+function saveScores(redirect = true) {
+  const d = {};
+  allSubjects.forEach(s => {
+    const safeId = 'score_' + encodeURIComponent(s).replace(/%/g, '_');
+    const inp = document.getElementById(safeId);
+    if (inp && inp.value !== '') {
+      const num = Number(inp.value);
+      if (!isNaN(num) && num >= 0 && num <= 10) {
+        d[s] = num;
+      }
+    }
+  });
 
-save('scores',d);
+  save('scores', d);
 
-location.href = 'sothich.html';
-
+  if (redirect) {
+    location.href = 'sothich.html';
+  }
 }
 
 </script>

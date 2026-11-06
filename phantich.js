@@ -10,9 +10,9 @@
  * Đảm bảo: TUYỆT ĐỐI KHÔNG THIÊN VỊ bất kỳ ngành nào (kể cả CNTT). Mọi ngành đều có cơ hội và xuất phát điểm công bằng.
  */
 
-function analyzeCareer() {
+function analyzeCareer(overrideScores = null) {
   const info = typeof read === 'function' ? (read('info') || {}) : {};
-  const scores = typeof read === 'function' ? (read('scores') || {}) : {};
+  const scores = (overrideScores && typeof overrideScores === 'object') ? overrideScores : (typeof read === 'function' ? (read('scores') || {}) : {});
   const hobbies = typeof read === 'function' ? (read('hobbies') || { selected: [], custom: '' }) : { selected: [], custom: '' };
   const answers = typeof read === 'function' ? (read('personalityAnswers') || []) : [];
   const customAnswers = typeof read === 'function' ? (read('personalityCustomAnswers') || {}) : {};

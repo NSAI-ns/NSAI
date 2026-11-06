@@ -12,7 +12,8 @@ const chatState = {
   topicCounts: {},
   lastAnswer: '',
   isSending: false,
-  fallbackIndex: 0
+  fallbackIndex: 0,
+  activeRoleplay: null
 };
 
 // Chuẩn hóa câu hỏi: xử lý từ viết tắt, teen code, lỗi chính tả gõ vội
@@ -367,10 +368,345 @@ function recordTopic(topic) {
   return chatState.topicCounts[topic];
 }
 
+// ==========================================
+// TÍNH MỚI ĐỘT PHÁ KHKT: MÔ PHỎNG TRẢI NGHIỆM THỬ 1 NGÀY LÀM NGHỀ
+// ==========================================
+const ROLEPLAY_SCENARIOS = {
+  it: {
+    id: 'it',
+    career: 'Công nghệ Thông tin & Kỹ thuật Phần mềm',
+    context: '22:00 đêm trước đợt mở cổng đăng ký vé Tết, hệ thống ứng dụng đặt vé do nhóm kỹ sư của bạn phụ trách bất ngờ ghi nhận lượng người truy cập tăng vọt gấp 8 lần dự kiến. Cơ sở dữ liệu bị nghẽn (CPU máy chủ chạm 98%), một số người dùng bắt đầu bị kẹt giao dịch. Bạn đang là kỹ sư trực chính chịu trách nhiệm vận hành.',
+    challenge: 'Để bảo vệ toàn bộ hệ thống và phục vụ hàng vạn khách hàng an toàn, bạn sẽ đưa ra quyết định kỹ thuật nào dưới đây?',
+    choices: {
+      A: {
+        text: 'Kích hoạt ngay cơ chế Hàng đợi thông minh (Virtual Queue) và tự động nhân bản máy chủ (Auto-scaling) để giãn tải, ưu tiên giữ an toàn dữ liệu và luồng thanh toán cốt lõi.',
+        role: 'Kiến trúc sư Hệ thống & Kỹ sư Vận hành (System Architect / DevOps)',
+        analysis: 'Bạn sở hữu tư duy hệ thống xuất sắc và phản xạ bảo vệ tính sẵn sàng cao (High Availability). Trong ngành phần mềm hiện đại, việc sử dụng cơ chế đệm tự động thay vì can thiệp chắp vá là chuẩn mực cao nhất để hệ thống chịu tải quy mô lớn.',
+        suitableRoles: 'Kỹ sư phần mềm, Điện toán đám mây, Quản trị hệ thống, Trí tuệ nhân tạo'
+      },
+      B: {
+        text: 'Tạm thời ngắt các tính năng phụ tải nặng (như gợi ý chỗ ngồi, lịch sử đặt vé, hiệu ứng động) và giải phóng bộ nhớ đệm (Cache) để dồn 100% tài nguyên cho việc thanh toán.',
+        role: 'Nhà Quản trị Sản phẩm & Kỹ sư Thực chiến (Pragmatic Engineer / Product Owner)',
+        analysis: 'Bạn có tư duy "hy sinh tính năng phụ để bảo vệ huyết mạch chính" cực kỳ thực tế. Kỹ năng xác định mức độ ưu tiên (Prioritization) dưới áp lực khẩn cấp là tố chất lãnh đạo công nghệ quan trọng.',
+        suitableRoles: 'Phát triển Web/App, Quản lý sản phẩm công nghệ (PM), Tối ưu hiệu năng'
+      },
+      C: {
+        text: 'Chủ động thông báo bảo trì khẩn cấp 15 phút trên trang chủ và mạng xã hội để toàn đội ngũ kiểm tra mã nguồn, tìm điểm nghẽn bộ nhớ và khởi động lại dịch vụ an toàn.',
+        role: 'Kỹ sư Kiểm chuẩn Chất lượng & An ninh Thông tin (QA / Cyber Security)',
+        analysis: 'Bạn cẩn trọng, tôn trọng an toàn dữ liệu và tính minh bạch với người dùng. Dù bảo trì có thể gây gián đoạn ngắn hạn, nó triệt tiêu rủi ro sai lệch dữ liệu tài chính nghiêm trọng.',
+        suitableRoles: 'An toàn thông tin, Kỹ thuật dữ liệu, Kiểm thử phần mềm'
+      }
+    },
+    highschoolAdvice: 'Tập trung học tốt môn Toán và Tin học (tư duy logic & giải thuật), tham gia các câu lạc bộ Robotics/Lập trình và tìm hiểu các dự án mã nguồn mở.'
+  },
+  business: {
+    id: 'business',
+    career: 'Kinh tế, Quản trị Kinh doanh & Marketing',
+    context: 'Bạn là Trưởng nhóm Dự án ra mắt dòng balo học sinh chống gù thông minh. Sau tuần đầu chi 50% ngân sách quảng cáo, lượng xem video trên mạng xã hội đạt 500.000 lượt nhưng tỷ lệ đặt hàng chỉ đạt 3% chỉ tiêu. Khách hàng bình luận: "Balo nhìn đẹp nhưng giá 450k hơi cao và chưa biết có chống gù thật không".',
+    challenge: 'Ngân sách tuần 2 chỉ còn lại một nửa, bạn sẽ điều chỉnh chiến lược tiếp thị và kinh doanh như thế nào?',
+    choices: {
+      A: {
+        text: 'Tạm dừng quảng cáo diện rộng; chuyển ngân sách sản xuất video thực nghiệm đo lực cột sống, đựng 10kg sách và mời các bác sĩ cơ xương khớp hoặc thầy cô uy tín trải nghiệm chứng thực.',
+        role: 'Nhà Chiến lược Tiếp thị Dựa trên Dữ liệu & Tâm lý Người tiêu dùng (Data-driven Marketer)',
+        analysis: 'Bạn phát hiện chính xác "nỗi đau của khách hàng" (Customer Pain Point) là thiếu niềm tin về công năng. Sử dụng bằng chứng thực nghiệm và chứng thực chuyên môn (Social Proof) là đòn bẩy thuyết phục bền vững nhất.',
+        suitableRoles: 'Marketing Chiến lược, Nghiên cứu thị trường, Quản trị thương hiệu'
+      },
+      B: {
+        text: 'Tung ngay chương trình khuyến mãi chớp nhoáng: Giảm giá 35% kèm tặng bình nước thời trang cho 100 khách hàng đầu tiên để kích cầu tăng số lượng đơn hàng ngay.',
+        role: 'Chuyên gia Tăng trưởng Doanh số & Tối ưu Chuyển đổi (Sales & Growth Hacker)',
+        analysis: 'Bạn quyết đoán trong việc tạo động lực hành động tức thì (FOMO). Phương án này giúp xả hàng nhanh và tạo doanh thu ban đầu, dù cần chú ý kiểm soát biên lợi nhuận.',
+        suitableRoles: 'Quản trị bán hàng, Thương mại điện tử, Quản lý chuỗi bán lẻ'
+      },
+      C: {
+        text: 'Mở rộng quảng cáo sang các thành phố khác và hợp tác với 3 nhà sáng tạo nội dung (KOL học sinh) nổi tiếng trên TikTok để tiếp tục đẩy mạnh độ phủ sóng thương hiệu.',
+        role: 'Nhà Phát triển Thị trường & Quan hệ Công chúng (PR / Market Expansion)',
+        analysis: 'Bạn tin tưởng vào hiệu ứng lan tỏa đám đông và độ nhận biết rộng rãi. Đây là tư duy phù hợp ở giai đoạn đầu thâm nhập thị trường, nhưng cần bổ sung thông điệp thuyết phục về chất lượng.',
+        suitableRoles: 'Truyền thông & PR, Tổ chức sự kiện, Phát triển kinh doanh quốc tế'
+      }
+    },
+    highschoolAdvice: 'Phát triển thế mạnh môn Toán, Tiếng Anh và Kinh tế - Pháp luật; rèn luyện kỹ năng thuyết trình, phân tích dữ liệu bảng tính và tham gia các dự án kinh doanh khởi nghiệp học sinh.'
+  },
+  medical: {
+    id: 'medical',
+    career: 'Y Đa khoa, Dược học & Khoa học Sức khỏe',
+    context: 'Trong ca trực tối tại khoa Cấp cứu, bạn tiếp nhận đồng thời 2 trường hợp: Một cụ ông 70 tuổi than mệt, khó thở nhẹ kèm vã mồ hôi và tiền sử tăng huyết áp; cùng một thanh niên 19 tuổi vừa ngã xe máy bị rách sâu ở cẳng tay, máu chảy thấm đẫm áo và đang hoảng loạn la hét.',
+    challenge: 'Là bác sĩ trực tiếp phân loại bệnh nhân (Triage), bạn sẽ phân bổ nhân lực và xử trí ban đầu theo thứ tự nào?',
+    choices: {
+      A: {
+        text: 'Phân loại cụ ông vào diện Cấp cứu ưu tiên 1: đo điện tim ngay và cho thở oxy vì nghi ngờ hội chứng mạch vành cấp; đồng thời chỉ định điều dưỡng băng ép cầm máu tức thì cho thanh niên.',
+        role: 'Bác sĩ Cấp cứu Lâm sàng Chuẩn mực (Clinical Triage Acuity)',
+        analysis: 'Bạn xuất sắc thấu hiểu nguyên tắc "Sinh mạng là số 1". Cụ ông có triệu chứng âm ỉ nhưng tiềm ẩn nguy cơ nhồi máu cơ tim có thể ngừng tuần hoàn đột ngột trong vài phút. Khả năng bình tĩnh phân loại và ủy quyền công việc cho đồng đội là tố chất y khoa mẫu mực.',
+        suitableRoles: 'Bác sĩ Đa khoa, Bác sĩ Hồi sức cấp cứu, Tim mạch'
+      },
+      B: {
+        text: 'Tập trung khâu và xử lý vết thương cho thanh niên trước vì máu chảy nhiều gây tâm lý sợ hãi cho cả phòng bệnh, sau đó quay sang thăm khám toàn diện cho cụ già.',
+        role: 'Nhân viên Y tế Giàu Trắc ẩn & Phản xạ Cứu trợ Nhanh (Empathetic First Responder)',
+        analysis: 'Bạn có tấm lòng nhân ái, mong muốn xoa dịu ngay nỗi sợ hãi hữu hình của người bệnh. Tuy nhiên trong môi trường cấp cứu, bạn cần rèn luyện thêm khả năng "nhìn xuyên qua triệu chứng" để nhận diện những ca nguy kịch ngầm.',
+        suitableRoles: 'Ngoại khoa, Phẫu thuật chấn thương, Chăm sóc điều dưỡng'
+      },
+      C: {
+        text: 'Chỉ định cho cả 2 bệnh nhân làm xét nghiệm máu toàn phần và chụp chiếu cận lâm sàng cùng lúc để có đầy đủ kết quả chỉ số xét nghiệm trước khi đưa ra phác đồ can thiệp.',
+        role: 'Nhà Nghiên cứu Y học Chứng cứ (Evidence-based Medicine)',
+        analysis: 'Bạn rất thận trọng và coi trọng dữ liệu cận lâm sàng chính xác. Dù vậy trong tình huống tối cấp, bác sĩ cần song song xử trí triệu chứng đe dọa tính mạng trước khi chờ kết quả xét nghiệm hoàn tất.',
+        suitableRoles: 'Bác sĩ Chẩn đoán hình ảnh, Xét nghiệm y học, Dược lâm sàng'
+      }
+    },
+    highschoolAdvice: 'Học chắc môn Hóa học, Sinh học và Tiếng Anh; rèn luyện đức tính kiên nhẫn, khả năng giữ bình tĩnh trước áp lực và tinh thần nhân ái phụng sự cộng đồng.'
+  },
+  education: {
+    id: 'education',
+    career: 'Sư phạm, Giáo dục & Tâm lý học',
+    context: 'Bạn là giáo viên chủ nhiệm lớp 10. Một học sinh trước đây rất sôi nổi bất ngờ 3 tuần liền thường xuyên đi học muộn, gục đầu xuống bàn trong giờ và bài kiểm tra gần nhất bị điểm kém. Khi bạn gặp riêng hỏi han, em ấy chỉ im lặng nhìn xuống đất và nói lí nhí "Em không sao, thầy/cô kệ em đi".',
+    challenge: 'Để thực sự giúp đỡ học sinh này mà không làm tổn thương sự tự tôn của em, bạn sẽ xử lý tình huống sư phạm ra sao?',
+    choices: {
+      A: {
+        text: 'Không gặng hỏi ép buộc; mời em một hộp sữa nhỏ, tạo không gian an toàn và bảo: "Thầy/cô thấy gần đây em có vẻ mệt, khi nào em sẵn sàng tâm sự thì phòng giáo viên luôn mở cửa nhé", sau đó quan sát thêm từ bạn bè thân thiết.',
+        role: 'Nhà Giáo dục Nhân bản & Chuyên gia Tâm lý Học đường (Empathetic Educator)',
+        analysis: 'Bạn hiểu sâu sắc rằng "an toàn tâm lý" là chìa khóa để một người mở lòng. Bạn không lấy quyền lực giáo viên để áp đặt mà dùng sự tôn trọng và chân thành. Đây là tố chất cao quý nhất của nghề Sư phạm và Tâm lý.',
+        suitableRoles: 'Giáo viên THPT, Chuyên viên Tâm lý học đường, Cố vấn giáo dục'
+      },
+      B: {
+        text: 'Liên hệ ngay với phụ huynh trong tối nay để thông báo tình trạng sa sút điểm số và đi học muộn, đề nghị gia đình kiểm tra việc sử dụng điện thoại ban đêm của em.',
+        role: 'Người Quản lý Kỷ luật & Phối hợp Gia đình (School-Family Coordinator)',
+        analysis: 'Bạn hành động dứt khoát và coi trọng liên lạc hai chiều với gia đình. Dù vậy nếu chưa tìm hiểu nguyên nhân (ví dụ em ấy đang gặp mâu thuẫn chính với bố mẹ), cách này có thể khiến học sinh cảm thấy bị "mách tội" và khép lòng hơn.',
+        suitableRoles: 'Quản lý giáo dục, Giám thị học đường, Quản trị trường học'
+      },
+      C: {
+        text: 'Giao cho em ấy làm nhóm trưởng một hoạt động văn nghệ hoặc trò chơi tập thể của lớp vào tuần tới để kéo em trở lại với không khí sôi động của bạn bè.',
+        role: 'Nhà Huấn luyện Kích hoạt Tiềm năng (Inspiring Activity Coach)',
+        analysis: 'Bạn có tinh thần năng động và tin vào sức mạnh tập thể. Tuy nhiên cần cân nhắc xem học sinh có đang kiệt sức (Burnout) hay không, vì việc giao thêm trọng trách nhóm trưởng khi đang khủng hoảng có thể tạo thêm áp lực.',
+        suitableRoles: 'Tổ chức sự kiện học đường, Giáo viên kỹ năng sống, Hoạt động thanh thiếu niên'
+      }
+    },
+    highschoolAdvice: 'Rèn luyện môn Ngữ văn, Lịch sử, Ngoại ngữ; trau dồi khả năng lắng nghe thấu cảm, nói chuyện trước đám đông và tham gia công tác Đoàn/Đội trường học.'
+  },
+  design: {
+    id: 'design',
+    career: 'Thiết kế Đồ họa, Đa phương tiện & Kiến trúc',
+    context: 'Bạn nhận thiết kế bộ nhận diện thương hiệu cho một ứng dụng đọc sách dành cho giới trẻ Gen Z. Khách hàng bên đối tác liên tục yêu cầu bạn phải chọn tông màu xám sẫm, bỏ hết các biểu tượng vui nhộn và nhồi nhét thật nhiều văn bản vì họ cho rằng phong cách đó "sang trọng và học thuật như ngân hàng".',
+    challenge: 'Bạn biết rõ nếu làm theo ý khách, ứng dụng sẽ rất kén người dùng trẻ. Bạn sẽ xử lý thế nào?',
+    choices: {
+      A: {
+        text: 'Thiết kế 2 phương án song song: Phương án 1 chuẩn theo ý khách, và Phương án 2 tối ưu cho Gen Z kèm số liệu khảo sát thị hiếu màu sắc để giải thích thuyết phục vì sao Phương án 2 sẽ mang lại nhiều lượt tải hơn.',
+        role: 'Giám đốc Nghệ thuật & Chuyên gia Thiết kế Trải nghiệm (UX Designer / Art Director)',
+        analysis: 'Bạn kết hợp hoàn hảo giữa thái độ tôn trọng đối tác và lập trường chuyên môn vững chắc dựa trên dữ liệu người dùng (User-centric Design). Đây là cách làm việc đẳng cấp của những nhà thiết kế chuyên nghiệp hàng đầu.',
+        suitableRoles: 'UI/UX Designer, Art Director, Thiết kế nhận diện thương hiệu'
+      },
+      B: {
+        text: 'Làm đúng 100% tất cả yêu cầu của khách hàng vì khách hàng là người trả chi phí và chịu trách nhiệm cao nhất về sản phẩm của họ.',
+        role: 'Người Thực thi Linh hoạt & Tôn trọng Yêu cầu (Pragmatic Graphic Designer)',
+        analysis: 'Bạn ưu tiên sự hòa nhã và tiến độ bàn giao hợp đồng. Tuy nhiên trong ngành sáng tạo, nếu chỉ đơn thuần "vẽ theo lệnh" mà thiếu tư vấn chuyên môn, bạn sẽ khó tạo ra những tác phẩm đột phá nâng tầm sự nghiệp.',
+        suitableRoles: 'Thiết kế ấn phẩm truyền thông, Họa sĩ minh họa thương mại'
+      },
+      C: {
+        text: 'Kiên quyết từ chối yêu cầu và cảnh báo thẳng thắn rằng thiết kế đó đi ngược xu hướng thị trường, nếu khách hàng khăng khăng thì xin dừng hợp đồng.',
+        role: 'Nghệ sĩ Cá tính Độc lập (Pure Visual Artist)',
+        analysis: 'Bạn có cái tôi nghệ thuật mạnh mẽ và tinh thần bảo vệ tác phẩm đáng nể. Dù vậy trong ngành thiết kế ứng dụng thương mại, kỹ năng đàm phán và thuyết phục đối tác chiếm đến 50% thành công của một dự án.',
+        suitableRoles: 'Họa sĩ sáng tác tự do, Nghệ thuật ý niệm (Concept Art)'
+      }
+    },
+    highschoolAdvice: 'Phát triển cảm thụ thẩm mỹ qua môn Mỹ thuật, Tin học và Tiếng Anh; tự học các công cụ đồ họa (Figma, Photoshop, Illustrator) và xây dựng Portfolio tác phẩm cá nhân từ sớm.'
+  },
+  engineering: {
+    id: 'engineering',
+    career: 'Kỹ thuật Cơ khí, Tự động hóa, Vi mạch & Xây dựng',
+    context: 'Trong buổi bay thử nghiệm mô hình Drone cứu hộ do bạn và nhóm chế tạo, cảm biến báo rung động trục cánh quạt vượt mức an toàn 12% khi gặp gió cấp 4. Nhóm có thể kịp nộp sản phẩm dự thi chiều nay nếu giữ nguyên, hoặc phải tháo rời cân chỉnh lại cơ khí và nộp muộn vào sáng mai (bị trừ 5% điểm tiến độ).',
+    challenge: 'Là trưởng nhóm kỹ thuật, bạn sẽ đưa ra quyết định gì?',
+    choices: {
+      A: {
+        text: 'Quyết định tháo dỡ để cân chỉnh lại cơ học và kiểm tra độ đồng trục; gửi báo cáo kỹ thuật giải thích rõ lý do chấp nhận trễ hạn vì an toàn vận hành là tiêu chí tối thượng.',
+        role: 'Kỹ sư Trưởng Trách nhiệm & Đạo đức Kỹ thuật (Chief Engineer Integrity)',
+        analysis: '"An toàn là số 1". Trong các ngành Cơ khí, Hàng không hay Vi mạch, sai số rung chấn có thể dẫn tới gãy trục thảm khốc khi hoạt động lâu dài. Sự dũng cảm dừng lại để bảo đảm chất lượng thể hiện phẩm chất của một Kỹ sư trưởng ưu tú.',
+        suitableRoles: 'Kỹ sư Cơ điện tử, Thiết kế máy bay không người lái, Kiểm định chất lượng'
+      },
+      B: {
+        text: 'Vẫn nộp sản phẩm đúng chiều nay kèm chú thích giới hạn bay ở sức gió cấp 3 để bảo toàn 100% điểm tiến độ của cả đội.',
+        role: 'Nhà Quản lý Dự án & Tiến độ Kỹ thuật (Project Timeline Manager)',
+        analysis: 'Bạn rất kỷ luật về thời hạn cam kết (Deadline). Dù vậy với sản phẩm mang tính cứu hộ và kỹ thuật cao, việc đẩy rủi ro sang điều kiện vận hành là quyết định cần hết sức thận trọng.',
+        suitableRoles: 'Quản lý dự án xây dựng, Vận hành chuỗi sản xuất công nghiệp'
+      },
+      C: {
+        text: 'Không tháo phần cứng mà can thiệp nhanh vào phần mềm vi điều khiển: tăng tần số bù rung và giảm 10% công suất động cơ chính để triệt tiêu rung chấn tức thì.',
+        role: 'Kỹ sư Thuật toán Điều khiển & Nhúng (Firmware & Control Systems Engineer)',
+        analysis: 'Bạn cực kỳ nhạy bén trong việc dùng thuật toán phần mềm để khắc phục giới hạn phần cứng (Hardware-Software Co-design). Đây là xu hướng then chốt trong thời đại Cách mạng Công nghiệp 4.0.',
+        suitableRoles: 'Lập trình nhúng vi mạch, Tự động hóa & Robotics, IoT'
+      }
+    },
+    highschoolAdvice: 'Tập trung học thật giỏi môn Vật lý, Toán học và Tin học; tham gia các cuộc thi Sáng tạo KHKT, STEM và rèn luyện kỹ năng làm việc nhóm thực hành.'
+  },
+  law: {
+    id: 'law',
+    career: 'Luật pháp, Ngoại giao & Khoa học Xã hội',
+    context: 'Là chuyên viên pháp chế của một doanh nghiệp nông sản xuất khẩu, bạn phát hiện đối tác nước ngoài đưa vào hợp đồng một điều khoản phụ về việc áp dụng tỷ giá thả nổi có thể gây thiệt hại nặng nề cho công ty nếu có biến động tiền tệ. Tuy nhiên Giám đốc kinh doanh đang rất nóng lòng muốn ký hợp đồng ngay trong chiều nay để kịp chỉ tiêu quý.',
+    challenge: 'Bạn sẽ giải quyết bài toán giữa tiến độ ký kết và rủi ro pháp lý như thế nào?',
+    choices: {
+      A: {
+        text: 'Soạn ngay bản phụ lục điều khoản rào chắn tỷ giá (Currency Collar) kèm biểu đồ phân tích rủi ro tài chính súc tích 1 trang gửi Giám đốc kinh doanh và chủ động đàm phán nhanh với đối tác để cùng chốt trong buổi chiều.',
+        role: 'Chuyên viên Pháp lý Doanh nghiệp & Đàm phán Quốc tế (Corporate Legal Counsel)',
+        analysis: 'Bạn không chỉ nói "không" mà chủ động đưa ra giải pháp bảo vệ quyền lợi doanh nghiệp (Solution-oriented Lawyer). Tư duy giải quyết vấn đề nhanh nhẹn kết hợp với sự am hiểu luật kinh tế quốc tế là phẩm chất hàng đầu của nghề Luật hiện đại.',
+        suitableRoles: 'Luật sư thương mại quốc tế, Trọng tài kinh tế, Cố vấn pháp chế tập đoàn'
+      },
+      B: {
+        text: 'Kiên quyết từ chối phê duyệt hồ sơ và yêu cầu đình chỉ hoàn toàn việc ký kết cho đến khi đối tác chấp nhận bỏ hoàn toàn điều khoản tỷ giá đó ra khỏi hợp đồng.',
+        role: 'Người Bảo vệ Pháp chế Nghiêm ngặt (Strict Compliance Officer)',
+        analysis: 'Bạn có nguyên tắc thép và sự dứt khoát tuyệt đối trong việc phòng ngừa rủi ro cho tổ chức. Tố chất này đặc biệt phù hợp trong các lĩnh vực Thanh tra, Kiểm toán và Cơ quan tư pháp nhà nước.',
+        suitableRoles: 'Kiểm sát viên, Thanh tra nhà nước, Chuyên viên kiểm soát tuân thủ'
+      },
+      C: {
+        text: 'Tư vấn Giám đốc mua thêm gói bảo hiểm phòng ngừa rủi ro tỷ giá từ ngân hàng thứ ba để vừa ký được hợp đồng chiều nay vừa giảm thiểu tổn thất tiềm ẩn.',
+        role: 'Chuyên gia Quản trị Rủi ro Tài chính & Pháp lý (Risk Management Strategist)',
+        analysis: 'Bạn có tầm nhìn bao quát kết hợp giữa pháp lý và tài chính hiện đại. Thay vì chỉ đàm phán hợp đồng, bạn biết dùng công cụ thị trường để hóa giải rủi ro.',
+        suitableRoles: 'Tư vấn tài chính doanh nghiệp, Ngân hàng đầu tư, Ngoại giao kinh tế'
+      }
+    },
+    highschoolAdvice: 'Trau dồi môn Ngữ văn, Lịch sử, Giáo dục Kinh tế - Pháp luật và Tiếng Anh; rèn luyện tư duy phản biện, kỹ năng tranh biện (Debate) và phân tích lập luận chặt chẽ.'
+  },
+  default: {
+    id: 'default',
+    career: 'Khám phá Định hướng Nghề nghiệp Đa ngành',
+    context: 'Bạn được phân công làm Trưởng nhóm một dự án nghiên cứu khoa học kỹ thuật cấp trường cùng 3 thành viên khác. Một tuần trước hạn nộp bài, sản phẩm thí nghiệm bất ngờ bị lỗi không cho kết quả như kỳ vọng lý thuyết, và hai bạn trong nhóm bắt đầu tranh cãi gay gắt đổ lỗi cho nhau.',
+    challenge: 'Với vai trò là người điều phối nhóm, bạn sẽ hành động thế nào để đưa dự án về đích thành công?',
+    choices: {
+      A: {
+        text: 'Tổ chức một buổi họp nhóm bình tĩnh trong 30 phút: cùng nhau bóc tách lại từng bước thí nghiệm để tìm ra lỗi sai khách quan, phân công lại nhiệm vụ rõ ràng và tập trung sửa chữa thay vì tranh cãi.',
+        role: 'Nhà Lãnh đạo Điềm đạm & Giải quyết Vấn đề (Calm Problem-Solving Leader)',
+        analysis: 'Bạn có tố chất lãnh đạo xuất sắc: tập trung vào "Vấn đề" chứ không nhắm vào "Con người". Khả năng giữ bình tĩnh và tạo lập tinh thần đồng đội dưới áp lực thời gian là năng lực vàng trong mọi ngành nghề thế kỷ 21.',
+        suitableRoles: 'Quản trị dự án, Lãnh đạo nhóm, Nhà nghiên cứu khoa học'
+      },
+      B: {
+        text: 'Tự mình thức trắng 2 đêm làm lại toàn bộ phần thí nghiệm bị lỗi để đảm bảo tiến độ và độ chính xác tuyệt đối mà không cần nhờ đến các bạn đang cãi nhau.',
+        role: 'Chuyên gia Kỹ thuật Độc lập & Chịu trách nhiệm Cao (Solo Technical Hero)',
+        analysis: 'Bạn có tinh thần trách nhiệm cá nhân rất cao và sự kiên trì bền bỉ đáng nể. Tuy nhiên trong tương lai ở môi trường đại học và làm việc, bạn cần học cách tin tưởng và phân quyền cho đồng đội để đi xa hơn.',
+        suitableRoles: 'Chuyên gia nghiên cứu độc lập, Kỹ thuật viên chuyên sâu'
+      },
+      C: {
+        text: 'Gặp ngay giáo viên hướng dẫn để báo cáo trung thực về sự cố thí nghiệm và xin thầy/cô lời khuyên can thiệp gỡ rối cả về kỹ thuật lẫn tinh thần nhóm.',
+        role: 'Người Cầu thị & Biết Tận dụng Nguồn lực (Resourceful & Transparent Collaborator)',
+        analysis: 'Bạn thông minh khi biết tìm kiếm sự hỗ trợ chuyên môn đúng lúc từ người có kinh nghiệm thay vì giấu giếm lỗi sai. Tính trung thực trong học thuật và tinh thần cầu thị là nền tảng của sự tiến bộ vững chắc.',
+        suitableRoles: 'Quan hệ công chúng, Quản lý nhân sự, Hợp tác dự án'
+      }
+    },
+    highschoolAdvice: 'Tích cực rèn luyện các môn học thế mạnh, tham gia các hoạt động ngoại khóa, câu lạc bộ và các cuộc thi sáng tạo KHKT để tôi luyện bản lĩnh.'
+  }
+};
+
+function getCareerRoleplayScenario(careerName) {
+  const cn = (careerName || '').toLowerCase();
+  if (/công nghệ|cntt|phần mềm|it|lập trình|máy tính|tin học|ai|trí tuệ nhân tạo|dữ liệu|an toàn thông tin|mạng/.test(cn)) {
+    return ROLEPLAY_SCENARIOS.it;
+  }
+  if (/kinh tế|kinh doanh|marketing|tài chính|ngân hàng|quản trị|thương mại|kế toán|kiểm toán|logistic/.test(cn)) {
+    return ROLEPLAY_SCENARIOS.business;
+  }
+  if (/y|dược|bác sĩ|điều dưỡng|nha|y tế|sức khỏe|dược liệu/.test(cn)) {
+    return ROLEPLAY_SCENARIOS.medical;
+  }
+  if (/sư phạm|giáo dục|giáo viên|dạy học|tâm lý|huấn luyện/.test(cn)) {
+    return ROLEPLAY_SCENARIOS.education;
+  }
+  if (/thiết kế|đồ họa|mỹ thuật|kiến trúc|multimedia|truyền thông đa phương tiện|nội thất/.test(cn)) {
+    return ROLEPLAY_SCENARIOS.design;
+  }
+  if (/cơ khí|kỹ thuật|tự động|điện|điện tử|bán dẫn|xây dựng|chế tạo|hàng hải|hàng không/.test(cn)) {
+    return ROLEPLAY_SCENARIOS.engineering;
+  }
+  if (/luật|pháp luật|ngoại giao|báo chí|quan hệ quốc tế|xã hội|nhân văn|ngôn ngữ/.test(cn)) {
+    return ROLEPLAY_SCENARIOS.law;
+  }
+  return ROLEPLAY_SCENARIOS.default;
+}
+
+function startCareerRoleplay() {
+  const c = getChatContext();
+  const careerName = c.top?.name || c.goal || 'Công nghệ Thông tin / Kỹ sư Phần mềm';
+  const scenario = getCareerRoleplayScenario(careerName);
+  chatState.activeRoleplay = scenario;
+
+  return `🎭 **TRẢI NGHIỆM THỰC TẾ 1 NGÀY LÀM NGHỀ: ${scenario.career}**\n` +
+    `*(Tính năng Mô phỏng Phản xạ Nghề nghiệp dựa trên Hồ sơ NS AI)*\n\n` +
+    `📍 **Bối cảnh tình huống:**\n${scenario.context}\n\n` +
+    `⚖️ **Thách thức đặt ra:**\n${scenario.challenge}\n\n` +
+    `👉 **3 Phương án bạn có thể lựa chọn:**\n` +
+    `• 🅰️ **Phương án A:** ${scenario.choices.A.text}\n` +
+    `• 🅱️ **Phương án B:** ${scenario.choices.B.text}\n` +
+    `• 🅲 **Phương án C:** ${scenario.choices.C.text}\n\n` +
+    `----------------------------------------------------\n` +
+    `💬 **Bạn sẽ xử lý ra sao?** Hãy gõ **A**, **B**, hoặc **C** (hoặc chia sẻ thêm suy nghĩ của bạn) vào khung chat để NS AI phân tích độ tương thích và phản xạ nghề nghiệp của bạn nhé! ✨`;
+}
+
+function evaluateRoleplayChoice(choiceLetter, scenario) {
+  const letter = (choiceLetter || '').trim().toUpperCase();
+  const selected = scenario.choices && scenario.choices[letter];
+  if (!selected) return null;
+
+  const otherLetters = ['A', 'B', 'C'].filter(l => l !== letter);
+
+  let reply = `✨ **PHÂN TÍCH PHẢN XẠ NGHỀ NGHIỆP TỪ NS AI (Lựa chọn ${letter})**\n` +
+    `*Ngành mô phỏng: ${scenario.career}*\n\n` +
+    `🏆 **Phong cách làm việc & Tố chất nổi bật của bạn:**\n` +
+    `• **Định vị phản xạ:** ${selected.role}\n` +
+    `• **Phân tích chiều sâu:** ${selected.analysis}\n` +
+    `• **Vị trí / Hướng chuyên sâu rất hợp với bạn:** ${selected.suitableRoles}\n\n` +
+    `🔍 **Góc nhìn đa chiều về các phương án khác:**\n`;
+
+  otherLetters.forEach(l => {
+    const alt = scenario.choices[l];
+    reply += `• **Nếu chọn ${l} (${alt.role}):** Mang lại góc nhìn bổ trợ hữu ích khi cần phối hợp đa chức năng trong nhóm.\n`;
+  });
+
+  reply += `\n📚 **Gợi ý rèn luyện ngay từ bậc THPT (GDPT 2018):**\n` +
+    `${scenario.highschoolAdvice}\n\n` +
+    `💡 *Bạn có muốn thử sức thêm với một tình huống nghề nghiệp khác không? Hãy gõ "Thử tình huống khác" hoặc chọn bất kỳ câu hỏi gợi ý nào nhé!* 💚`;
+
+  // Reset sau khi phản hồi thành công
+  chatState.activeRoleplay = null;
+  return reply;
+}
+
 function answer(q) {
   const raw = q.trim();
   const s = normalizeQuery(raw);
   const c = getChatContext();
+
+  // 0. XỬ LÝ TRẢ LỜI TÌNH HUỐNG MÔ PHỎNG NGHỀ NGHIỆP (A, B, C)
+  if (chatState.activeRoleplay) {
+    const rawClean = raw.trim().toUpperCase();
+    if (rawClean === 'A' || rawClean === 'B' || rawClean === 'C') {
+      const resp = evaluateRoleplayChoice(rawClean, chatState.activeRoleplay);
+      if (resp) return resp;
+    }
+    const choiceMatch = raw.match(/(?:chọn|phương án|đáp án|câu)?\s*([abc])\b/i);
+    if (choiceMatch && choiceMatch[1]) {
+      const resp = evaluateRoleplayChoice(choiceMatch[1], chatState.activeRoleplay);
+      if (resp) return resp;
+    }
+  }
+
+  // 0.1 KHỞI ĐỘNG CHẾ ĐỘ "TRẢI NGHIỆM THỬ 1 NGÀY LÀM NGHỀ" (TÍNH NĂNG MỚI ĐỘT PHÁ)
+  if (/trải nghiệm thử|1 ngày làm nghề|tình huống thực tế|thử làm nghề|đóng vai nghề nghiệp|thử việc|roleplay|thử đóng vai|tình huống nghề|thử tình huống khác/.test(s)) {
+    recordTopic('career_roleplay');
+    return startCareerRoleplay();
+  }
+
+  // 0.2 PHÂN TÍCH ĐỘ LỆCH KỲ VỌNG & GIẢI TỎA ÁP LỰC (EXPECTATION GAP INDEX)
+  if (/áp lực kỳ vọng quá lớn|áp lực kỳ vọng|lệch kỳ vọng|khoảng cách kỳ vọng|độ lệch kỳ vọng/.test(s)) {
+    recordTopic('expectation_gap_relief');
+    return `💙 **NS AI luôn ở đây để lắng nghe và đồng hành cùng bạn...**\n\n` +
+      `Mình hiểu rằng giai đoạn này bạn đang phải gánh trên vai rất nhiều sự kỳ vọng: kỳ vọng từ bố mẹ, thầy cô, và có lẽ lớn nhất là **kỳ vọng từ chính bản thân bạn**.\n\n` +
+      `Khi mục tiêu bạn mong ước dường như đang có khoảng cách so với điểm số hiện tại, cảm giác bất an, lo sợ trượt nguyện vọng hay sợ làm người khác thất vọng là điều hoàn toàn dễ hiểu. Nhưng hãy nhớ rằng:\n\n` +
+      `🌱 **3 Điều cốt lõi bạn cần nhớ lúc này:**\n` +
+      `1. **Điểm số hiện tại chỉ là "tọa độ tạm thời", không phải "định mệnh":**\n` +
+      `   Theo Chương trình GDPT 2018 và các kỳ thi hiện đại, chỉ cần 3 - 6 tháng học có phương pháp trọng tâm (đúng chuyên đề, chữa đề có phản hồi), mức điểm của bạn hoàn toàn có thể bứt phá từ **+1.0 đến +2.5 điểm** (bạn có thể kiểm chứng trực quan ngay tại **Bộ giả lập What-If** ở trang Kết quả).\n\n` +
+      `2. **Chiến lược "Hai bến đỗ" (Dual-Track Safe Strategy):**\n` +
+      `   Thay vì chỉ đặt cược tất cả vào một nguyện vọng Top đầu duy nhất gây căng thẳng tột độ, hãy xây dựng:\n` +
+      `   • **Bến đỗ ước mơ (Dream School):** Giữ ngọn lửa đam mê, phấn đấu hết mình bằng điểm thi THPT hoặc ĐGNL.\n` +
+      `   • **Bến đỗ an toàn (Safety Harbor):** Tận dụng xét học bạ sớm vào các trường/ngành có chất lượng tốt cùng khối ngành để bảo đảm tương lai chắc chắn. Khi đã có bến đỗ an toàn, tâm lý phòng thi của bạn sẽ nhẹ nhõm hơn rất nhiều!\n\n` +
+      `3. **Giá trị của bạn không đo bằng điểm số đơn thuần:**\n` +
+      `   Thành công trong cuộc đời được quyết định bởi tính bền bỉ, sự học hỏi liên tục và thái độ sống, chứ không nằm ở điểm số của một kỳ thi duy nhất.\n\n` +
+      `🌿 **Lời khuyên thực hành hôm nay:**\n` +
+      `• Hãy hít thở thật sâu (bạn có thể bấm chọn *🧘 Bài tập thở 4-7-8*).\n` +
+      `• Đừng tự gặm nhấm nỗi lo một mình: nếu bạn muốn lập thời gian biểu ôn tập cụ thể cho từng môn, hãy nói cho mình biết bạn đang lo lắng nhất ở môn nào nhé! 🫂💚`;
+  }
 
   // 1. CẢNH BÁO NGUY HIỂM / KHẨN CẤP
   if (/tự tử|muốn chết|tự làm hại|tự hại|tự sát|kết thúc cuộc sống/.test(s)) {
@@ -1584,9 +1920,25 @@ function initChatInput() {
   }
 }
 
+function checkUrlPrompt() {
+  try {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get('prompt');
+    if (p && p.trim()) {
+      setTimeout(() => {
+        quick(p.trim());
+      }, 400);
+    }
+  } catch (err) {
+    console.warn('URL prompt check error:', err);
+  }
+}
+
 function initAllChatbot() {
   initChatInput();
   initChatHistory();
+  checkUrlPrompt();
 }
 
 if (document.readyState === 'loading') {
